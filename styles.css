@@ -193,6 +193,12 @@ img {
   box-shadow: 0 12px 32px rgba(47, 45, 44, 0.06);
   display: flex;
   flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.case-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(47, 45, 44, 0.1);
 }
 
 .case-card img {
@@ -218,6 +224,122 @@ img {
 .case-card h3 {
   font-size: 28px;
   line-height: 1.25;
+}
+
+/* Case study detail pages */
+.case-hero {
+  padding: 56px 0 8px;
+}
+
+.case-hero .wrap {
+  max-width: 780px;
+}
+
+.case-hero h1 {
+  font-size: 44px;
+  line-height: 1.15;
+  margin-bottom: 24px;
+}
+
+.case-hero p {
+  font-size: 18px;
+  margin: 0 0 18px;
+}
+
+.case-figure {
+  padding: 32px 0 8px;
+}
+
+.case-figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  display: block;
+}
+
+.case-gallery {
+  padding: 40px 0 16px;
+}
+
+.case-gallery .wrap {
+  max-width: none;
+  padding-left: max(var(--wrap-pad), calc((100% - var(--max-width)) / 2 + var(--wrap-pad)));
+  padding-right: 0;
+}
+
+.gallery-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 4px 32px 20px 0;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery-row img {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  height: 440px;
+  width: auto;
+  max-width: 80vw;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 12px 32px rgba(47, 45, 44, 0.08);
+}
+
+.case-content {
+  padding: 24px 0 120px;
+}
+
+.case-content .wrap {
+  max-width: 780px;
+}
+
+.case-block {
+  margin-bottom: 40px;
+}
+
+.case-block:last-child {
+  margin-bottom: 0;
+}
+
+.case-block h2 {
+  font-size: 24px;
+  margin-bottom: 14px;
+}
+
+.case-block h3 {
+  font-size: 19px;
+  margin-bottom: 8px;
+}
+
+.case-block p {
+  font-size: 17px;
+  margin: 0 0 16px;
+}
+
+.case-block p:last-child {
+  margin-bottom: 0;
+}
+
+.case-block ol,
+.case-block ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.case-block ol li,
+.case-block ul li {
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+
+.case-subitem {
+  margin-bottom: 20px;
+}
+
+.case-subitem:last-child {
+  margin-bottom: 0;
 }
 
 /* My Story */
@@ -327,5 +449,17 @@ footer {
   .principles-grid {
     grid-template-columns: 1fr;
     gap: 40px;
+  }
+
+  .case-hero h1 {
+    font-size: 30px;
+  }
+
+  .case-hero p {
+    font-size: 17px;
+  }
+
+  .gallery-row img {
+    height: 300px;
   }
 }
