@@ -157,11 +157,16 @@ img {
   padding: 24px 0 88px;
 }
 
+.case-studies .wrap {
+  max-width: none;
+  padding-right: 0;
+}
+
 .case-grid {
   display: flex;
   gap: 24px;
   overflow-x: auto;
-  padding: 8px 0 24px;
+  padding: 8px 32px 24px 0;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
 }
