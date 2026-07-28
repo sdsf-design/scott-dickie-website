@@ -139,17 +139,6 @@ img {
   text-underline-offset: 3px;
 }
 
-.hero-glow {
-  margin-top: 40px;
-  height: 90px;
-  border-radius: 16px;
-  background-image: url("assets/hero-collage.jpg");
-  background-size: cover;
-  background-position: center 30%;
-  filter: blur(18px) saturate(1.1);
-  opacity: 0.85;
-}
-
 /* Logo bar */
 .logo-bar {
   padding: 40px 0 56px;
