@@ -7,6 +7,7 @@
   --accent-dark: #0f4fd1;
   --border: rgba(47, 45, 44, 0.12);
   --max-width: 1120px;
+  --wrap-pad: 32px;
 }
 
 * {
@@ -47,7 +48,7 @@ img {
 .wrap {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 var(--wrap-pad);
 }
 
 /* Header */
@@ -159,6 +160,7 @@ img {
 
 .case-studies .wrap {
   max-width: none;
+  padding-left: max(var(--wrap-pad), calc((100% - var(--max-width)) / 2 + var(--wrap-pad)));
   padding-right: 0;
 }
 
@@ -279,8 +281,12 @@ footer {
 }
 
 @media (max-width: 720px) {
+  :root {
+    --wrap-pad: 20px;
+  }
+
   .wrap {
-    padding: 0 20px;
+    padding: 0 var(--wrap-pad);
   }
 
   .site-header .wrap {
