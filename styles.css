@@ -110,9 +110,9 @@ img {
   font-weight: 500;
 }
 
-.btn-primary {
+.main-nav a.btn-primary {
   background: var(--text-primary);
-  color: transparent;
+  color: var(--bg);
   transition: background 0.15s ease;
 }
 
