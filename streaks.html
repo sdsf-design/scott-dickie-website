@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genshin World Level</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Philosopher:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#d9b26a;
+    --gold-light:#f3dfa8;
+    --gold-dark:#8a6a2f;
+    --ink:#f5efe0;
+    --navy-deep:#0c1730;
+    --navy:#152848;
+    --panel:#12213e;
+    --pyro:#ff6a3d;
+    --hydro:#4fc3f7;
+    --anemo:#6fe3c4;
+    --electro:#b57bff;
+    --geo:#f2c94c;
+    --dendro:#a4e05a;
+    --cryo:#a7ecff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Philosopher','Cinzel',serif;
+    min-height:100vh;
+    color:var(--ink);
+    padding:26px 16px 60px;
+    overflow-x:hidden;
+    position:relative;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(217,178,106,.18) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 10%, rgba(111,227,196,.14) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 100%, rgba(79,195,247,.12) 0%, transparent 50%),
+      linear-gradient(180deg, #060d1e 0%, #0c1a35 30%, #142a4d 60%, #1c3556 100%);
+  }
+  /* starfield */
+  .stars{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 15%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 25% 55%, #fff, transparent),
+      radial-gradient(1px 1px at 40% 20%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 60% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 75% 35%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 85% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 92% 25%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 15% 85%, #fff, transparent),
+      radial-gradient(1px 1px at 50% 40%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 70% 10%, #fff, transparent);
+    opacity:.55;
+    animation:twinkle 5s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle{ 0%{opacity:.3;} 100%{opacity:.7;} }
+
+  /* soft floating elemental glows, evoking Genshin's elemental orbs */
+  .glow{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(2px);
+    opacity:.5;
+    z-index:0;
+    animation:float 8s ease-in-out infinite;
+  }
+  .glow.g1{width:140px;height:140px;background:radial-gradient(circle, var(--pyro), transparent 70%);top:6%;left:2%;animation-delay:0s;}
+  .glow.g2{width:110px;height:110px;background:radial-gradient(circle, var(--hydro), transparent 70%);top:65%;left:6%;animation-delay:1.4s;}
+  .glow.g3{width:160px;height:160px;background:radial-gradient(circle, var(--anemo), transparent 70%);top:12%;right:3%;animation-delay:.7s;}
+  .glow.g4{width:120px;height:120px;background:radial-gradient(circle, var(--electro), transparent 70%);bottom:5%;right:8%;animation-delay:2s;}
+  @keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-22px);}
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
+
+  header{text-align:center;margin-bottom:30px;}
+  .badge{
+    display:inline-block;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold));
+    border:2px solid var(--gold-dark);
+    border-radius:999px;
+    padding:6px 24px;
+    font-weight:700;
+    font-size:.78rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#3a2a08;
+    box-shadow:0 3px 10px rgba(0,0,0,.4);
+    margin-bottom:16px;
+    font-family:'Cinzel',serif;
+  }
+  h1{
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:clamp(2rem, 5.6vw, 3.6rem);
+    margin:0;
+    letter-spacing:.03em;
+    background:linear-gradient(180deg, #fff6de 0%, var(--gold-light) 40%, var(--gold) 75%, var(--gold-dark) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    text-shadow:0 3px 18px rgba(217,178,106,.35);
+    line-height:1.15;
+  }
+  .subtitle{
+    margin-top:16px;
+    font-weight:600;
+    font-size:1.05rem;
+    color:var(--ink);
+    background:rgba(21,40,72,.6);
+    display:inline-block;
+    padding:8px 20px;
+    border-radius:14px;
+    border:1px solid rgba(217,178,106,.4);
+    backdrop-filter:blur(3px);
+  }
+
+  .champion-banner{
+    max-width:640px;
+    margin:26px auto 0;
+    background:linear-gradient(135deg, rgba(217,178,106,.22), rgba(111,227,196,.18));
+    border:1.5px solid var(--gold);
+    border-radius:18px;
+    box-shadow:0 6px 22px rgba(0,0,0,.35);
+    padding:16px 20px;
+    text-align:center;
+    color:var(--ink);
+    font-weight:700;
+    font-size:1.1rem;
+    display:none;
+    backdrop-filter:blur(4px);
+  }
+  .champion-banner.show{display:block;}
+  .champion-banner span.name{
+    color:var(--gold-light);
+    text-shadow:0 0 12px rgba(243,223,168,.6);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+    gap:26px;
+    margin-top:36px;
+  }
+
+  .card{
+    position:relative;
+    background:linear-gradient(160deg, rgba(21,40,72,.92), rgba(12,23,48,.94));
+    border:1.5px solid var(--gold-dark);
+    border-radius:22px;
+    padding:22px 22px 26px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card::before{
+    content:'';
+    position:absolute;
+    inset:6px;
+    border:1px solid rgba(217,178,106,.28);
+    border-radius:16px;
+    pointer-events:none;
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 16px 36px rgba(0,0,0,.55);
+    border-color:var(--gold);
+  }
+  .card.today .avatar{animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(217,178,106,.55);}
+    50%{box-shadow:0 0 0 10px rgba(217,178,106,0);}
+  }
+
+  .card-top{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+  .avatar{
+    width:64px;height:64px;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.25), transparent 60%);
+  }
+  .avatar svg{width:60%;height:60%;}
+  .name{
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:1.35rem;
+    margin:0;
+    color:var(--gold-light);
+  }
+  .role-tag{
+    font-size:.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    opacity:.65;
+  }
+
+  .streak-row{
+    display:flex;
+    gap:12px;
+    margin:18px 0 6px;
+  }
+  .stat{
+    flex:1;
+    border:1px solid rgba(217,178,106,.35);
+    border-radius:14px;
+    text-align:center;
+    padding:10px 4px 8px;
+    background:rgba(6,13,30,.5);
+  }
+  .stat .num{
+    font-family:'Cinzel',serif;
+    font-size:1.75rem;
+    font-weight:700;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    color:var(--ink);
+  }
+  .mini-star{
+    display:inline-block;
+    width:22px;height:22px;
+    background:linear-gradient(160deg, #fff8e0 0%, var(--gold-light) 30%, var(--gold) 65%, var(--gold-dark) 100%);
+    clip-path:polygon(50% 0%, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0% 50%, 37% 37%);
+    filter:drop-shadow(0 0 3px rgba(217,178,106,.8));
+    vertical-align:middle;
+  }
+  .stat .lbl{
+    font-size:.66rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    margin-top:5px;
+    opacity:.65;
+  }
+
+  .checkin-btn{
+    width:100%;
+    margin-top:12px;
+    border:1.5px solid var(--gold);
+    border-radius:14px;
+    padding:13px;
+    font-family:'Philosopher',serif;
+    font-weight:700;
+    font-size:1.05rem;
+    cursor:pointer;
+    transition:transform .1s ease, box-shadow .15s ease, background .2s ease;
+    color:#2a1b04;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold));
+    box-shadow:0 4px 14px rgba(217,178,106,.35);
+  }
+  .checkin-btn:hover{ box-shadow:0 6px 20px rgba(217,178,106,.55); }
+  .checkin-btn:active{ transform:translateY(2px); }
+  .checkin-btn.done{
+    background:linear-gradient(135deg, #2f5c4a, #1c3a30);
+    color:var(--ink);
+    border-color:var(--anemo);
+    cursor:default;
+    box-shadow:none;
+  }
+
+  .cal-title{
+    margin-top:18px;
+    font-size:.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    opacity:.6;
+  }
+  .cal{
+    display:grid;
+    grid-template-columns:repeat(10, 1fr);
+    gap:4px;
+    margin-top:8px;
+  }
+  .cal .day{
+    aspect-ratio:1/1;
+    border-radius:4px;
+    border:1px solid rgba(217,178,106,.25);
+    background:rgba(6,13,30,.6);
+  }
+  .cal .day.today-cell{
+    box-shadow:0 0 0 1.5px var(--gold-light);
+  }
+
+  .undo-link{
+    display:inline-block;
+    margin-top:12px;
+    font-size:.75rem;
+    font-weight:700;
+    text-decoration:underline;
+    opacity:.55;
+    cursor:pointer;
+    background:none;
+    border:none;
+    padding:0;
+    color:var(--ink);
+    font-family:'Philosopher',serif;
+  }
+  .undo-link:hover{opacity:.9;}
+
+  footer{
+    text-align:center;
+    margin-top:44px;
+    color:var(--ink);
+    font-weight:600;
+    font-size:.85rem;
+    opacity:.7;
+  }
+
+  /* full-card streak reveal overlay */
+  .streak-overlay{
+    position:absolute;
+    inset:0;
+    z-index:20;
+    border-radius:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at 50% 45%, rgba(28,53,86,.96) 0%, rgba(9,17,36,.97) 70%);
+    border:1.5px solid var(--gold);
+    pointer-events:none;
+    opacity:0;
+    animation:overlayFade 1.8s ease forwards;
+  }
+  @keyframes overlayFade{
+    0%{ opacity:0; }
+    12%{ opacity:1; }
+    72%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+
+  .overlay-number{
+    position:relative;
+    z-index:2;
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:4.2rem;
+    line-height:1;
+    color:var(--gold-light);
+    text-shadow:0 0 22px rgba(243,223,168,.75), 0 0 4px #fff;
+    transform:scale(.3);
+    opacity:0;
+    animation:numberPop 1.8s cubic-bezier(.22,1.4,.36,1) forwards;
+  }
+  @keyframes numberPop{
+    0%{ transform:scale(.3); opacity:0; }
+    20%{ transform:scale(1.15); opacity:1; }
+    32%{ transform:scale(1); opacity:1; }
+    72%{ transform:scale(1); opacity:1; }
+    100%{ transform:scale(1.05); opacity:0; }
+  }
+
+  .overlay-diamonds{
+    position:absolute;
+    inset:0;
+    z-index:1;
+  }
+  .overlay-diamond{
+    position:absolute;
+    width:44px;height:44px;
+    margin:-22px 0 0 -22px;
+    background:linear-gradient(160deg, #fff8e0 0%, var(--gold-light) 30%, var(--gold) 65%, var(--gold-dark) 100%);
+    clip-path:polygon(50% 0%, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0% 50%, 37% 37%);
+    box-shadow:0 0 14px rgba(217,178,106,.85);
+    filter:drop-shadow(0 0 5px #fff8e0);
+    transform:scale(0) rotate(0deg);
+    animation:diamondAppear 1.8s cubic-bezier(.22,1.4,.36,1) forwards;
+  }
+  .overlay-diamond-mid{
+    width:70px;height:70px;
+    margin:-35px 0 0 -35px;
+    filter:drop-shadow(0 0 10px #fff8e0);
+    box-shadow:0 0 26px rgba(217,178,106,.95);
+  }
+  @keyframes diamondAppear{
+    0%{ transform:scale(0) rotate(-25deg); opacity:0; }
+    18%{ transform:scale(1.15) rotate(8deg); opacity:1; }
+    30%{ transform:scale(1) rotate(0deg); opacity:1; }
+    72%{ transform:scale(1) rotate(0deg); opacity:1; }
+    100%{ transform:scale(.9) rotate(0deg); opacity:0; }
+  }
+
+  @media (max-width:480px){
+    .cal{grid-template-columns:repeat(7,1fr);}
+  }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+  <div class="glow g4"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="badge">Daily Commission</div>
+      <h1>GENSHIN<br>WORLD LEVEL</h1>
+      <div class="subtitle" id="todayLabel">Loading date...</div>
+    </header>
+
+    <div class="champion-banner" id="championBanner"></div>
+
+    <div class="grid" id="cardGrid"></div>
+
+    <footer>Tap "Check In" once you've played Genshin today. Streaks break if a day is missed ✨</footer>
+  </div>
+
+<script>
+(function(){
+  const ICONS = {
+    pyro: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2c-.7 3.1-3.8 4.4-3.8 8.3a3.8 3.8 0 007.6 0c0-.9-.4-1.6-.8-2.4.9.9 1.8 2.6 1.8 4.4a4.8 4.8 0 01-9.6 0c0-5.4 4-6.3 4.8-10.3z"/></svg>',
+    hydro: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.3C8.4 7.6 5.5 11.5 5.5 15a6.5 6.5 0 0013 0c0-3.5-2.9-7.4-6.5-12.7z"/></svg>',
+    anemo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.3 9.3c0-2.1 1.9-3.3 3.7-3.3s3.2 1.4 3.2 3-1.4 2.4-3 3-3 1-3 2.9 2 3.1 4 3.1"/></svg>'
+  };
+  const PLAYERS = [
+    { key:'william', name:'William', role:'Pyro Traveler', icon:ICONS.pyro, color:'#ff6a3d', dark:'#7a2e12' },
+    { key:'sophia',  name:'Sophia',  role:'Hydro Traveler', icon:ICONS.hydro, color:'#4fc3f7', dark:'#124a6b' },
+    { key:'daddy',   name:'Daddy',   role:'Anemo Traveler', icon:ICONS.anemo, color:'#6fe3c4', dark:'#155c48' },
+  ];
+
+  const STORAGE_KEY = 'genshinStreakSquad.v1';
+
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    const fresh = {};
+    PLAYERS.forEach(p => fresh[p.key] = { checkins: [] });
+    return fresh;
+  }
+
+  function saveData(data){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  }
+
+  let data = loadData();
+  PLAYERS.forEach(p => { if(!data[p.key]) data[p.key] = { checkins: [] }; });
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function dateStrFromOffset(offsetDays){
+    const d = new Date();
+    d.setDate(d.getDate() - offsetDays);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function parseDate(str){
+    const [y,m,d] = str.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  function daysBetween(a,b){
+    const MS = 24*60*60*1000;
+    return Math.round((parseDate(a) - parseDate(b)) / MS);
+  }
+
+  function currentStreak(checkins){
+    const set = new Set(checkins);
+    const today = todayStr();
+    const yesterday = dateStrFromOffset(1);
+    let anchor;
+    if(set.has(today)) anchor = 0;
+    else if(set.has(yesterday)) anchor = 1;
+    else return 0;
+    let count = 0;
+    let offset = anchor;
+    while(set.has(dateStrFromOffset(offset))){
+      count++;
+      offset++;
+    }
+    return count;
+  }
+
+  function longestStreak(checkins){
+    if(checkins.length === 0) return 0;
+    const sorted = [...checkins].sort();
+    let longest = 1, run = 1;
+    for(let i=1;i<sorted.length;i++){
+      if(daysBetween(sorted[i], sorted[i-1]) === 1){
+        run++;
+      } else if(daysBetween(sorted[i], sorted[i-1]) === 0){
+        // duplicate, skip
+      } else {
+        run = 1;
+      }
+      longest = Math.max(longest, run);
+    }
+    return longest;
+  }
+
+  function renderCalendar(checkins, colorDark){
+    const set = new Set(checkins);
+    const CELLS = 30;
+    let html = '';
+    for(let i = CELLS - 1; i >= 0; i--){
+      const ds = dateStrFromOffset(i);
+      const filled = set.has(ds);
+      const isToday = i === 0;
+      html += `<div class="day${isToday ? ' today-cell' : ''}" style="${filled ? `background:${colorDark};` : ''}" title="${ds}"></div>`;
+    }
+    return html;
+  }
+
+  function showStreakOverlay(key, streakValue){
+    const card = document.querySelector(`.card[data-player="${key}"]`);
+    if(!card) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'streak-overlay';
+
+    const diamondsWrap = document.createElement('div');
+    diamondsWrap.className = 'overlay-diamonds';
+    const COUNT = 5;
+    const positions = [16, 33, 50, 67, 84]; // percent left, evenly spaced horizontal line
+    for(let i = 0; i < COUNT; i++){
+      const left = positions[i];
+      const top = 50;
+      const d = document.createElement('div');
+      d.className = 'overlay-diamond' + (i === 2 ? ' overlay-diamond-mid' : '');
+      d.style.left = left + '%';
+      d.style.top = top + '%';
+      d.style.animationDelay = (Math.abs(i - 2) * 0.07) + 's';
+      diamondsWrap.appendChild(d);
+    }
+
+    const numEl = document.createElement('div');
+    numEl.className = 'overlay-number';
+    numEl.textContent = streakValue;
+
+    overlay.appendChild(diamondsWrap);
+    overlay.appendChild(numEl);
+    card.appendChild(overlay);
+
+    overlay.addEventListener('animationend', (e) => {
+      if(e.target === overlay) overlay.remove();
+    });
+    setTimeout(() => overlay.remove(), 1900);
+  }
+
+  function checkIn(key, btnEl){
+    const today = todayStr();
+    if(!data[key].checkins.includes(today)){
+      data[key].checkins.push(today);
+      saveData(data);
+      render();
+      showStreakOverlay(key, currentStreak(data[key].checkins));
+      return;
+    }
+    render();
+  }
+
+  function undo(key){
+    const today = todayStr();
+    data[key].checkins = data[key].checkins.filter(d => d !== today);
+    saveData(data);
+    render();
+  }
+
+  function render(){
+    const grid = document.getElementById('cardGrid');
+    grid.innerHTML = '';
+
+    const today = todayStr();
+    const todayDisplay = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    document.getElementById('todayLabel').textContent = todayDisplay;
+
+    let bestStreak = 0, bestName = '';
+
+    PLAYERS.forEach(p => {
+      const checkins = data[p.key].checkins;
+      const cur = currentStreak(checkins);
+      const longest = longestStreak(checkins);
+      const doneToday = checkins.includes(today);
+
+      if(cur > bestStreak){ bestStreak = cur; bestName = p.name; }
+
+      const card = document.createElement('div');
+      card.className = 'card' + (doneToday ? '' : ' today');
+      card.setAttribute('data-player', p.key);
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="avatar" style="border-color:${p.color}; color:${p.color};">${p.icon}</div>
+          <div>
+            <p class="name">${p.name}</p>
+            <div class="role-tag" style="color:${p.color};">${p.role}</div>
+          </div>
+        </div>
+        <div class="streak-row">
+          <div class="stat">
+            <div class="num">🔥 ${cur}</div>
+            <div class="lbl">Current</div>
+          </div>
+          <div class="stat">
+            <div class="num"><span class="mini-star"></span> ${longest}</div>
+            <div class="lbl">Best</div>
+          </div>
+        </div>
+        <button class="checkin-btn${doneToday ? ' done' : ''}" data-key="${p.key}">
+          ${doneToday ? "✅ Checked In Today!" : "▶ Check In Today"}
+        </button>
+        <div class="cal-title">Last 30 Days</div>
+        <div class="cal">${renderCalendar(checkins, p.color)}</div>
+        ${doneToday ? `<button class="undo-link" data-undo="${p.key}">Undo today's check-in</button>` : ''}
+      `;
+      grid.appendChild(card);
+    });
+
+    document.querySelectorAll('.checkin-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(btn.classList.contains('done')) return;
+        checkIn(btn.dataset.key, btn);
+      });
+    });
+    document.querySelectorAll('[data-undo]').forEach(btn => {
+      btn.addEventListener('click', () => undo(btn.dataset.undo));
+    });
+
+    const banner = document.getElementById('championBanner');
+    if(bestStreak >= 3){
+      banner.classList.add('show');
+      banner.innerHTML = `🎉 <span class="name">${bestName}</span> is leading with a ${bestStreak}-day streak! 🎉`;
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
