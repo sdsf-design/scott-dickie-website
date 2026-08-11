@@ -51,30 +51,48 @@
       radial-gradient(1px 1px at 92% 25%, #fff, transparent),
       radial-gradient(1.5px 1.5px at 15% 85%, #fff, transparent),
       radial-gradient(1px 1px at 50% 40%, #fff, transparent),
-      radial-gradient(1.5px 1.5px at 70% 10%, #fff, transparent);
-    opacity:.55;
+      radial-gradient(1.5px 1.5px at 70% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 5% 45%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 33% 8%, #fff, transparent),
+      radial-gradient(1px 1px at 55% 92%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 80% 60%, #fff, transparent),
+      radial-gradient(1px 1px at 96% 70%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 45% 78%, #fff, transparent),
+      radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 65% 45%, #fff, transparent);
+    opacity:.6;
     animation:twinkle 5s ease-in-out infinite alternate;
   }
-  @keyframes twinkle{ 0%{opacity:.3;} 100%{opacity:.7;} }
+  @keyframes twinkle{ 0%{opacity:.3;} 100%{opacity:.75;} }
 
-  /* soft floating elemental glows, evoking Genshin's elemental orbs */
-  .glow{
+  /* drifting clouds */
+  .cloud{
     position:fixed;
-    border-radius:50%;
-    filter:blur(2px);
-    opacity:.5;
+    background:rgba(210,225,245,.14);
+    border-radius:100px;
+    filter:blur(1.5px);
     z-index:0;
-    animation:float 8s ease-in-out infinite;
+    pointer-events:none;
+    animation:drift 60s linear infinite;
   }
-  .glow.g1{width:140px;height:140px;background:radial-gradient(circle, var(--pyro), transparent 70%);top:6%;left:2%;animation-delay:0s;}
-  .glow.g2{width:110px;height:110px;background:radial-gradient(circle, var(--hydro), transparent 70%);top:65%;left:6%;animation-delay:1.4s;}
-  .glow.g3{width:160px;height:160px;background:radial-gradient(circle, var(--anemo), transparent 70%);top:12%;right:3%;animation-delay:.7s;}
-  .glow.g4{width:120px;height:120px;background:radial-gradient(circle, var(--electro), transparent 70%);bottom:5%;right:8%;animation-delay:2s;}
-  @keyframes float{
-    0%,100%{transform:translateY(0);}
-    50%{transform:translateY(-22px);}
+  .cloud::before, .cloud::after{
+    content:'';
+    position:absolute;
+    background:inherit;
+    border-radius:50%;
   }
+  .cloud::before{ width:55%; height:130%; top:-55%; left:8%; }
+  .cloud::after{ width:42%; height:110%; top:-45%; right:12%; }
 
+  .cloud.c1{width:260px;height:60px;top:8%;left:-20%;opacity:.8;animation-duration:70s;}
+  .cloud.c2{width:180px;height:44px;top:22%;left:-15%;opacity:.55;animation-duration:52s;animation-delay:-14s;}
+  .cloud.c3{width:320px;height:70px;top:42%;left:-25%;opacity:.7;animation-duration:85s;animation-delay:-30s;}
+  .cloud.c4{width:200px;height:48px;top:63%;left:-18%;opacity:.5;animation-duration:60s;animation-delay:-8s;}
+  .cloud.c5{width:240px;height:56px;top:80%;left:-22%;opacity:.65;animation-duration:75s;animation-delay:-40s;}
+  @keyframes drift{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(140vw); }
+  }
   .wrap{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
 
   header{text-align:center;margin-bottom:30px;}
@@ -202,6 +220,7 @@
 
   .streak-row{
     display:flex;
+    justify-content:center;
     gap:12px;
     margin:18px 0 6px;
   }
@@ -213,7 +232,11 @@
     padding:10px 4px 8px;
     background:rgba(6,13,30,.5);
   }
-  .stat .num{
+  .best-stat{
+    text-align:center;
+    padding:6px 4px 4px;
+  }
+  .stat .num, .best-stat .num{
     font-family:'Cinzel',serif;
     font-size:1.75rem;
     font-weight:700;
@@ -232,7 +255,7 @@
     filter:drop-shadow(0 0 3px rgba(217,178,106,.8));
     vertical-align:middle;
   }
-  .stat .lbl{
+  .stat .lbl, .best-stat .lbl{
     font-size:.66rem;
     font-weight:700;
     text-transform:uppercase;
@@ -266,28 +289,105 @@
     box-shadow:none;
   }
 
-  .cal-title{
-    margin-top:18px;
-    font-size:.72rem;
+  /* elemental login visual */
+  .element-visual{
+    position:relative;
+    margin-top:16px;
+    height:80px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* pyro: flickering flame */
+  .flame-shape{
+    width:42px;height:56px;
+    margin-bottom:8px;
+    background:radial-gradient(circle at 50% 75%, #fff4d0 0%, #ffd18a 22%, var(--el-color) 55%, var(--el-color-dark) 88%);
+    border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;
+    filter:drop-shadow(0 0 10px var(--el-color));
+    transform-origin:bottom center;
+    animation:flameFlicker 1.5s ease-in-out infinite;
+  }
+  @keyframes flameFlicker{
+    0%,100%{ transform:scaleY(1) scaleX(1) rotate(0deg); }
+    25%{ transform:scaleY(1.1) scaleX(.92) rotate(-3deg); }
+    50%{ transform:scaleY(.9) scaleX(1.06) rotate(2deg); }
+    75%{ transform:scaleY(1.06) scaleX(.96) rotate(-1.5deg); }
+  }
+
+  /* hydro: falling rain */
+  .hydro-visual{ align-items:flex-start; }
+  .rain-cloud{
+    position:relative;
+    width:60px;height:20px;
+    margin:6px auto 0;
+    background:rgba(210,225,245,.4);
+    border-radius:40px;
+  }
+  .rain-cloud::before, .rain-cloud::after{
+    content:'';
+    position:absolute;
+    background:inherit;
+    border-radius:50%;
+  }
+  .rain-cloud::before{ width:50%; height:140%; top:-60%; left:6%; }
+  .rain-cloud::after{ width:40%; height:120%; top:-50%; right:10%; }
+  .raindrop{
+    position:absolute;
+    top:28px;
+    width:2px;height:16px;
+    background:linear-gradient(180deg, transparent, var(--el-color));
+    opacity:0;
+    animation:rainFall linear infinite;
+  }
+  @keyframes rainFall{
+    0%{ transform:translateY(0); opacity:0; }
+    15%{ opacity:.9; }
+    85%{ opacity:.55; }
+    100%{ transform:translateY(44px); opacity:0; }
+  }
+
+  /* anemo: gusts of wind */
+  .anemo-visual{ align-items:center; }
+  .wind-gust{
+    position:absolute;
+    left:0;
+    height:3px;
+    border-radius:3px;
+    background:linear-gradient(90deg, transparent, var(--el-color), var(--el-color), transparent);
+    opacity:0;
+    filter:drop-shadow(0 0 4px var(--el-color));
+    animation-name:windBlow;
+    animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite;
+  }
+  @keyframes windBlow{
+    0%{ transform:translateX(-120%); opacity:0; }
+    12%{ opacity:.9; }
+    50%{ transform:translateX(40%); }
+    88%{ opacity:.9; }
+    100%{ transform:translateX(220%); opacity:0; }
+  }
+
+  .days-logged{
+    margin-top:12px;
+    text-align:center;
+  }
+  .days-num{
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:1.6rem;
+    color:var(--gold-light);
+  }
+  .days-lbl{
+    font-size:.68rem;
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:.08em;
-    opacity:.6;
-  }
-  .cal{
-    display:grid;
-    grid-template-columns:repeat(10, 1fr);
-    gap:4px;
-    margin-top:8px;
-  }
-  .cal .day{
-    aspect-ratio:1/1;
-    border-radius:4px;
-    border:1px solid rgba(217,178,106,.25);
-    background:rgba(6,13,30,.6);
-  }
-  .cal .day.today-cell{
-    box-shadow:0 0 0 1.5px var(--gold-light);
+    opacity:.65;
+    margin-top:2px;
   }
 
   .undo-link{
@@ -344,8 +444,10 @@
     font-weight:700;
     font-size:4.2rem;
     line-height:1;
-    color:var(--gold-light);
-    text-shadow:0 0 22px rgba(243,223,168,.75), 0 0 4px #fff;
+    color:#ffffff;
+    -webkit-text-stroke:2px var(--gold);
+    text-stroke:2px var(--gold);
+    text-shadow:0 0 18px rgba(217,178,106,.85), 0 0 6px rgba(217,178,106,.6);
     transform:scale(.3);
     opacity:0;
     animation:numberPop 1.8s cubic-bezier(.22,1.4,.36,1) forwards;
@@ -367,11 +469,13 @@
     position:absolute;
     width:44px;height:44px;
     margin:-22px 0 0 -22px;
+    --start-x:0px;
+    --start-y:140px;
     background:linear-gradient(160deg, #fff8e0 0%, var(--gold-light) 30%, var(--gold) 65%, var(--gold-dark) 100%);
     clip-path:polygon(50% 0%, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0% 50%, 37% 37%);
     box-shadow:0 0 14px rgba(217,178,106,.85);
     filter:drop-shadow(0 0 5px #fff8e0);
-    transform:scale(0) rotate(0deg);
+    transform:translate(var(--start-x), var(--start-y)) scale(0) rotate(-25deg);
     animation:diamondAppear 1.8s cubic-bezier(.22,1.4,.36,1) forwards;
   }
   .overlay-diamond-mid{
@@ -381,24 +485,22 @@
     box-shadow:0 0 26px rgba(217,178,106,.95);
   }
   @keyframes diamondAppear{
-    0%{ transform:scale(0) rotate(-25deg); opacity:0; }
-    18%{ transform:scale(1.15) rotate(8deg); opacity:1; }
-    30%{ transform:scale(1) rotate(0deg); opacity:1; }
-    72%{ transform:scale(1) rotate(0deg); opacity:1; }
-    100%{ transform:scale(.9) rotate(0deg); opacity:0; }
+    0%{ transform:translate(var(--start-x), var(--start-y)) scale(0) rotate(-25deg); opacity:0; }
+    18%{ transform:translate(calc(var(--start-x) * .35), calc(var(--start-y) * .35)) scale(1.15) rotate(8deg); opacity:1; }
+    32%{ transform:translate(0, 0) scale(1) rotate(0deg); opacity:1; }
+    72%{ transform:translate(0, 0) scale(1) rotate(0deg); opacity:1; }
+    100%{ transform:translate(0, 0) scale(.9) rotate(0deg); opacity:0; }
   }
 
-  @media (max-width:480px){
-    .cal{grid-template-columns:repeat(7,1fr);}
-  }
 </style>
 </head>
 <body>
   <div class="stars"></div>
-  <div class="glow g1"></div>
-  <div class="glow g2"></div>
-  <div class="glow g3"></div>
-  <div class="glow g4"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="cloud c4"></div>
+  <div class="cloud c5"></div>
 
   <div class="wrap">
     <header>
@@ -422,9 +524,9 @@
     anemo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.3 9.3c0-2.1 1.9-3.3 3.7-3.3s3.2 1.4 3.2 3-1.4 2.4-3 3-3 1-3 2.9 2 3.1 4 3.1"/></svg>'
   };
   const PLAYERS = [
-    { key:'william', name:'William', role:'Pyro Traveler', icon:ICONS.pyro, color:'#ff6a3d', dark:'#7a2e12' },
-    { key:'sophia',  name:'Sophia',  role:'Hydro Traveler', icon:ICONS.hydro, color:'#4fc3f7', dark:'#124a6b' },
-    { key:'daddy',   name:'Daddy',   role:'Anemo Traveler', icon:ICONS.anemo, color:'#6fe3c4', dark:'#155c48' },
+    { key:'william', name:'William', role:'Pyro Traveler', element:'pyro',  icon:ICONS.pyro,  color:'#ff6a3d', dark:'#7a2e12' },
+    { key:'sophia',  name:'Sophia',  role:'Hydro Traveler', element:'hydro', icon:ICONS.hydro, color:'#4fc3f7', dark:'#124a6b' },
+    { key:'daddy',   name:'Daddy',   role:'Anemo Traveler', element:'anemo', icon:ICONS.anemo, color:'#6fe3c4', dark:'#155c48' },
   ];
 
   const STORAGE_KEY = 'genshinStreakSquad.v1';
@@ -501,17 +603,37 @@
     return longest;
   }
 
-  function renderCalendar(checkins, colorDark){
-    const set = new Set(checkins);
-    const CELLS = 30;
-    let html = '';
-    for(let i = CELLS - 1; i >= 0; i--){
-      const ds = dateStrFromOffset(i);
-      const filled = set.has(ds);
-      const isToday = i === 0;
-      html += `<div class="day${isToday ? ' today-cell' : ''}" style="${filled ? `background:${colorDark};` : ''}" title="${ds}"></div>`;
+  function renderElementVisual(element, color, colorDark){
+    const styleVars = `--el-color:${color}; --el-color-dark:${colorDark};`;
+
+    if(element === 'pyro'){
+      return `<div class="element-visual pyro-visual" style="${styleVars}">
+        <div class="flame-shape"></div>
+      </div>`;
     }
-    return html;
+
+    if(element === 'hydro'){
+      const lefts = [8, 22, 36, 50, 64, 78, 92];
+      const drops = lefts.map((left, i) => `<div class="raindrop" style="left:${left}%; animation-delay:${(i * 0.15).toFixed(2)}s; animation-duration:${(0.9 + (i % 3) * 0.15).toFixed(2)}s;"></div>`).join('');
+      return `<div class="element-visual hydro-visual" style="${styleVars}">
+        <div class="rain-cloud"></div>
+        ${drops}
+      </div>`;
+    }
+
+    if(element === 'anemo'){
+      const gusts = [
+        { top: 12, width: 46 }, { top: 24, width: 62 }, { top: 36, width: 34 },
+        { top: 48, width: 70 }, { top: 60, width: 40 }, { top: 72, width: 56 },
+        { top: 18, width: 30 }, { top: 66, width: 28 },
+      ];
+      const lines = gusts.map((g, i) => `<div class="wind-gust" style="top:${g.top}%; width:${g.width}px; animation-delay:${(i * 0.22).toFixed(2)}s; animation-duration:${(1.5 + (i % 4) * 0.25).toFixed(2)}s;"></div>`).join('');
+      return `<div class="element-visual anemo-visual" style="${styleVars}">
+        ${lines}
+      </div>`;
+    }
+
+    return '';
   }
 
   function showStreakOverlay(key, streakValue){
@@ -525,6 +647,22 @@
     diamondsWrap.className = 'overlay-diamonds';
     const COUNT = 5;
     const positions = [16, 33, 50, 67, 84]; // percent left, evenly spaced horizontal line
+    const TOTAL_S = 1.8;             // total lifetime of the overlay
+    const ARRIVAL_FRACTION = 0.32;   // point in each star's own run when it settles into place
+
+    // build a 3-tier cascade: middle -> adjacent pair -> outermost pair,
+    // each tier only starting once the previous tier has arrived.
+    const midDelay = 0;
+    const midDuration = TOTAL_S;
+    const midArrival = midDelay + ARRIVAL_FRACTION * midDuration;
+
+    const adjDelay = midArrival;
+    const adjDuration = Math.max(TOTAL_S - adjDelay, 0.7);
+    const adjArrival = adjDelay + ARRIVAL_FRACTION * adjDuration;
+
+    const outDelay = adjArrival;
+    const outDuration = Math.max(TOTAL_S - outDelay, 0.6);
+
     for(let i = 0; i < COUNT; i++){
       const left = positions[i];
       const top = 50;
@@ -532,7 +670,18 @@
       d.className = 'overlay-diamond' + (i === 2 ? ' overlay-diamond-mid' : '');
       d.style.left = left + '%';
       d.style.top = top + '%';
-      d.style.animationDelay = (Math.abs(i - 2) * 0.07) + 's';
+      // enter from below the card near center, then spread outward to its final slot
+      const dxPx = (50 - left) * 2.2;
+      d.style.setProperty('--start-x', dxPx + 'px');
+      d.style.setProperty('--start-y', '150px');
+
+      const distance = Math.abs(i - 2); // 0 = middle, 1 = adjacent, 2 = outermost
+      let delay, duration;
+      if(distance === 0){ delay = midDelay; duration = midDuration; }
+      else if(distance === 1){ delay = adjDelay; duration = adjDuration; }
+      else { delay = outDelay; duration = outDuration; }
+      d.style.animationDelay = delay + 's';
+      d.style.animationDuration = duration + 's';
       diamondsWrap.appendChild(d);
     }
 
@@ -599,20 +748,19 @@
           </div>
         </div>
         <div class="streak-row">
-          <div class="stat">
-            <div class="num">🔥 ${cur}</div>
-            <div class="lbl">Current</div>
-          </div>
-          <div class="stat">
+          <div class="best-stat">
             <div class="num"><span class="mini-star"></span> ${longest}</div>
             <div class="lbl">Best</div>
           </div>
         </div>
         <button class="checkin-btn${doneToday ? ' done' : ''}" data-key="${p.key}">
-          ${doneToday ? "✅ Checked In Today!" : "▶ Check In Today"}
+          ${doneToday ? "Claimed" : "▶ Claim Rewards"}
         </button>
-        <div class="cal-title">Last 30 Days</div>
-        <div class="cal">${renderCalendar(checkins, p.color)}</div>
+        ${renderElementVisual(p.element, p.color, p.dark)}
+        <div class="days-logged">
+          <div class="days-num">${checkins.length}</div>
+          <div class="days-lbl">Days Logged In</div>
+        </div>
         ${doneToday ? `<button class="undo-link" data-undo="${p.key}">Undo today's check-in</button>` : ''}
       `;
       grid.appendChild(card);
