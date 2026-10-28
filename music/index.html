@@ -31,8 +31,15 @@
       backdrop-filter: none;
     }
 
-    .btn-primary:hover {
-      background: #fff;
+    /* Just the name, centred at the top */
+    .site-header .wrap {
+      justify-content: center;
+    }
+
+    .page-name {
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      color: var(--text-secondary);
     }
 
     .visually-hidden {
@@ -132,7 +139,7 @@
 
     /* Controls */
     .controls {
-      width: min(100%, 360px);
+      width: 100%;
       margin-top: 40px;
       text-align: center;
     }
@@ -210,35 +217,45 @@
       margin: 12px 0 0;
     }
 
+    /* One line of songs; scrolls sideways on narrow screens */
     .tracklist {
       list-style: none;
-      margin: 28px 0 0;
-      padding: 0;
+      margin: 32px 0 0;
+      padding: 0 0 4px;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 4px 6px;
+      gap: 28px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tracklist::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Auto margins centre the line when it fits without hiding the start when it doesn't */
+    .tracklist li:first-child {
+      margin-left: auto;
+    }
+
+    .tracklist li:last-child {
+      margin-right: auto;
     }
 
     .track {
-      padding: 4px 10px;
+      padding: 4px 0;
       border: 0;
-      border-radius: 999px;
       background: transparent;
       font: inherit;
-      font-size: 14px;
-      color: var(--text-secondary);
+      font-size: 18px;
+      white-space: nowrap;
+      color: #8f8a84;
       cursor: pointer;
       transition: color 0.15s ease;
     }
 
-    .track:hover {
-      color: var(--text-primary);
-    }
-
+    .track:hover,
     .track[aria-current="true"] {
-      color: var(--text-primary);
-      background: var(--card-bg);
+      color: #d6d2cc;
     }
 
     @media (max-width: 720px) {
@@ -249,21 +266,24 @@
       .controls {
         margin-top: 32px;
       }
+
+      .tracklist {
+        gap: 22px;
+        margin-left: calc(-1 * var(--wrap-pad));
+        margin-right: calc(-1 * var(--wrap-pad));
+        padding: 0 var(--wrap-pad) 4px;
+      }
+
+      .track {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
   <header class="site-header">
     <div class="wrap">
-      <a class="brand" href="../index.html">
-        <img src="../assets/profile.jpg" alt="Scott Dickie" />
-        Scott Dickie
-      </a>
-      <nav class="main-nav">
-        <a href="../index.html">Home</a>
-        <a href="../leadership.html">Leadership</a>
-        <a class="btn btn-primary" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">Linkedin</a>
-      </nav>
+      <a class="page-name" href="../index.html">Scott Dickie</a>
     </div>
   </header>
 
