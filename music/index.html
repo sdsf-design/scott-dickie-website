@@ -19,6 +19,7 @@
       --text-secondary: #b3aea6;
       --accent: #7aa7ff;
       --border: rgba(243, 239, 232, 0.1);
+      --record-size: min(78vw, 420px);
       color-scheme: dark;
     }
 
@@ -26,107 +27,97 @@
       background: rgba(22, 21, 20, 0.9);
     }
 
-    .btn-primary:hover,
-    .play-btn:hover {
+    .btn-primary:hover {
       background: #fff;
     }
 
-    .music-intro {
-      padding: 56px 0 8px;
-    }
-
-    .music-intro .wrap {
-      max-width: calc(520px + 2 * var(--wrap-pad));
-    }
-
-    .music-intro h1 {
-      font-size: 44px;
-      line-height: 1.15;
-      margin-bottom: 12px;
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
 
     .music {
-      padding: 32px 0 120px;
+      padding: 48px 0 96px;
     }
 
     .music .wrap {
-      max-width: 980px;
-    }
-
-    .player {
-      max-width: 520px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
-    }
-
-    .player-side {
-      padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      align-items: center;
     }
 
-    .now-playing .label {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--accent);
-      display: block;
-      margin-bottom: 6px;
+    /* Record */
+    .record {
+      position: relative;
+      width: var(--record-size);
+      aspect-ratio: 1;
     }
 
-    .now-playing h2 {
+    .disc {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        conic-gradient(from 30deg, transparent 0deg, rgba(255, 255, 255, 0.05) 40deg, transparent 80deg, transparent 200deg, rgba(255, 255, 255, 0.04) 230deg, transparent 260deg),
+        repeating-radial-gradient(circle, #0d0c0c 0 2px, #141312 2px 3px),
+        #0d0c0c;
+      box-shadow:
+        0 0 0 1px rgba(243, 239, 232, 0.06),
+        0 30px 60px rgba(0, 0, 0, 0.55);
+      animation: spin 12s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .disc::after {
+      /* label ring */
+      content: "";
+      position: absolute;
+      inset: 27%;
+      border-radius: 50%;
+      background: #1c1a19;
+      box-shadow: 0 0 0 1px rgba(243, 239, 232, 0.08);
+    }
+
+    .record.is-playing .disc {
+      animation-play-state: running;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .disc {
+        animation: none;
+      }
+    }
+
+    .visualizer {
+      position: absolute;
+      inset: 27%;
+      width: 46%;
+      height: 46%;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Controls */
+    .controls {
+      width: min(100%, 360px);
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .controls h2 {
       font-size: 26px;
       line-height: 1.2;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .play-btn {
-      flex: 0 0 auto;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: 0;
-      background: var(--text-primary);
-      color: var(--bg);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      transition: background 0.15s ease, transform 0.1s ease;
-    }
-
-    .play-btn:active {
-      transform: scale(0.96);
-    }
-
-    .play-btn:focus-visible,
-    .track:focus-visible,
-    .progress:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .play-btn svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
-
-    .play-btn svg[hidden] {
-      display: none;
-    }
-
-    .timeline {
-      flex: 1 1 auto;
-      min-width: 0;
+      margin-bottom: 18px;
     }
 
     .progress {
@@ -143,62 +134,110 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 10px;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .play-btn {
+      width: 52px;
+      height: 52px;
+      background: var(--text-primary);
+      color: var(--bg);
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .play-btn:hover {
+      background: #fff;
+      color: var(--bg);
+    }
+
+    .play-btn:active {
+      transform: scale(0.96);
+    }
+
+    .icon-btn svg[hidden] {
+      display: none;
+    }
+
+    .icon-btn:focus-visible,
+    .track:focus-visible,
+    .progress:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     .player-error {
       font-size: 14px;
       color: #ff8a80;
-      margin: -12px 0 0;
+      margin: 12px 0 0;
     }
 
     .tracklist {
       list-style: none;
-      margin: 0;
+      margin: 28px 0 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px 6px;
     }
 
     .track {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 10px 12px;
+      padding: 4px 10px;
       border: 0;
-      border-radius: 12px;
+      border-radius: 999px;
       background: transparent;
       font: inherit;
-      font-size: 15px;
-      color: var(--text-primary);
-      text-align: left;
+      font-size: 14px;
+      color: var(--text-secondary);
       cursor: pointer;
+      transition: color 0.15s ease;
     }
 
     .track:hover {
-      background: var(--bg);
+      color: var(--text-primary);
     }
 
     .track[aria-current="true"] {
-      background: var(--bg);
-      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--card-bg);
     }
-
-    .track-num {
-      width: 18px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-      font-weight: 400;
-    }
-
 
     @media (max-width: 720px) {
-      .music-intro h1 {
-        font-size: 30px;
+      .music {
+        padding: 24px 0 72px;
       }
 
-      .player-side {
-        padding: 22px 20px;
+      .controls {
+        margin-top: 32px;
       }
     }
   </style>
@@ -219,39 +258,39 @@
   </header>
 
   <main>
-    <section class="music-intro">
-      <div class="wrap">
-        <h1>Music</h1>
-      </div>
-    </section>
-
     <section class="music">
+      <h1 class="visually-hidden">Music</h1>
       <div class="wrap">
-        <div class="player">
-          <div class="player-side">
-            <div class="now-playing">
-              <span class="label">Now playing</span>
-              <h2 id="song-title"></h2>
-            </div>
+        <div class="record" id="record">
+          <div class="disc"></div>
+          <canvas class="visualizer" id="visualizer" aria-hidden="true"></canvas>
+        </div>
 
-            <div class="controls">
-              <button class="play-btn" id="play-btn" type="button" aria-label="Play">
-                <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
-                <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
-              </button>
-              <div class="timeline">
-                <input class="progress" id="progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" />
-                <div class="times">
-                  <span id="time-current">0:00</span>
-                  <span id="time-total">0:00</span>
-                </div>
-              </div>
-            </div>
+        <div class="controls">
+          <h2 id="song-title"></h2>
 
-            <p class="player-error" id="player-error" hidden>This song couldn&rsquo;t be loaded.</p>
-
-            <ol class="tracklist" id="tracklist"></ol>
+          <input class="progress" id="progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" />
+          <div class="times">
+            <span id="time-current">0:00</span>
+            <span id="time-total">0:00</span>
           </div>
+
+          <div class="buttons">
+            <button class="icon-btn" id="prev-btn" type="button" aria-label="Previous song">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z" /></svg>
+            </button>
+            <button class="icon-btn play-btn" id="play-btn" type="button" aria-label="Play">
+              <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+              <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+            </button>
+            <button class="icon-btn" id="next-btn" type="button" aria-label="Next song">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z" /></svg>
+            </button>
+          </div>
+
+          <p class="player-error" id="player-error" hidden>This song couldn&rsquo;t be loaded.</p>
+
+          <ol class="tracklist" id="tracklist"></ol>
         </div>
 
         <audio id="audio" preload="metadata"></audio>
@@ -289,6 +328,8 @@
     ];
 
     const audio = document.getElementById("audio");
+    const record = document.getElementById("record");
+    const canvas = document.getElementById("visualizer");
     const playBtn = document.getElementById("play-btn");
     const iconPlay = document.getElementById("icon-play");
     const iconPause = document.getElementById("icon-pause");
@@ -312,6 +353,7 @@
       iconPlay.toggleAttribute("hidden", playing);
       iconPause.toggleAttribute("hidden", !playing);
       playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+      record.classList.toggle("is-playing", playing);
     }
 
     function loadSong(index, autoplay) {
@@ -327,9 +369,22 @@
         btn.setAttribute("aria-current", i === index ? "true" : "false");
       });
       if (autoplay) {
-        audio.play().catch(() => {});
+        play();
       } else {
         setPlayingUI(false);
+      }
+    }
+
+    function play() {
+      startVisualizer();
+      audio.play().catch(() => {});
+    }
+
+    function togglePlay() {
+      if (audio.paused) {
+        play();
+      } else {
+        audio.pause();
       }
     }
 
@@ -338,8 +393,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "track";
-      btn.innerHTML = `<span class="track-num">${i + 1}</span><span></span>`;
-      btn.lastChild.textContent = song.title;
+      btn.textContent = song.title;
       btn.addEventListener("click", () => {
         if (i === current && audio.src) {
           togglePlay();
@@ -351,17 +405,22 @@
       tracklist.appendChild(li);
     });
 
-    function togglePlay() {
-      if (audio.paused) {
-        audio.play().catch(() => {});
-      } else {
-        audio.pause();
-      }
-    }
-
     playBtn.addEventListener("click", togglePlay);
+    document.getElementById("prev-btn").addEventListener("click", () => {
+      if (audio.currentTime > 3) {
+        audio.currentTime = 0;
+      } else {
+        loadSong((current - 1 + songs.length) % songs.length, !audio.paused);
+      }
+    });
+    document.getElementById("next-btn").addEventListener("click", () => {
+      loadSong((current + 1) % songs.length, !audio.paused);
+    });
 
-    audio.addEventListener("play", () => setPlayingUI(true));
+    audio.addEventListener("play", () => {
+      setPlayingUI(true);
+      drawLoop();
+    });
     audio.addEventListener("pause", () => setPlayingUI(false));
     audio.addEventListener("loadedmetadata", () => {
       timeTotal.textContent = formatTime(audio.duration);
@@ -390,6 +449,99 @@
       }
     });
 
+    // Pixel wave visualizer drawn inside the record label
+    const ctx = canvas.getContext("2d");
+    const CELL = 7; // css px per pixel block, including gap
+    const GAP = 1.5;
+    let analyser = null;
+    let freq = null;
+    let levels = [];
+    let drawing = false;
+
+    function startVisualizer() {
+      if (analyser) {
+        if (analyser.context.state === "suspended") analyser.context.resume();
+        return;
+      }
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const audioCtx = new AudioCtx();
+      const source = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      freq = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    function sizeCanvas() {
+      const size = canvas.clientWidth;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(size * dpr);
+      canvas.height = Math.round(size * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function draw() {
+      const size = canvas.clientWidth;
+      const cols = Math.floor(size / CELL);
+      const half = Math.floor(cols / 2);
+      const offset = (size - cols * CELL) / 2;
+      const radius = size / 2 - CELL * 0.6;
+      const center = size / 2;
+      if (levels.length !== cols) levels = new Array(cols).fill(0);
+
+      if (analyser && !audio.paused) {
+        analyser.getByteFrequencyData(freq);
+      }
+
+      ctx.clearRect(0, 0, size, size);
+      let active = false;
+
+      for (let c = 0; c < cols; c++) {
+        // Mirror the spectrum around the middle column, low frequencies in the centre
+        const fromMid = Math.abs(c - (cols - 1) / 2) / (cols / 2);
+        let target = 0;
+        if (analyser && !audio.paused) {
+          const bin = Math.floor(Math.pow(fromMid, 1.4) * freq.length * 0.7);
+          target = freq[bin] / 255;
+        }
+        levels[c] += (target - levels[c]) * (target > levels[c] ? 0.5 : 0.12);
+        if (levels[c] > 0.01) active = true;
+
+        const h = Math.round(levels[c] * half);
+        const x = offset + c * CELL;
+        for (let r = -h; r <= h; r++) {
+          const y = offset + (half + r) * CELL;
+          const dx = x + CELL / 2 - center;
+          const dy = y + CELL / 2 - center;
+          if (dx * dx + dy * dy > radius * radius) continue;
+          const edge = Math.abs(r) === h && h > 0;
+          ctx.fillStyle = edge ? "#7aa7ff" : `rgba(243, 239, 232, ${0.9 - (Math.abs(r) / (half + 1)) * 0.6})`;
+          ctx.fillRect(x, y, CELL - GAP, CELL - GAP);
+        }
+      }
+      return active;
+    }
+
+    function drawLoop() {
+      if (drawing) return;
+      drawing = true;
+      const tick = () => {
+        const active = draw();
+        if (!audio.paused || active) {
+          requestAnimationFrame(tick);
+        } else {
+          drawing = false;
+        }
+      };
+      requestAnimationFrame(tick);
+    }
+
+    window.addEventListener("resize", sizeCanvas);
+    sizeCanvas();
     loadSong(0, false);
   </script>
   <script src="../script.js"></script>
