@@ -400,8 +400,8 @@
 
     // Pixel wave visualizer drawn inside the record label
     const ctx = canvas.getContext("2d");
-    const CELL = 7; // css px per pixel block, including gap
-    const GAP = 1.5;
+    const CELL = 3; // css px per pixel block, including gap
+    const GAP = 1;
     let analyser = null;
     let freq = null;
     let levels = [];
@@ -417,7 +417,7 @@
       const audioCtx = new AudioCtx();
       const source = audioCtx.createMediaElementSource(audio);
       analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
+      analyser.fftSize = 1024;
       analyser.smoothingTimeConstant = 0.82;
       source.connect(analyser);
       analyser.connect(audioCtx.destination);
@@ -437,7 +437,7 @@
       const size = canvas.clientWidth;
       const cols = Math.floor(size / CELL);
       const half = Math.floor(cols / 2);
-      const offset = (size - cols * CELL) / 2;
+      const offset = Math.floor((size - cols * CELL) / 2);
       const radius = size / 2 - CELL * 0.6;
       const center = size / 2;
       if (levels.length !== cols) levels = new Array(cols).fill(0);
@@ -468,7 +468,9 @@
           const dy = y + CELL / 2 - center;
           if (dx * dx + dy * dy > radius * radius) continue;
           const edge = Math.abs(r) === h && h > 0;
-          ctx.fillStyle = edge ? "#7aa7ff" : `rgba(243, 239, 232, ${0.9 - (Math.abs(r) / (half + 1)) * 0.6})`;
+          ctx.fillStyle = edge
+            ? "rgba(122, 167, 255, 0.55)"
+            : `rgba(243, 239, 232, ${0.5 - (Math.abs(r) / (half + 1)) * 0.38})`;
           ctx.fillRect(x, y, CELL - GAP, CELL - GAP);
         }
       }
