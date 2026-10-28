@@ -402,6 +402,7 @@
     const ctx = canvas.getContext("2d");
     const CELL = 3; // css px per pixel block, including gap
     const GAP = 1;
+    const HEIGHT = 0.45; // share of the label the wave can fill vertically
     let analyser = null;
     let freq = null;
     let levels = [];
@@ -460,7 +461,7 @@
         levels[c] += (target - levels[c]) * (target > levels[c] ? 0.5 : 0.12);
         if (levels[c] > 0.01) active = true;
 
-        const h = Math.round(levels[c] * half);
+        const h = Math.round(levels[c] * half * HEIGHT);
         const x = offset + c * CELL;
         for (let r = -h; r <= h; r++) {
           const y = offset + (half + r) * CELL;
@@ -469,8 +470,8 @@
           if (dx * dx + dy * dy > radius * radius) continue;
           const edge = Math.abs(r) === h && h > 0;
           ctx.fillStyle = edge
-            ? "rgba(122, 167, 255, 0.55)"
-            : `rgba(243, 239, 232, ${0.5 - (Math.abs(r) / (half + 1)) * 0.38})`;
+            ? "rgba(200, 200, 200, 0.6)"
+            : `rgba(160, 160, 160, ${0.5 - (Math.abs(r) / (h + 1)) * 0.35})`;
           ctx.fillRect(x, y, CELL - GAP, CELL - GAP);
         }
       }
