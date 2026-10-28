@@ -531,6 +531,7 @@
     let lastFrame = 0;
 
     function drawSiri(c, width, height, maxHeight, lineScale, clipRadius, t) {
+      if (width < 8 || height < 8) return; // not laid out yet
       const cy = height / 2;
       c.clearRect(0, 0, width, height);
       c.save();
@@ -594,9 +595,9 @@
       requestAnimationFrame(tick);
     }
 
+    loadSong(0, false);
     window.addEventListener("resize", sizeCanvas);
     sizeCanvas();
-    loadSong(0, false);
   </script>
 </body>
 </html>
