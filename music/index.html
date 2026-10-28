@@ -394,7 +394,6 @@
       titleEl.textContent = song.title;
       errorEl.hidden = true;
       audio.src = song.src;
-      loadEnvelope(song).then(() => draw());
       tracklist.querySelectorAll(".track").forEach((btn, i) => {
         btn.setAttribute("aria-current", i === index ? "true" : "false");
       });
@@ -406,6 +405,7 @@
     }
 
     function play() {
+      startAnalyser();
       audio.play().catch(() => {});
     }
 
@@ -454,7 +454,6 @@
       setPlayingUI(false);
       drawLoop();
     });
-    audio.addEventListener("seeked", () => draw());
     audio.addEventListener("ended", () => {
       if (current < songs.length - 1) {
         loadSong(current + 1, true);
@@ -467,50 +466,39 @@
       setPlayingUI(false);
     });
 
-    // Siri-style wave driven by each song's loudness: crisp inside the label, and a larger copy
-    // blurred across the page behind the record.
+    // Siri-style wave driven by the live audio as it plays: crisp inside the label, and a larger
+    // copy blurred across the page behind the record.
     const ctx = canvas.getContext("2d");
     const bgCtx = backdrop.getContext("2d");
-    const STEP = 0.02; // seconds of audio per loudness reading
-    const SAMPLE_RATE = 8000; // songs are analysed at a low rate to keep decoding light
     // Fixed loudness scale so every part of every song is drawn the same way
     const FLOOR = 0.04;
     const CEILING = 0.48;
-    const envelopes = new Map();
+    let analyser = null;
+    let samples = null;
     let drawing = false;
 
-    async function loadEnvelope(song) {
-      if (envelopes.has(song.src)) return envelopes.get(song.src);
-      const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      if (!Offline) return null;
-      const pending = fetch(song.src)
-        .then((res) => res.arrayBuffer())
-        .then((data) => new Offline(1, 1, SAMPLE_RATE).decodeAudioData(data))
-        .then((buffer) => {
-          const channels = [];
-          for (let ch = 0; ch < buffer.numberOfChannels; ch++) channels.push(buffer.getChannelData(ch));
-          const win = Math.round(buffer.sampleRate * STEP);
-          const env = new Float32Array(Math.floor(buffer.length / win));
-          for (let i = 0; i < env.length; i++) {
-            let sum = 0;
-            for (let j = i * win; j < (i + 1) * win; j++) {
-              let v = 0;
-              for (const data of channels) v += data[j];
-              v /= channels.length;
-              sum += v * v;
-            }
-            env[i] = Math.sqrt(sum / win);
-          }
-          return env;
-        })
-        .catch(() => null);
-      envelopes.set(song.src, pending);
-      const env = await pending;
-      envelopes.set(song.src, env);
-      return env;
+    function startAnalyser() {
+      if (analyser) {
+        if (analyser.context.state === "suspended") analyser.context.resume();
+        return;
+      }
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const audioCtx = new AudioCtx({ latencyHint: "interactive" });
+      const source = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024; // ~20ms of audio, so the wave reacts to what's playing right now
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      samples = new Float32Array(analyser.fftSize);
     }
 
-    function level(rms) {
+    function currentLevel() {
+      if (!analyser || audio.paused) return 0;
+      analyser.getFloatTimeDomainData(samples);
+      let sum = 0;
+      for (let i = 0; i < samples.length; i++) sum += samples[i] * samples[i];
+      const rms = Math.sqrt(sum / samples.length);
       const v = Math.min(1, Math.max(0, (rms - FLOOR) / (CEILING - FLOOR)));
       return Math.pow(v, 1.4); // widen the gap between hits and quiet moments
     }
@@ -525,35 +513,24 @@
       draw();
     }
 
-    // Siri-style wave inside the record: a few thin tapered sine lines, white fading to grey,
-    // whose height follows the song's loudness right now
+    // A few thin tapered sine lines, white fading to grey. Each line has its own frequency, speed
+    // and slow "breathing" so they weave around each other rather than moving in lockstep.
     const SIRI_LINES = [
-      { attenuation: -2, alpha: 0.1, width: 1 },
-      { attenuation: -6, alpha: 0.2, width: 1 },
-      { attenuation: 4, alpha: 0.35, width: 1 },
-      { attenuation: 2, alpha: 0.6, width: 1 },
-      { attenuation: 1, alpha: 0.95, width: 1.5 }
+      { attenuation: -2, alpha: 0.1, width: 1, freq: 1.3, speed: 0.7, offset: 0.0 },
+      { attenuation: -6, alpha: 0.2, width: 1, freq: 1.9, speed: 1.3, offset: 1.1 },
+      { attenuation: 4, alpha: 0.35, width: 1, freq: 1.5, speed: 0.9, offset: 2.3 },
+      { attenuation: 2, alpha: 0.6, width: 1, freq: 1.7, speed: 1.15, offset: 3.4 },
+      { attenuation: 1, alpha: 0.95, width: 1.5, freq: 1.6, speed: 1, offset: 0.6 }
     ];
-    const LOOKAHEAD = 0.03; // seconds
-    const ATTACK = 40; // how fast the wave jumps up on a hit (per second)
-    const RELEASE = 9; // how fast it falls back
+    // Spring easing: quick to respond, settles with a soft overshoot instead of a hard stop
+    const STIFFNESS = 650;
+    const DAMPING = 30;
     let siriAmp = 0;
+    let siriVel = 0;
     let siriPhase = 0;
     let lastFrame = 0;
 
-    function currentLevel() {
-      const env = envelopes.get(songs[current].src);
-      if (!(env instanceof Float32Array) || audio.paused) return 0;
-      // Read a touch ahead so the wave lands on the beat rather than after it
-      const i = Math.floor((audio.currentTime + LOOKAHEAD) / STEP);
-      let peak = 0;
-      for (let k = i; k <= i + 1; k++) {
-        if (k >= 0 && k < env.length) peak = Math.max(peak, level(env[k]));
-      }
-      return peak;
-    }
-
-    function drawSiri(c, width, height, maxHeight, lineScale, clipRadius) {
+    function drawSiri(c, width, height, maxHeight, lineScale, clipRadius, t) {
       const cy = height / 2;
       c.clearRect(0, 0, width, height);
       c.save();
@@ -564,11 +541,14 @@
       }
       const stepX = Math.max(1, width / 400);
       for (const line of SIRI_LINES) {
+        const breath = 0.8 + 0.2 * Math.sin(t * 1.7 + line.offset);
+        const amp = (siriAmp * maxHeight * breath) / line.attenuation;
+        const phase = siriPhase * line.speed + line.offset;
         c.beginPath();
         for (let x = 0; x <= width + stepX; x += stepX) {
           const u = (x / width) * 4 - 2; // -2..2 across the wave
           const taper = Math.pow(4 / (4 + Math.pow(u, 4)), 4);
-          const y = cy + ((siriAmp * maxHeight * taper) / line.attenuation) * Math.sin(1.6 * Math.PI * u - siriPhase);
+          const y = cy + amp * taper * Math.sin(line.freq * Math.PI * u - phase);
           if (x === 0) c.moveTo(x, y);
           else c.lineTo(x, y);
         }
@@ -583,18 +563,19 @@
       const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
       lastFrame = now;
       const target = currentLevel();
-      const rate = target > siriAmp ? ATTACK : RELEASE;
-      siriAmp += (target - siriAmp) * Math.min(1, dt * rate);
-      siriPhase = (siriPhase + dt * (4 + siriAmp * 10)) % (Math.PI * 2);
+      siriVel += ((target - siriAmp) * STIFFNESS - siriVel * DAMPING) * dt;
+      siriAmp = Math.max(0, siriAmp + siriVel * dt);
+      siriPhase += dt * (5 + siriAmp * 14);
 
+      const t = now / 1000;
       const size = canvas.clientWidth;
-      drawSiri(ctx, size, size, size * 0.3, 1, size / 2 - 4);
+      drawSiri(ctx, size, size, size * 0.3, 1, size / 2 - 4, t);
 
       // The same wave scaled up to span the page, kept inside the backdrop's height
       const bgWidth = backdrop.clientWidth;
       const bgHeight = backdrop.clientHeight;
       const scale = bgWidth / size;
-      drawSiri(bgCtx, bgWidth, bgHeight, Math.min(size * 0.3 * scale, bgHeight * 0.45), Math.min(4, scale), 0);
+      drawSiri(bgCtx, bgWidth, bgHeight, Math.min(size * 0.3 * scale, bgHeight * 0.45), Math.min(4, scale), 0, t);
     }
 
     function drawLoop() {
@@ -604,7 +585,7 @@
       const tick = (now) => {
         draw(now);
         // Keep animating after a pause until the wave has eased back to flat
-        if (!audio.paused || siriAmp > 0.005) {
+        if (!audio.paused || siriAmp > 0.003 || Math.abs(siriVel) > 0.01) {
           requestAnimationFrame(tick);
         } else {
           drawing = false;
