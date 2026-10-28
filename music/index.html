@@ -361,8 +361,8 @@
     }
 
     function setPlayingUI(playing) {
-      iconPlay.hidden = playing;
-      iconPause.hidden = !playing;
+      iconPlay.toggleAttribute("hidden", playing);
+      iconPause.toggleAttribute("hidden", !playing);
       playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
     }
 
