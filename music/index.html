@@ -471,7 +471,7 @@
     // blurred across the page behind the record.
     const ctx = canvas.getContext("2d");
     const bgCtx = backdrop.getContext("2d");
-    const STEP = 0.045; // seconds of audio per column
+    const STEP = 0.02; // seconds of audio per loudness reading
     const SAMPLE_RATE = 8000; // songs are analysed at a low rate to keep decoding light
     // Fixed loudness scale so every part of every song is drawn the same way
     const FLOOR = 0.04;
@@ -534,6 +534,9 @@
       { attenuation: 2, alpha: 0.6, width: 1 },
       { attenuation: 1, alpha: 0.95, width: 1.5 }
     ];
+    const LOOKAHEAD = 0.03; // seconds
+    const ATTACK = 40; // how fast the wave jumps up on a hit (per second)
+    const RELEASE = 9; // how fast it falls back
     let siriAmp = 0;
     let siriPhase = 0;
     let lastFrame = 0;
@@ -541,9 +544,10 @@
     function currentLevel() {
       const env = envelopes.get(songs[current].src);
       if (!(env instanceof Float32Array) || audio.paused) return 0;
-      const i = Math.floor(audio.currentTime / STEP);
+      // Read a touch ahead so the wave lands on the beat rather than after it
+      const i = Math.floor((audio.currentTime + LOOKAHEAD) / STEP);
       let peak = 0;
-      for (let k = i - 1; k <= i + 1; k++) {
+      for (let k = i; k <= i + 1; k++) {
         if (k >= 0 && k < env.length) peak = Math.max(peak, level(env[k]));
       }
       return peak;
@@ -579,8 +583,9 @@
       const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
       lastFrame = now;
       const target = currentLevel();
-      siriAmp += (target - siriAmp) * Math.min(1, dt * 10);
-      siriPhase = (siriPhase + dt * (2 + siriAmp * 6)) % (Math.PI * 2);
+      const rate = target > siriAmp ? ATTACK : RELEASE;
+      siriAmp += (target - siriAmp) * Math.min(1, dt * rate);
+      siriPhase = (siriPhase + dt * (4 + siriAmp * 10)) % (Math.PI * 2);
 
       const size = canvas.clientWidth;
       drawSiri(ctx, size, size, size * 0.3, 1, size / 2 - 4);
