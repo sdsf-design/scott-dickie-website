@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music | Scott Dickie</title>
+  <meta name="description" content="Songs written and recorded by Scott Dickie." />
+  <link rel="icon" href="../assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    /* Dark theme for this page, built on the site's tokens */
+    :root {
+      --bg: #161514;
+      --card-bg: #211f1d;
+      --text-primary: #f3efe8;
+      --text-secondary: #b3aea6;
+      --accent: #7aa7ff;
+      --border: rgba(243, 239, 232, 0.1);
+      color-scheme: dark;
+    }
+
+    .site-header {
+      background: rgba(22, 21, 20, 0.9);
+    }
+
+    .btn-primary:hover,
+    .play-btn:hover {
+      background: #fff;
+    }
+
+    .music-intro {
+      padding: 56px 0 8px;
+    }
+
+    .music-intro .wrap {
+      max-width: 980px;
+    }
+
+    .music-intro h1 {
+      font-size: 44px;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .music-intro p {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .music {
+      padding: 32px 0 120px;
+    }
+
+    .music .wrap {
+      max-width: 980px;
+    }
+
+    .player {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .player-side {
+      padding: 28px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .now-playing .label {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .now-playing h2 {
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .play-btn {
+      flex: 0 0 auto;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--text-primary);
+      color: var(--bg);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .play-btn:active {
+      transform: scale(0.96);
+    }
+
+    .play-btn:focus-visible,
+    .track:focus-visible,
+    .progress:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .play-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .timeline {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .progress {
+      width: 100%;
+      margin: 0;
+      accent-color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .player-error {
+      font-size: 14px;
+      color: #ff8a80;
+      margin: -12px 0 0;
+    }
+
+    .tracklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .track {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      font: inherit;
+      font-size: 15px;
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .track:hover {
+      background: var(--bg);
+    }
+
+    .track[aria-current="true"] {
+      background: var(--bg);
+      font-weight: 600;
+    }
+
+    .track-num {
+      width: 18px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      font-weight: 400;
+    }
+
+    .lyrics {
+      padding: 28px 36px 36px;
+      max-height: 560px;
+      overflow-y: auto;
+    }
+
+    .lyrics h3 {
+      font-size: 13px;
+      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .lyrics-text {
+      white-space: pre-line;
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    @media (max-width: 720px) {
+      .music-intro h1 {
+        font-size: 30px;
+      }
+
+      .music-intro p {
+        font-size: 17px;
+      }
+
+      .player {
+        grid-template-columns: 1fr;
+      }
+
+      .player-side {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+        padding: 22px 20px;
+      }
+
+      .lyrics {
+        padding: 22px 20px 28px;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../index.html">
+        <img src="../assets/profile.jpg" alt="Scott Dickie" />
+        Scott Dickie
+      </a>
+      <nav class="main-nav">
+        <a href="../index.html">Home</a>
+        <a href="../leadership.html">Leadership</a>
+        <a class="btn btn-primary" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">Linkedin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="music-intro">
+      <div class="wrap">
+        <h1>Music</h1>
+        <p>A few songs I&rsquo;ve written and recorded. Pick one, press play and follow along.</p>
+      </div>
+    </section>
+
+    <section class="music">
+      <div class="wrap">
+        <div class="player">
+          <div class="player-side">
+            <div class="now-playing">
+              <span class="label">Now playing</span>
+              <h2 id="song-title"></h2>
+            </div>
+
+            <div class="controls">
+              <button class="play-btn" id="play-btn" type="button" aria-label="Play">
+                <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+                <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+              </button>
+              <div class="timeline">
+                <input class="progress" id="progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" />
+                <div class="times">
+                  <span id="time-current">0:00</span>
+                  <span id="time-total">0:00</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="player-error" id="player-error" hidden>This song couldn&rsquo;t be loaded.</p>
+
+            <ol class="tracklist" id="tracklist"></ol>
+          </div>
+
+          <div class="lyrics">
+            <h3>Lyrics</h3>
+            <p class="lyrics-text" id="lyrics"></p>
+          </div>
+        </div>
+
+        <audio id="audio" preload="metadata"></audio>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">&copy; <span id="year"></span> Scott Dickie</div>
+  </footer>
+
+  <script>
+    // Add songs here. Put audio files in music/audio/ and reference them by filename.
+    const songs = [
+      {
+        title: "Song One",
+        src: "audio/song-one.mp3",
+        lyrics: `First verse line one
+First verse line two
+
+Chorus line one
+Chorus line two`
+      },
+      {
+        title: "Song Two",
+        src: "audio/song-two.mp3",
+        lyrics: `Lyrics for song two go here.`
+      },
+      {
+        title: "Song Three",
+        src: "audio/song-three.mp3",
+        lyrics: `Lyrics for song three go here.`
+      }
+    ];
+
+    const audio = document.getElementById("audio");
+    const playBtn = document.getElementById("play-btn");
+    const iconPlay = document.getElementById("icon-play");
+    const iconPause = document.getElementById("icon-pause");
+    const progress = document.getElementById("progress");
+    const timeCurrent = document.getElementById("time-current");
+    const timeTotal = document.getElementById("time-total");
+    const titleEl = document.getElementById("song-title");
+    const lyricsEl = document.getElementById("lyrics");
+    const errorEl = document.getElementById("player-error");
+    const tracklist = document.getElementById("tracklist");
+
+    let current = 0;
+
+    function formatTime(seconds) {
+      if (!isFinite(seconds)) return "0:00";
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
+    function setPlayingUI(playing) {
+      iconPlay.hidden = playing;
+      iconPause.hidden = !playing;
+      playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+    }
+
+    function loadSong(index, autoplay) {
+      current = index;
+      const song = songs[index];
+      titleEl.textContent = song.title;
+      lyricsEl.textContent = song.lyrics;
+      errorEl.hidden = true;
+      audio.src = song.src;
+      progress.value = 0;
+      timeCurrent.textContent = "0:00";
+      timeTotal.textContent = "0:00";
+      tracklist.querySelectorAll(".track").forEach((btn, i) => {
+        btn.setAttribute("aria-current", i === index ? "true" : "false");
+      });
+      if (autoplay) {
+        audio.play().catch(() => {});
+      } else {
+        setPlayingUI(false);
+      }
+    }
+
+    songs.forEach((song, i) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "track";
+      btn.innerHTML = `<span class="track-num">${i + 1}</span><span></span>`;
+      btn.lastChild.textContent = song.title;
+      btn.addEventListener("click", () => {
+        if (i === current && audio.src) {
+          togglePlay();
+        } else {
+          loadSong(i, true);
+        }
+      });
+      li.appendChild(btn);
+      tracklist.appendChild(li);
+    });
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+    }
+
+    playBtn.addEventListener("click", togglePlay);
+
+    audio.addEventListener("play", () => setPlayingUI(true));
+    audio.addEventListener("pause", () => setPlayingUI(false));
+    audio.addEventListener("loadedmetadata", () => {
+      timeTotal.textContent = formatTime(audio.duration);
+    });
+    audio.addEventListener("timeupdate", () => {
+      if (audio.duration) {
+        progress.value = (audio.currentTime / audio.duration) * 100;
+      }
+      timeCurrent.textContent = formatTime(audio.currentTime);
+    });
+    audio.addEventListener("ended", () => {
+      if (current < songs.length - 1) {
+        loadSong(current + 1, true);
+      } else {
+        setPlayingUI(false);
+      }
+    });
+    audio.addEventListener("error", () => {
+      errorEl.hidden = false;
+      setPlayingUI(false);
+    });
+
+    progress.addEventListener("input", () => {
+      if (audio.duration) {
+        audio.currentTime = (progress.value / 100) * audio.duration;
+      }
+    });
+
+    loadSong(0, false);
+  </script>
+  <script src="../script.js"></script>
+</body>
+</html>
