@@ -45,11 +45,6 @@
       margin-bottom: 12px;
     }
 
-    .music-intro p {
-      font-size: 18px;
-      margin: 0;
-    }
-
     .music {
       padding: 32px 0 120px;
     }
@@ -59,8 +54,7 @@
     }
 
     .player {
-      display: grid;
-      grid-template-columns: 340px 1fr;
+      max-width: 520px;
       background: var(--card-bg);
       border-radius: 20px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
@@ -69,7 +63,6 @@
 
     .player-side {
       padding: 28px;
-      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -197,52 +190,14 @@
       font-weight: 400;
     }
 
-    .lyrics {
-      padding: 28px 36px 36px;
-      max-height: 560px;
-      overflow-y: auto;
-    }
-
-    .lyrics h3 {
-      font-size: 13px;
-      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-secondary);
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-
-    .lyrics-text {
-      white-space: pre-line;
-      font-size: 17px;
-      line-height: 1.8;
-      color: var(--text-primary);
-      margin: 0;
-    }
 
     @media (max-width: 720px) {
       .music-intro h1 {
         font-size: 30px;
       }
 
-      .music-intro p {
-        font-size: 17px;
-      }
-
-      .player {
-        grid-template-columns: 1fr;
-      }
-
       .player-side {
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
         padding: 22px 20px;
-      }
-
-      .lyrics {
-        padding: 22px 20px 28px;
-        max-height: none;
       }
     }
   </style>
@@ -266,7 +221,6 @@
     <section class="music-intro">
       <div class="wrap">
         <h1>Music</h1>
-        <p>A few songs I&rsquo;ve written and recorded. Pick one, press play and follow along.</p>
       </div>
     </section>
 
@@ -297,11 +251,6 @@
 
             <ol class="tracklist" id="tracklist"></ol>
           </div>
-
-          <div class="lyrics">
-            <h3>Lyrics</h3>
-            <p class="lyrics-text" id="lyrics"></p>
-          </div>
         </div>
 
         <audio id="audio" preload="metadata"></audio>
@@ -314,32 +263,27 @@
   </footer>
 
   <script>
-    // Add songs here. Put audio files in music/audio/ and set lyrics between the backticks.
+    // Add songs here. Put audio files in music/audio/.
     const songs = [
       {
         title: "Calm Chaos",
-        src: "/music/audio/calm-chaos.m4a",
-        lyrics: `Lyrics coming soon.`
+        src: "/music/audio/calm-chaos.m4a"
       },
       {
         title: "Become",
-        src: "/music/audio/become.m4a",
-        lyrics: `Lyrics coming soon.`
+        src: "/music/audio/become.m4a"
       },
       {
         title: "I'm Walking Away",
-        src: "/music/audio/im-walking-away.m4a",
-        lyrics: `Lyrics coming soon.`
+        src: "/music/audio/im-walking-away.m4a"
       },
       {
         title: "Rise",
-        src: "/music/audio/rise.m4a",
-        lyrics: `Lyrics coming soon.`
+        src: "/music/audio/rise.m4a"
       },
       {
         title: "Monday Morning",
-        src: "/music/audio/monday-morning.m4a",
-        lyrics: `Lyrics coming soon.`
+        src: "/music/audio/monday-morning.m4a"
       }
     ];
 
@@ -351,7 +295,6 @@
     const timeCurrent = document.getElementById("time-current");
     const timeTotal = document.getElementById("time-total");
     const titleEl = document.getElementById("song-title");
-    const lyricsEl = document.getElementById("lyrics");
     const errorEl = document.getElementById("player-error");
     const tracklist = document.getElementById("tracklist");
 
@@ -374,7 +317,6 @@
       current = index;
       const song = songs[index];
       titleEl.textContent = song.title;
-      lyricsEl.textContent = song.lyrics;
       errorEl.hidden = true;
       audio.src = song.src;
       progress.value = 0;
