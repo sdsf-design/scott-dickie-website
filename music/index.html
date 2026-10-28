@@ -19,7 +19,7 @@
       --text-secondary: #b3aea6;
       --accent: #7aa7ff;
       --border: rgba(243, 239, 232, 0.1);
-      --record-size: min(78vw, 420px);
+      --record-size: min(78vw, 420px, 50vh, 50svh);
       color-scheme: dark;
     }
 
@@ -51,8 +51,25 @@
       white-space: nowrap;
     }
 
+    /* Fill the screen so the song list can sit near the bottom without scrolling */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
     .music {
-      padding: 72px 0 120px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 56px 0 40px;
     }
 
     .music {
@@ -60,6 +77,8 @@
     }
 
     .music .wrap {
+      flex: 1;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -219,9 +238,10 @@
 
     /* One line of songs; scrolls sideways on narrow screens */
     .tracklist {
+      width: 100%;
       list-style: none;
-      margin: 32px 0 0;
-      padding: 0 0 4px;
+      margin: auto 0 0;
+      padding: 40px 0 4px;
       display: flex;
       gap: 28px;
       overflow-x: auto;
@@ -246,21 +266,21 @@
       border: 0;
       background: transparent;
       font: inherit;
-      font-size: 18px;
+      font-size: 22px;
       white-space: nowrap;
-      color: #8f8a84;
+      color: #5f5b57;
       cursor: pointer;
       transition: color 0.15s ease;
     }
 
     .track:hover,
     .track[aria-current="true"] {
-      color: #d6d2cc;
+      color: #a8a39d;
     }
 
     @media (max-width: 720px) {
       .music {
-        padding: 48px 0 96px;
+        padding: 40px 0 32px;
       }
 
       .controls {
@@ -271,11 +291,11 @@
         gap: 22px;
         margin-left: calc(-1 * var(--wrap-pad));
         margin-right: calc(-1 * var(--wrap-pad));
-        padding: 0 var(--wrap-pad) 4px;
+        padding: 32px var(--wrap-pad) 4px;
       }
 
       .track {
-        font-size: 16px;
+        font-size: 19px;
       }
     }
   </style>
@@ -314,9 +334,9 @@
           </div>
 
           <p class="player-error" id="player-error" hidden>This song couldn&rsquo;t be loaded.</p>
-
-          <ol class="tracklist" id="tracklist"></ol>
         </div>
+
+        <ol class="tracklist" id="tracklist"></ol>
 
         <audio id="audio" preload="metadata"></audio>
       </div>
