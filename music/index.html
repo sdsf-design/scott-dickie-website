@@ -564,8 +564,13 @@
       const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
       lastFrame = now;
       const target = currentLevel();
-      siriVel += ((target - siriAmp) * STIFFNESS - siriVel * DAMPING) * dt;
-      siriAmp = Math.max(0, siriAmp + siriVel * dt);
+      // Step the spring in small fixed slices so it stays stable even at low frame rates
+      const steps = Math.ceil(dt / 0.004);
+      const h = steps ? dt / steps : 0;
+      for (let i = 0; i < steps; i++) {
+        siriVel += ((target - siriAmp) * STIFFNESS - siriVel * DAMPING) * h;
+        siriAmp = Math.min(1.2, Math.max(0, siriAmp + siriVel * h));
+      }
       siriPhase += dt * (5 + siriAmp * 14);
 
       const t = now / 1000;
