@@ -398,14 +398,15 @@
       setPlayingUI(false);
     });
 
-    // Pixel wave visualizer drawn inside the record label
+    // Pixel waveform drawn inside the record label
     const ctx = canvas.getContext("2d");
     const CELL = 3; // css px per pixel block, including gap
     const GAP = 1;
-    const HEIGHT = 0.45; // share of the label the wave can fill vertically
+    const HEIGHT = 0.6; // share of the label's half-height the wave can reach
     let analyser = null;
-    let freq = null;
-    let levels = [];
+    let samples = null;
+    let wave = [];
+    let peak = 0.1;
     let drawing = false;
 
     function startVisualizer() {
@@ -418,11 +419,10 @@
       const audioCtx = new AudioCtx();
       const source = audioCtx.createMediaElementSource(audio);
       analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.82;
+      analyser.fftSize = 2048;
       source.connect(analyser);
       analyser.connect(audioCtx.destination);
-      freq = new Uint8Array(analyser.frequencyBinCount);
+      samples = new Float32Array(analyser.fftSize);
     }
 
     function sizeCanvas() {
@@ -441,39 +441,50 @@
       const offset = Math.floor((size - cols * CELL) / 2);
       const radius = size / 2 - CELL * 0.6;
       const center = size / 2;
-      if (levels.length !== cols) levels = new Array(cols).fill(0);
+      if (wave.length !== cols) wave = new Array(cols).fill(0);
 
-      if (analyser && !audio.paused) {
-        analyser.getByteFrequencyData(freq);
+      const live = analyser && !audio.paused;
+      if (live) {
+        analyser.getFloatTimeDomainData(samples);
+        // Auto-gain so quiet passages still move and loud ones don't clip
+        let max = 0;
+        for (let i = 0; i < samples.length; i++) max = Math.max(max, Math.abs(samples[i]));
+        peak = Math.max(max, peak * 0.97, 0.02);
       }
 
       ctx.clearRect(0, 0, size, size);
       let active = false;
+      let prevRow = null;
 
       for (let c = 0; c < cols; c++) {
-        // Mirror the spectrum around the middle column, low frequencies in the centre
-        const fromMid = Math.abs(c - (cols - 1) / 2) / (cols / 2);
         let target = 0;
-        if (analyser && !audio.paused) {
-          const bin = Math.floor(Math.pow(fromMid, 1.4) * freq.length * 0.7);
-          target = freq[bin] / 255;
+        if (live) {
+          // Average a short slice of the signal for each column
+          const span = Math.floor(samples.length / cols);
+          let sum = 0;
+          for (let i = c * span; i < (c + 1) * span; i++) sum += samples[i];
+          target = sum / span / peak;
         }
-        levels[c] += (target - levels[c]) * (target > levels[c] ? 0.5 : 0.12);
-        if (levels[c] > 0.01) active = true;
+        wave[c] = live ? target : wave[c] * 0.85;
+        if (Math.abs(wave[c]) > 0.01) active = true;
 
-        const h = Math.round(levels[c] * half * HEIGHT);
+        const row = Math.round(-wave[c] * half * HEIGHT);
         const x = offset + c * CELL;
-        for (let r = -h; r <= h; r++) {
+        const from = prevRow === null ? row : prevRow;
+        const lo = Math.min(row, from, 0);
+        const hi = Math.max(row, from, 0);
+
+        for (let r = lo; r <= hi; r++) {
           const y = offset + (half + r) * CELL;
           const dx = x + CELL / 2 - center;
           const dy = y + CELL / 2 - center;
           if (dx * dx + dy * dy > radius * radius) continue;
-          const edge = Math.abs(r) === h && h > 0;
-          ctx.fillStyle = edge
-            ? "rgba(200, 200, 200, 0.6)"
-            : `rgba(160, 160, 160, ${0.5 - (Math.abs(r) / (h + 1)) * 0.35})`;
+          // Bright trace connecting to the previous column, faint fill back to the centre line
+          const onTrace = r >= Math.min(row, from) && r <= Math.max(row, from);
+          ctx.fillStyle = onTrace ? "rgba(200, 200, 200, 0.75)" : "rgba(150, 150, 150, 0.18)";
           ctx.fillRect(x, y, CELL - GAP, CELL - GAP);
         }
+        prevRow = row;
       }
       return active;
     }
