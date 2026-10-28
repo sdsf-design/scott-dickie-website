@@ -23,8 +23,11 @@
       color-scheme: dark;
     }
 
+    /* Let the record's shadow show through instead of being clipped by a sticky header */
     .site-header {
-      background: rgba(22, 21, 20, 0.9);
+      position: static;
+      background: transparent;
+      backdrop-filter: none;
     }
 
     .btn-primary:hover {
@@ -41,7 +44,7 @@
     }
 
     .music {
-      padding: 48px 0 96px;
+      padding: 72px 0 120px;
     }
 
     .music .wrap {
@@ -220,7 +223,7 @@
 
     @media (max-width: 720px) {
       .music {
-        padding: 24px 0 72px;
+        padding: 48px 0 96px;
       }
 
       .controls {
