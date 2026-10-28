@@ -401,15 +401,19 @@
       setPlayingUI(false);
     });
 
-    // Pixel waveform drawn inside the record label
+    // Scrolling loudness waveform drawn inside the record label: newest on the right
     const ctx = canvas.getContext("2d");
     const CELL = 3; // css px per pixel block, including gap
     const GAP = 1;
-    const HEIGHT = 0.6; // share of the label's half-height the wave can reach
+    const HEIGHT = 0.9; // share of the label's half-height the tallest bar can reach
+    const STEP_MS = 45; // how often a new column scrolls in
+    // Fixed loudness scale so every part of every song is drawn the same way
+    const FLOOR = 0.02;
+    const CEILING = 0.32;
     let analyser = null;
     let samples = null;
-    let wave = [];
-    let peak = 0.1;
+    let history = [];
+    let lastStep = 0;
     let drawing = false;
 
     function startVisualizer() {
@@ -434,69 +438,60 @@
       canvas.width = Math.round(size * dpr);
       canvas.height = Math.round(size * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      draw();
+      draw(performance.now());
     }
 
-    function draw() {
+    function loudness() {
+      analyser.getFloatTimeDomainData(samples);
+      let sum = 0;
+      for (let i = 0; i < samples.length; i++) sum += samples[i] * samples[i];
+      const rms = Math.sqrt(sum / samples.length);
+      const v = Math.min(1, Math.max(0, (rms - FLOOR) / (CEILING - FLOOR)));
+      return Math.pow(v, 1.4); // widen the gap between hits and quiet moments
+    }
+
+    function draw(now) {
       const size = canvas.clientWidth;
       const cols = Math.floor(size / CELL);
       const half = Math.floor(cols / 2);
       const offset = Math.floor((size - cols * CELL) / 2);
       const radius = size / 2 - CELL * 0.6;
       const center = size / 2;
-      if (wave.length !== cols) wave = new Array(cols).fill(0);
+      const maxRows = Math.round(half * HEIGHT);
+      if (history.length !== cols) history = new Array(cols).fill(0);
 
       const live = analyser && !audio.paused;
-      if (live) {
-        analyser.getFloatTimeDomainData(samples);
-        // Auto-gain so quiet passages still move and loud ones don't clip
-        let max = 0;
-        for (let i = 0; i < samples.length; i++) max = Math.max(max, Math.abs(samples[i]));
-        peak = Math.max(max, peak * 0.97, 0.02);
+      if (now - lastStep >= STEP_MS) {
+        lastStep = now;
+        history.shift();
+        history.push(live ? loudness() : 0);
       }
 
       ctx.clearRect(0, 0, size, size);
-      let active = false;
-      let prevRow = null;
+      // Bars grow upward from a baseline set so the tallest bar is centred in the label
+      const baseRow = half + Math.floor(maxRows / 2);
 
       for (let c = 0; c < cols; c++) {
-        let target = 0;
-        if (live) {
-          // Average a short slice of the signal for each column
-          const span = Math.floor(samples.length / cols);
-          let sum = 0;
-          for (let i = c * span; i < (c + 1) * span; i++) sum += samples[i];
-          target = sum / span / peak;
-        }
-        wave[c] = live ? target : wave[c] * 0.85;
-        if (Math.abs(wave[c]) > 0.01) active = true;
-
-        const row = Math.round(-wave[c] * half * HEIGHT);
+        const h = Math.max(1, Math.round(history[c] * maxRows));
         const x = offset + c * CELL;
-        const from = prevRow === null ? row : prevRow;
-        const lo = Math.min(row, from, 0);
-        const hi = Math.max(row, from, 0);
-
-        for (let r = lo; r <= hi; r++) {
-          const y = offset + (half + r) * CELL;
+        for (let r = 0; r < h; r++) {
+          const y = offset + (baseRow - r) * CELL;
           const dx = x + CELL / 2 - center;
           const dy = y + CELL / 2 - center;
           if (dx * dx + dy * dy > radius * radius) continue;
-          // Bright trace connecting to the previous column, faint fill back to the centre line
-          const onTrace = r >= Math.min(row, from) && r <= Math.max(row, from);
-          ctx.fillStyle = onTrace ? "rgba(200, 200, 200, 0.75)" : "rgba(150, 150, 150, 0.18)";
+          const top = r === h - 1;
+          ctx.fillStyle = top ? "rgba(205, 205, 205, 0.8)" : "rgba(150, 150, 150, 0.32)";
           ctx.fillRect(x, y, CELL - GAP, CELL - GAP);
         }
-        prevRow = row;
       }
-      return active;
+      return history.some((v) => v > 0.005);
     }
 
     function drawLoop() {
       if (drawing) return;
       drawing = true;
-      const tick = () => {
-        const active = draw();
+      const tick = (now) => {
+        const active = draw(now);
         if (!audio.paused || active) {
           requestAnimationFrame(tick);
         } else {
