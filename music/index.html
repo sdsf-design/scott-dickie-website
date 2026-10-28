@@ -483,7 +483,11 @@
       draw();
     }
 
-    function drawBars(c, width, height, reach, clipRadius) {
+    // Spikes inside the record gently bob up and down while a song plays
+    const WOBBLE = 0.18; // how far a spike stretches and shrinks, as a share of its height
+    const WOBBLE_SPEED = 9; // radians per second
+
+    function drawBars(c, width, height, reach, clipRadius, wobble) {
       const env = envelopes.get(songs[current].src);
       const ready = env instanceof Float32Array;
       const nowIndex = Math.floor(audio.currentTime / STEP);
@@ -491,12 +495,17 @@
       const cy = height / 2;
       const span = Math.ceil(cx / CELL);
       const block = CELL - GAP;
+      const t = performance.now() / 1000;
 
       c.clearRect(0, 0, width, height);
       for (let k = -span; k <= span; k++) {
         const i = nowIndex + k;
-        const value = ready && i >= 0 && i < env.length ? level(env[i]) : 0;
-        const h = Math.round(value * reach);
+        let value = ready && i >= 0 && i < env.length ? level(env[i]) : 0;
+        if (wobble && value > 0) {
+          // Phase follows the column's place in the song so each spike keeps its own rhythm as it scrolls
+          value *= 1 + WOBBLE * Math.sin(t * WOBBLE_SPEED + i * 0.9);
+        }
+        const h = Math.min(reach, Math.round(value * reach));
         const x = Math.round(cx + k * CELL - block / 2);
         for (let r = -h; r <= h; r++) {
           const y = Math.round(cy + r * CELL - block / 2);
@@ -515,8 +524,8 @@
     function draw() {
       const size = canvas.clientWidth;
       const reach = Math.floor((size / CELL) * 0.225);
-      drawBars(ctx, size, size, reach, size / 2 - CELL * 0.6);
-      drawBars(bgCtx, backdrop.clientWidth, backdrop.clientHeight, reach, 0);
+      drawBars(ctx, size, size, reach, size / 2 - CELL * 0.6, !audio.paused);
+      drawBars(bgCtx, backdrop.clientWidth, backdrop.clientHeight, reach, 0, false);
     }
 
     function drawLoop() {
