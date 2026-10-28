@@ -409,7 +409,10 @@
       setPlayingUI(true);
       drawLoop();
     });
-    audio.addEventListener("pause", () => setPlayingUI(false));
+    audio.addEventListener("pause", () => {
+      setPlayingUI(false);
+      drawLoop();
+    });
     audio.addEventListener("seeked", () => draw());
     audio.addEventListener("ended", () => {
       if (current < songs.length - 1) {
@@ -483,11 +486,7 @@
       draw();
     }
 
-    // Spikes inside the record gently bob up and down while a song plays
-    const WOBBLE = 0.18; // how far a spike stretches and shrinks, as a share of its height
-    const WOBBLE_SPEED = 9; // radians per second
-
-    function drawBars(c, width, height, reach, clipRadius, wobble) {
+    function drawBars(c, width, height, reach) {
       const env = envelopes.get(songs[current].src);
       const ready = env instanceof Float32Array;
       const nowIndex = Math.floor(audio.currentTime / STEP);
@@ -495,25 +494,15 @@
       const cy = height / 2;
       const span = Math.ceil(cx / CELL);
       const block = CELL - GAP;
-      const t = performance.now() / 1000;
 
       c.clearRect(0, 0, width, height);
       for (let k = -span; k <= span; k++) {
         const i = nowIndex + k;
-        let value = ready && i >= 0 && i < env.length ? level(env[i]) : 0;
-        if (wobble && value > 0) {
-          // Phase follows the column's place in the song so each spike keeps its own rhythm as it scrolls
-          value *= 1 + WOBBLE * Math.sin(t * WOBBLE_SPEED + i * 0.9);
-        }
-        const h = Math.min(reach, Math.round(value * reach));
+        const value = ready && i >= 0 && i < env.length ? level(env[i]) : 0;
+        const h = Math.round(value * reach);
         const x = Math.round(cx + k * CELL - block / 2);
         for (let r = -h; r <= h; r++) {
           const y = Math.round(cy + r * CELL - block / 2);
-          if (clipRadius) {
-            const dx = x + block / 2 - cx;
-            const dy = y + block / 2 - cy;
-            if (dx * dx + dy * dy > clipRadius * clipRadius) continue;
-          }
           const top = Math.abs(r) === h;
           c.fillStyle = top ? "rgba(205, 205, 205, 0.8)" : "rgba(150, 150, 150, 0.32)";
           c.fillRect(x, y, block, block);
@@ -521,19 +510,75 @@
       }
     }
 
-    function draw() {
+    // Siri-style wave inside the record: a few thin tapered sine lines, white fading to grey,
+    // whose height follows the song's loudness right now
+    const SIRI_LINES = [
+      { attenuation: -2, alpha: 0.1, width: 1 },
+      { attenuation: -6, alpha: 0.2, width: 1 },
+      { attenuation: 4, alpha: 0.35, width: 1 },
+      { attenuation: 2, alpha: 0.6, width: 1 },
+      { attenuation: 1, alpha: 0.95, width: 1.5 }
+    ];
+    let siriAmp = 0;
+    let siriPhase = 0;
+    let lastFrame = 0;
+
+    function currentLevel() {
+      const env = envelopes.get(songs[current].src);
+      if (!(env instanceof Float32Array) || audio.paused) return 0;
+      const i = Math.floor(audio.currentTime / STEP);
+      let peak = 0;
+      for (let k = i - 1; k <= i + 1; k++) {
+        if (k >= 0 && k < env.length) peak = Math.max(peak, level(env[k]));
+      }
+      return peak;
+    }
+
+    function drawSiri(size, now) {
+      const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
+      lastFrame = now;
+      const target = currentLevel();
+      siriAmp += (target - siriAmp) * Math.min(1, dt * 10);
+      siriPhase = (siriPhase + dt * (2 + siriAmp * 6)) % (Math.PI * 2);
+
+      const cy = size / 2;
+      const maxHeight = size * 0.3;
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size / 2, cy, size / 2 - 4, 0, Math.PI * 2);
+      ctx.clip();
+
+      for (const line of SIRI_LINES) {
+        ctx.beginPath();
+        for (let x = 0; x <= size; x += 1) {
+          const u = (x / size) * 4 - 2; // -2..2 across the label
+          const taper = Math.pow(4 / (4 + Math.pow(u, 4)), 4);
+          const y = cy + ((siriAmp * maxHeight * taper) / line.attenuation) * Math.sin(1.6 * Math.PI * u - siriPhase);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = `rgba(235, 235, 235, ${line.alpha})`;
+        ctx.lineWidth = line.width;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function draw(now = performance.now()) {
       const size = canvas.clientWidth;
-      const reach = Math.floor((size / CELL) * 0.225);
-      drawBars(ctx, size, size, reach, size / 2 - CELL * 0.6, !audio.paused);
-      drawBars(bgCtx, backdrop.clientWidth, backdrop.clientHeight, reach, 0, false);
+      drawSiri(size, now);
+      drawBars(bgCtx, backdrop.clientWidth, backdrop.clientHeight, Math.floor((size / CELL) * 0.225));
     }
 
     function drawLoop() {
       if (drawing) return;
       drawing = true;
-      const tick = () => {
-        draw();
-        if (!audio.paused) {
+      lastFrame = 0;
+      const tick = (now) => {
+        draw(now);
+        // Keep animating after a pause until the wave has eased back to flat
+        if (!audio.paused || siriAmp > 0.005) {
           requestAnimationFrame(tick);
         } else {
           drawing = false;
