@@ -476,7 +476,7 @@
     // The sound is held back so the wave lands on the beat with the music instead of after it.
     // Add ?delay=<ms> to the page address to try other values, e.g. /music?delay=150
     const delayParam = Number(new URLSearchParams(location.search).get("delay"));
-    const AUDIO_DELAY = delayParam > 0 ? Math.min(500, delayParam) / 1000 : 0.1;
+    const AUDIO_DELAY = delayParam > 0 ? Math.min(500, delayParam) / 1000 : 0.068;
     let analyser = null;
     let samples = null;
     let drawing = false;
