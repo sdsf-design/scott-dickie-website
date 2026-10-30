@@ -473,9 +473,10 @@
     // Fixed loudness scale so every part of every song is drawn the same way
     const FLOOR = 0.04;
     const CEILING = 0.48;
-    // The sound is held back just long enough to cover the analyser window, easing and drawing,
-    // so the wave lands on the beat with the music instead of after it
-    const AUDIO_DELAY = 0.03;
+    // The sound is held back so the wave lands on the beat with the music instead of after it.
+    // Add ?delay=<ms> to the page address to try other values, e.g. /music?delay=150
+    const delayParam = Number(new URLSearchParams(location.search).get("delay"));
+    const AUDIO_DELAY = delayParam > 0 ? Math.min(500, delayParam) / 1000 : 0.1;
     let analyser = null;
     let samples = null;
     let drawing = false;
@@ -529,7 +530,7 @@
       { attenuation: 1, alpha: 0.95, width: 1.5, freq: 1.6, speed: 1, offset: 0.6 }
     ];
     // Spring easing: snaps up on a hit, then falls back with a soft bounce
-    const RISE = { stiffness: 2200, damping: 75 };
+    const RISE = { stiffness: 4000, damping: 110 };
     const FALL = { stiffness: 320, damping: 20 };
     let siriAmp = 0;
     let siriVel = 0;
