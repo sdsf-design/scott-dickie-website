@@ -170,7 +170,10 @@ main, header, footer { position: relative; z-index: 1; }
 /* ---------- Work: Selected work as a stack of cards that fans out on scroll ---------- */
 .work-stack { position: relative; padding: 72px var(--gutter); border-top: 1px solid var(--line); }
 .stack-text { max-width: 36em; margin: 0 auto 40px; text-align: center; display: grid; gap: 12px; justify-items: center; }
-.stack-text h2 { font: 300 clamp(30px, 4vw, 52px)/1.05 var(--sans); letter-spacing: -.035em; color: var(--ink); text-wrap: balance; }
+.stack-text h2, .section-title h2 { font: 300 clamp(30px, 4vw, 52px)/1.05 var(--sans); letter-spacing: -.035em; color: var(--ink); text-wrap: balance; }
+/* A centred section title, matching Selected work: small index above a large light heading */
+.section-title { display: grid; justify-items: center; gap: 12px; text-align: center; margin-bottom: 40px; }
+.story.centered { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0; }
 .stack-text p:not(.label) { color: var(--quiet); font-size: 15px; line-height: 1.65; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; max-width: 1100px; margin: 0 auto; }
 /* A subtle card: thumbnail in a soft frame, title underneath */
@@ -434,8 +437,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
   </section>
 
   <section class="section work-only" aria-labelledby="story-title">
-    <div class="story">
-      <div class="head"><h2 id="story-title"><b>[03]</b> My story</h2></div>
+    <div class="story centered">
+      <div class="section-title"><p class="label"><b>[03]</b></p><h2 id="story-title">My story</h2></div>
       <div class="body">
         <p>Right now, I lead Design, Research &amp; Brand at Study.com helping 30 million weekly learners achieve their goals with AI-native, interactive learning.</p>
         <p>My teams of designers, researchers and creatives have launched a new app, design system and brand in the last year. I lead the company&rsquo;s AI Steering Committee, helping all employees adopt AI into their daily work and develop tools to enable scale and quality. My day to day involves guiding vision, co-creating product strategy and identifying growth and marketing opportunities, personally shipping features and meeting with our customers.</p>
