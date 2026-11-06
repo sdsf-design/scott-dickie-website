@@ -567,7 +567,7 @@ for (const input of document.querySelectorAll('input[name="mode"]')) input.addEv
     const h = Math.max(innerHeight, 2 * ch + 380);
     stage.style.height = h + "px";
     const xEdge = w / 2 - cw / 2 - 28, yTop = -(h / 2 - ch / 2 - 84), yBottom = h / 2 - ch / 2 - 36;
-    const SPOTS = [[-xEdge, yTop, -4], [xEdge, yTop + 24, 3], [-xEdge, yBottom - 28, 3], [xEdge, yBottom - 8, -3], [0, yBottom, 1.5]];
+    const SPOTS = [[-xEdge, yTop, -4], [xEdge, yTop + 24, 3], [-xEdge, yBottom - 110, 3], [xEdge, yBottom - 90, -3], [0, yBottom, 1.5]];
     const mid = (cards.length - 1) / 2;
     cards.forEach((card, i) => {
       const [fx, fy, fr] = SPOTS[i % SPOTS.length];
