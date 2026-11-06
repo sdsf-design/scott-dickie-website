@@ -186,8 +186,8 @@ main, header, footer { position: relative; z-index: 1; }
 .about-project .more { font: 12px/1.4 var(--mono); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--pushed); margin-top: 4px; }
 .about-project .more:hover { color: var(--pushed); }
 .panel-frame { position: relative; width: 100%; }
-.shot { display: block; max-width: 980px; }
-.shot img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.shot { display: block; max-width: min(1200px, max(320px, calc((100svh - 370px) * 2))); }   /* as wide as possible while the section still fits one screen */
+.shot img { width: 100%; height: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, .35); transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
 .shot:hover img { transform: scale(1.02); }
 
 /* The music player, from scott-dickie.com/music: a record whose label shows a live wave of the song */
@@ -394,7 +394,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
           <a class="more" href="https://www.unstuck.services/" target="_blank" rel="noopener">Visit unstuck.services ↗</a>
         </div>
         <a class="panel-frame shot" href="https://www.unstuck.services/" target="_blank" rel="noopener" aria-label="Get Unstuck website">
-          <img src="assets/unstuck-home.jpg" alt="The Get Unstuck homepage: Make hard decisions in less than 1 hour." width="1440" height="810" loading="lazy">
+          <img src="assets/unstuck-home.jpg" alt="The Get Unstuck homepage: Make hard decisions in less than 1 hour." width="2400" height="1200" loading="lazy">
         </a>
       </article>
     </div>
