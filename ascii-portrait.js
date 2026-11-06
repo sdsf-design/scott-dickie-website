@@ -155,7 +155,7 @@ function makeSheet(scale, ink, pushed) {
     for (let t = 0; t < TONES; t++) {
       const density = t / (TONES - 1);
       const glyph = RAMP[Math.min(RAMP.length - 1, Math.floor(density * RAMP.length))];
-      const color = `rgba(${c[0]},${c[1]},${c[2]},${isDark ? .3 + .7 * density : .28 + .52 * density})`;
+      const color = `rgba(${c[0]},${c[1]},${c[2]},${isDark ? .3 + .7 * density : .26 + .72 * density * density})`;
       s.fillStyle = color;
       s.fillText(glyph, (t + .5) * w, (m + .5) * h);
       // The font alone tops out at about a third coverage; thicken the densest glyphs to reach deeper tones.
@@ -267,7 +267,7 @@ function layout() {
     if (tone < 0) continue;
     // Local contrast: push each character away from its neighbourhood, so small features (eyes, glasses, brows) stand out.
     const around = averageTone(u - 2 / cols, v - 2 / rows, u + 3 / cols, v + 3 / rows);
-    if (around >= 0) tone = Math.max(0, Math.min(1, tone + (tone - around) * (isDark ? .3 : .9)));
+    if (around >= 0) tone = Math.max(0, Math.min(1, tone + (tone - around) * (isDark ? .3 : 1.3)));
     const u2 = u + .5 / cols, v2 = v + .5 / rows;
 
     let eye = 0, lash = 0, edx = 0, edy = 0, eyeSide = 0;
@@ -367,8 +367,8 @@ function glyphFor(tone) {
   // Light ground lifts the midtones so skin keeps some texture instead of going blank.
   let density = isDark ? tone : Math.pow(Math.max(0, 1 - Math.pow(Math.max(0, tone), P.lightTone)), .9);
   // On a light ground, steepen the curve so skin stays airy and the darks (eyes, glasses, brows) read clearly.
-  // Darkest characters stop short of the heaviest glyphs, so the portrait stays light.
-  if (!isDark) density = Math.max(0, Math.min(1, (density - .3) * 1.15 + .25)) * .84;
+  // Light tones stay airy; the shadows and features step up to darker, denser characters so the face reads clearly.
+  if (!isDark) density = Math.pow(Math.max(0, Math.min(1, (density - .28) * 1.35 + .26)), .9);
   // A floor keeps every part of the head on the page: dark hair on a dark ground, a pale cap on a light one.
   const floor = isDark ? .22 : .1;
   const ti = Math.round((floor + (1 - floor) * density) * (TONES - 1));
