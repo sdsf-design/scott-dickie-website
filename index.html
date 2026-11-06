@@ -273,8 +273,6 @@ main, header, footer { position: relative; z-index: 1; }
 
 /* ---------- footer ---------- */
 footer { padding: 28px var(--gutter) calc(36px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); display: grid; gap: 14px; font: 12px/1.5 var(--mono); color: var(--quiet); }
-footer .ramp { font-size: clamp(14px, 3vw, 28px); letter-spacing: .3em; color: var(--ink); opacity: .55; overflow: hidden; white-space: nowrap; }
-[data-mode="play"] footer .ramp { background: var(--rainbow); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 1; }
 footer .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
 
@@ -456,7 +454,6 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
 </main>
 
 <footer>
-  <div class="ramp" aria-hidden="true"> .`:-~=+*xoaXOZ#%8&amp;@ .`:-~=+*xoaXOZ#%8&amp;@</div>
   <div class="row"><span>&copy; Scott Dickie</span><span><a class="work-only" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">LinkedIn ↗</a><a class="play-only" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Spotify ↗</a></span></div>
 </footer>
 
