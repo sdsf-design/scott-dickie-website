@@ -202,7 +202,6 @@ main, header, footer { position: relative; z-index: 1; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .visualizer { position: absolute; inset: 27%; width: 46%; height: 46%; border-radius: 50%; pointer-events: none; }
 .player-controls { margin-top: clamp(16px, 3vh, 28px); text-align: center; }
-.song { font: 13px/1.4 var(--mono); color: var(--quiet); margin-bottom: 12px; min-height: 1.4em; }
 .player-buttons { display: flex; align-items: center; justify-content: center; gap: 22px; }
 .icon-btn { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--quiet); cursor: pointer; transition: color .15s, background .15s, transform .1s; }
 .icon-btn:hover { color: var(--ink); }
@@ -212,11 +211,13 @@ main, header, footer { position: relative; z-index: 1; }
 .play-btn:hover { background: var(--pushed); color: #11132a; }
 .play-btn:active { transform: scale(.96); }
 .player-error { font: 12px/1.4 var(--mono); color: #ff8a80; margin-top: 10px; }
-.tracklist { width: 100%; list-style: none; margin: 20px 0 0; padding: 8px 0 0; display: flex; gap: 24px; overflow-x: auto; scrollbar-width: none; }
+.tracklist { width: 100%; list-style: none; margin: 8px 0 0; padding: 8px 0 0; display: flex; gap: 24px; overflow-x: auto; scrollbar-width: none; }
 .tracklist li:first-child { margin-left: auto; } .tracklist li:last-child { margin-right: auto; }
-.track { padding: 4px 0; border: 0; background: transparent; font: 400 20px/1.2 var(--serif); white-space: nowrap; color: color-mix(in srgb, var(--ink) 40%, transparent); cursor: pointer; transition: color .15s; }
+.track { padding: 4px 0; border: 0; background: transparent; font: 13px/1.4 var(--mono); white-space: nowrap; color: color-mix(in srgb, var(--ink) 40%, transparent); cursor: pointer; transition: color .15s; }
 .track:hover, .track[aria-current="true"] { color: var(--ink); }
 .track[aria-current="true"] { color: var(--pushed); }
+.spotify { margin-top: 14px; font: 13px/1.4 var(--mono); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--pushed); }
+.spotify:hover { color: var(--pushed); }
 
 /* ---------- story ---------- */
 .story { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 32px; }
@@ -363,7 +364,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
         <div class="about-project">
           <p class="label"><b>01</b> / Music</p>
           <h3 id="music-title">Music Songwriting &amp; Production</h3>
-          <p>I write lyrics in a variety of genres and use Suno, eMastered and FL Studio to produce my music.</p>
+          <p>I write lyrics and compose music across several genres and use Suno, eMastered and FL Studio to produce and master my music.</p>
         </div>
         <div class="panel-frame player" id="player">
           <div class="record" id="record">
@@ -372,7 +373,6 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
             <canvas class="visualizer" id="music-visualizer" aria-hidden="true"></canvas>
           </div>
           <div class="player-controls">
-            <p class="song" id="song-title" aria-live="polite"></p>
             <div class="player-buttons">
               <button class="icon-btn" id="prev-btn" type="button" aria-label="Previous song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
               <button class="icon-btn play-btn" id="play-btn" type="button" aria-label="Play"><svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
@@ -381,6 +381,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
             <p class="player-error" id="player-error" hidden>This song couldn&rsquo;t be loaded.</p>
           </div>
           <ol class="tracklist" id="tracklist" aria-label="Songs"></ol>
+          <a class="spotify" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Listen on Spotify ↗</a>
           <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
         </div>
       </article>

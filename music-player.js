@@ -19,7 +19,6 @@
   const playBtn = document.getElementById("play-btn");
   const iconPlay = document.getElementById("icon-play");
   const iconPause = document.getElementById("icon-pause");
-  const titleEl = document.getElementById("song-title");
   const errorEl = document.getElementById("player-error");
   const tracklist = document.getElementById("tracklist");
   let current = 0;
@@ -34,7 +33,6 @@
   function loadSong(index, autoplay) {
     current = index;
     const song = songs[index];
-    titleEl.textContent = song.title;
     errorEl.hidden = true;
     audio.src = song.src;
     tracklist.querySelectorAll(".track").forEach((btn, i) => btn.setAttribute("aria-current", i === index ? "true" : "false"));

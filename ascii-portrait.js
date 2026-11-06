@@ -248,8 +248,9 @@ function layout() {
   faceH = Math.min(room, (EMBED ? W * .82 : W - 32) / PORTRAIT_ASPECT);
   faceW = faceH * PORTRAIT_ASPECT;
   isDark = parseInt(getComputedStyle(canvas).getPropertyValue("--ground").trim().slice(1, 3), 16) < 128;   // needed before the grid size
-  // Finer grid than the original (about 3.4px per character) so eyes and glasses resolve; lighter while the camera runs.
-  const cols = Math.max(48, Math.min(lite ? 110 : 175, Math.round(faceW / (lite ? 4.6 : (isDark ? 3.4 : 2.9)))));
+  // Finer grid than the original so eyes and glasses resolve; lighter while the camera runs.
+  // Below about 3.2px per character drawing cost jumps sharply (over 3x in testing), so the light ground stops there.
+  const cols = Math.max(48, Math.min(lite ? 110 : 175, Math.round(faceW / (lite ? 4.6 : (isDark ? 3.4 : 3.2)))));
   cellW = faceW / cols; cellH = cellW / CHAR_ASPECT;
   const rows = Math.round(faceH / cellH);
   faceRows = rows;
@@ -625,7 +626,7 @@ const EFFECTS = {
         : pointer.on ? [clamp((px - cx) / (faceW * .65), 1), clamp((py - cy) / (faceH * .6), 1)] : null;
       const a = steer ? steer[0] * (steer[0] > 0 ? P.turn.right : P.turn.left) : Math.sin(t * .4) * .1;
       const b = steer ? steer[1] * (steer[1] > 0 ? P.turn.down : P.turn.up) : Math.sin(t * .29) * .05;
-      const ease = headPose.on ? .3 : .08;
+      const ease = headPose.on ? .3 : .16;   // quicker than the original .08, so the head keeps up with the cursor
       turn.a += (a - turn.a) * ease;
       turn.b += (b - turn.b) * ease;
       turn.sa = Math.sin(turn.a); turn.ca = Math.cos(turn.a);
@@ -663,8 +664,8 @@ const EFFECTS = {
         gaze.ty = (Math.random() - .5) * .4;
         gaze.next = now + 1.2 + Math.random() * 2.4;
       }
-      gaze.x += (gaze.tx - gaze.x) * .22;
-      gaze.y += (gaze.ty - gaze.y) * .22;
+      gaze.x += (gaze.tx - gaze.x) * .32;
+      gaze.y += (gaze.ty - gaze.y) * .32;
       // Above the mouth is a smile (+1), below is a frown (-1), with a short blend across the mouth itself.
       const mood = pointer.on ? Math.max(-1, Math.min(1, (faceT + faceH * MOUTH.y - py) / (faceH * .05))) : 0;
       gaze.mood += (mood - gaze.mood) * .09;
@@ -924,7 +925,7 @@ function frame(ms) {
   t = still ? 0 : now;
   if (!still) updateBlink(t);
 
-  pointer.strength += ((pointer.on ? 1 : 0) - pointer.strength) * .14;
+  pointer.strength += ((pointer.on ? 1 : 0) - pointer.strength) * .3;
   px = pointer.x; py = pointer.y; power = pointer.strength;
 
   if (headPose.on) {
