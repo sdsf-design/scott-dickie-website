@@ -1,0 +1,26 @@
+/* Case study pages: the homepage's Work ground, and a top bar with a small ASCII face (head turn) in the
+   middle and a close button on the right, styled like the homepage's LinkedIn button. */
+:root { --bg: #e8ebf0; --card-bg: #f3f5f8; }
+body { background: var(--bg); }
+
+.case-top {
+  position: sticky; top: 0; z-index: 50;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  padding: 8px clamp(16px, 4vw, 48px);
+  background: color-mix(in srgb, #e8ebf0 86%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.case-top .face { grid-column: 2; display: block; width: 84px; height: 90px; }
+.case-top .face canvas {
+  --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  display: block; width: 100%; height: 100%; cursor: pointer;
+}
+.case-top .close {
+  grid-column: 3; justify-self: end; display: grid; place-items: center; width: 40px; height: 40px;
+  color: #16233b; text-decoration: none; box-shadow: inset 0 0 0 1px rgba(22, 35, 59, .16);
+  transition: background .3s, color .3s;
+}
+.case-top .close:hover { background: #16233b; color: #e8ebf0; }
+.case-top .close:focus-visible, .case-top .face:focus-visible { outline: 2px solid #b4531a; outline-offset: 2px; }
+.case-top .close svg { width: 20px; height: 20px; }
+@media (max-width: 600px) { .case-top .face { width: 64px; height: 68px; } }

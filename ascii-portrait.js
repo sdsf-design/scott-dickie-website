@@ -250,7 +250,7 @@ function layout() {
   isDark = parseInt(getComputedStyle(canvas).getPropertyValue("--ground").trim().slice(1, 3), 16) < 128;   // needed before the grid size
   // Finer grid than the original so eyes and glasses resolve; lighter while the camera runs.
   // Below about 3.2px per character drawing cost jumps sharply (over 3x in testing), so the light ground stops there.
-  const cols = Math.max(48, Math.min(lite ? 110 : 175, Math.round(faceW / (lite ? 4.6 : (isDark ? 3.4 : 3.2)))));
+  const cols = Math.max(opts.minCols || 48, Math.min(lite ? 110 : 175, Math.round(faceW / (lite ? 4.6 : (isDark ? 3.4 : 3.2)))));
   cellW = faceW / cols; cellH = cellW / CHAR_ASPECT;
   const rows = Math.round(faceH / cellH);
   faceRows = rows;
