@@ -158,21 +158,37 @@ main, header, footer { position: relative; z-index: 1; }
 [data-mode="play"] .work-list a:hover, [data-mode="play"] .work-list a:focus-visible { color: #11132a; }
 [data-mode="play"] .work-list a:hover :is(.n, .co), [data-mode="play"] .work-list a:focus-visible :is(.n, .co) { color: #11132a; }
 
-.peek { position: fixed; left: 0; top: 0; z-index: 40; width: 340px; pointer-events: none; opacity: 0; transition: opacity .25s; perspective: 800px; }
-.peek.on { opacity: 1; }
-.peek .card { transform-style: preserve-3d; box-shadow: 0 24px 50px rgba(10, 15, 30, .28); border: 1px solid var(--line); background: var(--paper); }
-.peek img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
-.peek .cap { display: flex; justify-content: space-between; padding: 8px 10px; font: 11px/1.2 var(--mono); color: var(--quiet); }
-[data-mode="play"] .peek .card { border: 2px solid var(--pushed); box-shadow: 10px 10px 0 var(--peek-hue, var(--r5)); }
 
 /* Without a fine pointer there is no hover, so rows show their pictures inline. */
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .peek { display: none; }
   .work-list a { grid-template-columns: 40px minmax(0, 1fr) 28px; grid-template-areas: "n co go" "thumb thumb thumb" "h h h"; row-gap: 14px; }
   .work-list .n { grid-area: n; } .work-list .co { grid-area: co; } .work-list .go { grid-area: go; }
   .work-list h3 { grid-area: h; }
   .work-list .thumb { display: block; grid-area: thumb; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; border: 1px solid var(--line); }
 }
+
+/* ---------- Work: Selected work as a stack of cards that fans out on scroll ---------- */
+.work-stack { position: relative; padding: 72px var(--gutter); border-top: 1px solid var(--line); }
+.stack-text { max-width: 36em; margin: 0 auto 40px; text-align: center; display: grid; gap: 12px; justify-items: center; }
+.stack-text h2 { font: 300 clamp(30px, 4vw, 52px)/1.05 var(--sans); letter-spacing: -.035em; color: var(--ink); text-wrap: balance; }
+.stack-text p:not(.label) { color: var(--quiet); font-size: 15px; line-height: 1.65; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; max-width: 1100px; margin: 0 auto; }
+/* A subtle card: thumbnail in a soft frame, title underneath */
+.wcard { display: grid; gap: 4px; padding: 8px 8px 14px; border-radius: 18px; text-decoration: none; color: var(--ink);
+  background: var(--paper); box-shadow: 0 0 0 1px var(--line), 0 18px 40px rgba(22, 35, 59, .12); transition: box-shadow .3s; }
+.wcard img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 11px; margin-bottom: 8px; background: var(--ground); }
+.wcard .co { font: 11px/1.3 var(--mono); color: var(--quiet); text-transform: uppercase; letter-spacing: .04em; padding: 0 6px; }
+.wcard .t { font: 400 15px/1.35 var(--sans); padding: 0 6px; }
+.wcard:hover { box-shadow: 0 0 0 1px var(--pushed), 0 24px 50px rgba(22, 35, 59, .18); }
+/* On wide screens the section is pinned for a few screens of scrolling while the cards move. */
+.work-stack.animated { height: 300vh; padding: 0; }
+.work-stack.animated .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.work-stack.animated .stack-text { position: absolute; left: 50%; top: 50%; translate: -50% -50%; margin: 0; width: min(36em, 34vw); z-index: 0; }
+.work-stack.animated .cards { display: block; max-width: none; }
+.work-stack.animated .wcard { position: absolute; left: 50%; top: 52%; width: clamp(220px, 19vw, 290px); will-change: transform; }
+.work-stack.animated .wcard:nth-child(1) { z-index: 5; } .work-stack.animated .wcard:nth-child(2) { z-index: 4; }
+.work-stack.animated .wcard:nth-child(3) { z-index: 3; } .work-stack.animated .wcard:nth-child(4) { z-index: 2; }
+.work-stack.animated .wcard:nth-child(5) { z-index: 1; }
 
 /* ---------- Play: one full-screen, minimal section per side project ---------- */
 [data-mode="play"] #projects-section { padding: 0; }
@@ -334,30 +350,24 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
     </div>
   </section>
 
-  <section class="section" id="projects-section" aria-labelledby="work-title">
-    <div class="head"><h2 id="work-title"><b>[02]</b> <span class="work-only">Selected work</span><span class="play-only">Side projects</span></h2><span class="label"><span class="work-only">05 case studies</span><span class="play-only">02 projects</span></span></div>
-    <ul class="work-list work-only">
-      <li><a href="upwork.html" data-img="assets/upwork-thumbnail.jpg">
-        <span class="n">01</span><span class="co">Upwork</span>
-        <img class="thumb" src="assets/upwork-thumbnail.jpg" alt="" loading="lazy">
-        <h3>Expanding upmarket for IPO</h3><span class="go" aria-hidden="true">→</span></a></li>
-      <li><a href="study.html" data-img="assets/study-thumbnail.jpg">
-        <span class="n">02</span><span class="co">Study.com</span>
-        <img class="thumb" src="assets/study-thumbnail.jpg" alt="" loading="lazy">
-        <h3>Accelerating growth for multiple B2C businesses</h3><span class="go" aria-hidden="true">→</span></a></li>
-      <li><a href="udacity.html" data-img="assets/udacity-thumbnail.jpg">
-        <span class="n">03</span><span class="co">Udacity</span>
-        <img class="thumb" src="assets/udacity-thumbnail.jpg" alt="" loading="lazy">
-        <h3>Becoming B2C first and elevating B2B</h3><span class="go" aria-hidden="true">→</span></a></li>
-      <li><a href="comfy.html" data-img="assets/siemens-thumbnail.jpg">
-        <span class="n">04</span><span class="co">Comfy (Siemens)</span>
-        <img class="thumb" src="assets/siemens-thumbnail.jpg" alt="" loading="lazy">
-        <h3>0-1 B2C product launch post COVID</h3><span class="go" aria-hidden="true">→</span></a></li>
-      <li><a href="ai-initiatives.html" data-img="assets/ai-portfolio-thumbnail.jpg">
-        <span class="n">05</span><span class="co">AI Projects</span>
-        <img class="thumb" src="assets/ai-portfolio-thumbnail.jpg" alt="" loading="lazy">
-        <h3>AI Initiatives to drive growth, quality and efficiency</h3><span class="go" aria-hidden="true">→</span></a></li>
-    </ul>
+  <section class="work-stack work-only" id="work-stack" aria-labelledby="work-title">
+    <div class="stage">
+      <div class="stack-text">
+        <p class="label"><b>[02]</b></p>
+        <h2 id="work-title">Selected work</h2>
+        <p>I&rsquo;ve led design from 0-1 launches to IPOs and acquisitions, across B2C &amp; B2B SaaS, marketplaces and ed-tech, at companies that reach millions of people.</p>
+      </div>
+      <div class="cards">
+        <a class="wcard" href="ai-initiatives.html"><img src="assets/ai-portfolio-thumbnail.jpg" alt="" width="1400" height="787" loading="lazy"><span class="co">AI Projects</span><span class="t">AI Initiatives to drive growth, quality and efficiency</span></a>
+        <a class="wcard" href="upwork.html"><img src="assets/upwork-thumbnail.jpg" alt="" width="1400" height="787" loading="lazy"><span class="co">Upwork</span><span class="t">Expanding upmarket for IPO</span></a>
+        <a class="wcard" href="study.html"><img src="assets/study-thumbnail.jpg" alt="" width="1400" height="787" loading="lazy"><span class="co">Study.com</span><span class="t">Accelerating growth for multiple B2C businesses</span></a>
+        <a class="wcard" href="udacity.html"><img src="assets/udacity-thumbnail.jpg" alt="" width="1400" height="787" loading="lazy"><span class="co">Udacity</span><span class="t">Becoming B2C first and elevating B2B</span></a>
+        <a class="wcard" href="comfy.html"><img src="assets/siemens-thumbnail.jpg" alt="" width="1400" height="787" loading="lazy"><span class="co">Comfy (Siemens)</span><span class="t">0-1 B2C product launch post COVID</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section play-only" id="projects-section" aria-label="Side projects">
     <div class="projects play-only">
       <!-- One section per side project: the words on the left, the thing itself in a bordered panel on the right. -->
       <article class="project" aria-labelledby="music-title">
@@ -439,7 +449,6 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
   <div class="row"><span>&copy; Scott Dickie</span><span><a class="work-only" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">LinkedIn ↗</a><a class="play-only" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Spotify ↗</a></span></div>
 </footer>
 
-<div class="peek" id="peek" aria-hidden="true"><div class="card"><img alt=""><div class="cap"><span class="peek-co"></span><span>view case study →</span></div></div></div>
 <canvas id="bits" aria-hidden="true"></canvas>
 
 <script src="portraits.js"></script>
@@ -519,9 +528,9 @@ function applyMode(mode, fromUser) {
   typeKicker(look.kicker);
   sky.running(mode === "play");
   bits.running(mode === "play");
+  window.updateWorkStack?.();
   if (mode !== "play") window.musicPlayer?.pause();   // the music lives in Play, so leaving Play stops it
   if (fromUser) {
-    try { localStorage.setItem("sd-mode", mode); } catch (e) {}
     if (mode === "play") {
       const b = document.querySelector(".mode").getBoundingClientRect();
       bits.pop(b.right - 30, b.bottom, 36);
@@ -530,35 +539,45 @@ function applyMode(mode, fromUser) {
 }
 for (const input of document.querySelectorAll('input[name="mode"]')) input.addEventListener("change", () => applyMode(input.value, true));
 
-/* ---- case study preview: follows the cursor and tilts in 3D with its speed ---- */
+/* ---- Selected work: the cards start as a stack (each one peeking out), then fan out to the sides as you
+   scroll, and the section title and a line about my experience fade in where the stack was ---- */
 (() => {
-  const peek = document.getElementById("peek"), card = peek.firstElementChild, img = peek.querySelector("img"), co = peek.querySelector(".peek-co");
-  const fine = matchMedia("(hover: hover) and (pointer: fine)");
-  let x = 0, y = 0, tx = 0, ty = 0, rx = 0, ry = 0, active = false, frame = 0;
-  function step() {
-    const dx = tx - x, dy = ty - y;
-    x += dx * .16; y += dy * .16;
-    const boost = root.dataset.mode === "play" ? 1.8 : 1;
-    ry += (Math.max(-18, Math.min(18, dx * .25 * boost)) - ry) * .2;
-    rx += (Math.max(-18, Math.min(18, -dy * .25 * boost)) - rx) * .2;
-    peek.style.transform = `translate(${x + 24}px, ${y - 100}px)`;
-    card.style.transform = `rotateY(${ry}deg) rotateX(${rx}deg)${root.dataset.mode === "play" ? ` rotate(${ry * .4}deg)` : ""}`;
-    frame = active || Math.abs(dx) + Math.abs(dy) > .5 ? requestAnimationFrame(step) : 0;
-  }
-  document.querySelectorAll(".work-list a").forEach((link, i) => {
-    link.addEventListener("pointerenter", e => {
-      if (!fine.matches || reduceMotion.matches || !link.dataset.img) return;
-      img.src = link.dataset.img;
-      co.textContent = link.querySelector(".co").textContent;
-      peek.style.setProperty("--peek-hue", PLAY_HUES[[3, 2, 5, 4, 0, 3, 2][i] ?? 4]);
-      if (!active) { x = tx = e.clientX; y = ty = e.clientY; }
-      active = true;
-      peek.classList.add("on");
-      if (!frame) frame = requestAnimationFrame(step);
+  const section = document.getElementById("work-stack");
+  const cards = [...section.querySelectorAll(".wcard")];
+  const text = section.querySelector(".stack-text");
+  // Where each card settles, as fractions of the screen from its centre, plus a slight tilt.
+  const SPOTS = [[-.33, -.25, -5], [.32, -.27, 4], [-.35, .23, 3], [.34, .22, -4], [.02, .4, 2]];
+  const wide = matchMedia("(min-width: 900px) and (min-height: 560px)");
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  let queued = false;
+  function update() {
+    queued = false;
+    const on = wide.matches && !reduceMotion.matches && root.dataset.mode === "work";
+    section.classList.toggle("animated", on);
+    if (!on) { for (const c of cards) c.style.transform = ""; text.style.opacity = text.style.transform = ""; return; }
+    const box = section.getBoundingClientRect();
+    const p = clamp(-box.top / Math.max(1, box.height - innerHeight));
+    const spread = ease(clamp((p - .12) / .5));
+    const mid = (cards.length - 1) / 2;
+    cards.forEach((card, i) => {
+      // Stacked: fanned a little so every card peeks out from behind the one in front.
+      const sx = (i - mid) * 26, sy = (i - mid) * 14, sr = (i - mid) * 3.5;
+      const [fx, fy, fr] = SPOTS[i % SPOTS.length];
+      const x = sx + (fx * innerWidth - sx) * spread, y = sy + (fy * innerHeight - sy) * spread, r = sr + (fr - sr) * spread;
+      card.style.transform = `translate(-50%, -50%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${r.toFixed(2)}deg)`;
     });
-    link.addEventListener("pointermove", e => { tx = e.clientX; ty = e.clientY; });
-    link.addEventListener("pointerleave", () => { active = false; peek.classList.remove("on"); });
-  });
+    const show = clamp((p - .42) / .25);
+    text.style.opacity = show.toFixed(3);
+    text.style.transform = `translateY(${((1 - show) * 24).toFixed(1)}px)`;
+  }
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  addEventListener("scroll", queue, { passive: true });
+  addEventListener("resize", queue);
+  wide.addEventListener?.("change", queue);
+  reduceMotion.addEventListener?.("change", queue);
+  window.updateWorkStack = queue;
+  update();
 })();
 
 /* ---- Play: twinkling four-point stars across the night ground (from the mockup) ---- */
@@ -635,10 +654,10 @@ const bits = (() => {
   };
 })();
 
-/* ---- start in the saved mode (or ?mode=play / ?mode=work) ---- */
-let startMode = new URLSearchParams(location.search).get("mode");
-if (!LOOKS[startMode]) { try { startMode = localStorage.getItem("sd-mode"); } catch (e) {} }
-applyMode(LOOKS[startMode] ? startMode : "work", false);
+/* ---- start in Work (or ?mode=play) ---- */
+// The page always opens on Work; ?mode=play opens Play directly.
+const startMode = new URLSearchParams(location.search).get("mode");
+applyMode(startMode === "play" ? "play" : "work", false);
 </script>
 </body>
 </html>
