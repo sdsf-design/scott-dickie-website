@@ -229,6 +229,7 @@ main, header, footer { position: relative; z-index: 1; }
 .project + .project { border-top: 1px solid var(--line); }
 .about-project { display: grid; justify-items: center; gap: 10px; width: 100%; max-width: 1100px; color: var(--quiet); font-size: 15px; }
 .about-project > p:not(.label) { max-width: 34em; }
+#unstuck-title + p { max-width: 54em; text-wrap: balance; }   /* Get Unstuck: two wide lines */
 .about-project h3 { text-wrap: balance; }
 .about-project h3 { font: 300 clamp(32px, min(5vw, 7vh), 68px)/1.02 var(--sans); letter-spacing: -.04em; color: var(--ink); }
 .about-project .more { font: 12px/1.4 var(--mono); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--pushed); margin-top: 4px; }
