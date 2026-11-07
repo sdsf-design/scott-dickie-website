@@ -204,7 +204,7 @@ main, header, footer { position: relative; z-index: 1; }
 
 /* ---------- Play: More projects, the Selected work deck with more bounce ---------- */
 .fun-stack .wcard:nth-child(1) { --hue: var(--r1); } .fun-stack .wcard:nth-child(2) { --hue: var(--r4); }
-.fun-stack .wcard:nth-child(3) { --hue: var(--r2); } .fun-stack .wcard:nth-child(4) { --hue: var(--r5); } .fun-stack .wcard:nth-child(5) { --hue: var(--r3); }
+.fun-stack .wcard:nth-child(3) { --hue: var(--r2); } .fun-stack .wcard:nth-child(4) { --hue: var(--r5); } .fun-stack .wcard:nth-child(5) { --hue: var(--r3); } .fun-stack .wcard:nth-child(6) { --hue: var(--r6); }
 .fun-stack .wcard { cursor: pointer; }
 .fun-stack.animated .wcard { width: clamp(250px, 24vw, 400px); }
 .fun-stack .wcard img { object-position: 50% 50%; }
@@ -215,7 +215,7 @@ main, header, footer { position: relative; z-index: 1; }
 /* A springy overshoot as the cards land, and they land one after another */
 .fun-stack.animated .wcard { transition: transform 1.25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s, scale .35s cubic-bezier(.34, 1.56, .64, 1); }
 .fun-stack.animated .wcard:nth-child(2) { transition-delay: .09s, 0s, 0s; } .fun-stack.animated .wcard:nth-child(3) { transition-delay: .18s, 0s, 0s; }
-.fun-stack.animated .wcard:nth-child(4) { transition-delay: .27s, 0s, 0s; } .fun-stack.animated .wcard:nth-child(5) { transition-delay: .36s, 0s, 0s; }
+.fun-stack.animated .wcard:nth-child(4) { transition-delay: .27s, 0s, 0s; } .fun-stack.animated .wcard:nth-child(5) { transition-delay: .36s, 0s, 0s; } .fun-stack.animated .wcard:nth-child(6) { transition-delay: .45s, 0s, 0s; }
 /* Hover: the card lifts and gives a little wiggle (scale and rotate stack on top of its fanned transform) */
 .fun-stack .wcard:hover, .fun-stack .wcard:focus-visible { scale: 1.05; animation: wiggle .5s ease-in-out; }
 .fun-stack .wcard.boing { animation: boing .45s cubic-bezier(.34, 1.56, .64, 1); }
@@ -487,7 +487,7 @@ html:has(.lead-modal[open]) { overflow: hidden; }
       <div class="stack-text">
         <p class="label"><b>[03]</b></p>
         <h2 id="more-title">More projects</h2>
-        <p>A book, a toy, a bench, a little wizard and a very good day on the mountain. The things I make (and do) when nobody&rsquo;s asking.</p>
+        <p>A book, a toy, a bench, a little wizard, a pile of jokes and a very good day on the mountain. The things I make (and do) when nobody&rsquo;s asking.</p>
       </div>
       <div class="cards">
         <div class="wcard" tabindex="0"><img src="assets/play/impact-influence.jpg" alt="The Impact + Influence book cover: a collection of fundamentals for UX designers, by Scott Dickie" width="966" height="1046" loading="lazy"><span class="co">Impact &amp; Influence</span><span class="t">Helping designers learn non-design skills</span></div>
@@ -495,6 +495,7 @@ html:has(.lead-modal[open]) { overflow: hidden; }
         <div class="wcard" tabindex="0"><img src="assets/play/snowboard-bench.jpg" alt="A yellow snowboard on black metal legs, used as a bench in a hallway" width="1200" height="900" loading="lazy"><span class="co">Snowboard bench</span><span class="t">Homemade bench made from a snowboard and metal legs</span></div>
         <div class="wcard" tabindex="0"><img class="top" src="assets/play/snowboarding.jpg" alt="Scott in a purple unicorn onesie on his snowboard, next to his daughter in pink ski gear" width="900" height="1200" loading="lazy"><span class="co">Snowboarding</span><span class="t">My favorite sport, celebrating the season&rsquo;s last day in the onesie</span></div>
         <a class="wcard" href="/shouldibuyit/" target="_blank" rel="noopener"><img src="assets/play/shouldibuyit.jpg" alt="The Should I Buy It? wizard: step 1 asks whether it&rsquo;s a want or a need" width="1200" height="960" loading="lazy"><span class="co">Should I Buy It? &#8599;</span><span class="t">A 14-question gut check before you buy something</span></a>
+        <a class="wcard" href="/jokes/" target="_blank" rel="noopener"><img src="assets/play/jokes.jpg" alt="Joke Flip: a joke card reading &ldquo;My dog can do math&rdquo; with big left and right arrows" width="1200" height="960" loading="lazy"><span class="co">Joke Flip &#8599;</span><span class="t">Kid-friendly jokes: read the setup, tap to flip for the punchline</span></a>
       </div>
     </div>
   </section>
@@ -694,15 +695,15 @@ const placeWork = cardStack("work-stack", (w, cw, ch) => {
     pile: (i, n) => { const m = (n - 1) / 2; return [(i - m) * 40, (i - m) * 20, (i - m) * 3.5]; },
   };
 });
-// Play: two cards to a side and one along the bottom centre, tossed at jauntier angles from a messier pile.
-// Like Work, the section grows tall enough that the bottom card clears the text in the middle.
+// Play: two cards to a side, one above and one below the text in the middle, tossed at jauntier angles from a
+// messier pile. The section grows tall enough that the middle column clears the text.
 const placeFun = cardStack("fun-stack", (w, cw, ch) => {
-  const h = Math.max(innerHeight, 2 * ch + 340);
+  const h = Math.max(innerHeight, 2 * ch + 420);
   const xEdge = w / 2 - cw / 2 - 64, yTop = -(h / 2 - ch / 2 - 88), yBottom = h / 2 - ch / 2 - 56;
   return {
     height: h,
-    spots: [[-xEdge, yTop, -7], [xEdge, yTop + 36, 6], [-xEdge + 24, yBottom - 110, 5], [xEdge - 16, yBottom - 90, -6], [0, yBottom, 3]],
-    pile: (i) => [[-14, 10, -9], [18, -8, 7], [-6, -14, -3], [10, 12, 12], [4, -4, -12]][i % 5],
+    spots: [[-xEdge, yTop + 60, -7], [xEdge, yTop + 96, 6], [-xEdge + 24, yBottom - 110, 5], [xEdge - 16, yBottom - 90, -6], [0, yBottom, 3], [0, yTop, -3]],
+    pile: (i) => [[-14, 10, -9], [18, -8, 7], [-6, -14, -3], [10, 12, 12], [4, -4, -12], [-10, 6, 4]][i % 6],
   };
 });
 window.updateWorkStack = () => { placeWork(); placeFun(); };
