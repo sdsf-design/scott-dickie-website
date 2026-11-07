@@ -306,12 +306,18 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
 /* ---------- leadership principles: a glass sheet over the blurred hero ---------- */
 html:has(.lead-modal[open]) { overflow: hidden; }
 .lead-modal {
-  width: min(880px, calc(100vw - 2 * var(--gutter))); max-height: calc(100svh - 2 * var(--gutter));
-  margin: auto; padding: 0; border: 0; color: var(--ink); overflow: auto; overscroll-behavior: contain;
+  --feather: clamp(28px, 4vw, 64px);
+  width: min(1320px, 100vw - var(--gutter)); max-width: none; max-height: calc(100svh - var(--gutter));
+  margin: auto; padding: 0; border: 0; color: var(--ink); overflow: auto; overscroll-behavior: contain; scrollbar-width: none;
   background: color-mix(in srgb, var(--paper) 62%, transparent);
   backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55), 0 0 0 1px var(--line), 0 30px 90px rgba(22, 35, 59, .28);
+  /* Feathered edges: the glass and its blur fade into the page instead of ending on a line */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent), linear-gradient(to bottom, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent), linear-gradient(to bottom, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent);
+  mask-composite: intersect;
 }
+.lead-modal::-webkit-scrollbar { display: none; }
 .lead-modal::backdrop {
   background: rgba(232, 235, 240, .28);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -321,7 +327,7 @@ html:has(.lead-modal[open]) { overflow: hidden; }
 @keyframes lead-in { from { opacity: 0; transform: translateY(12px) scale(.985); } }
 .lead-modal[open]::backdrop { animation-name: lead-fade; }
 @keyframes lead-fade { from { opacity: 0; } }
-.lead-inner { display: grid; gap: 32px; padding: clamp(28px, 5vw, 56px); }
+.lead-inner { display: grid; gap: 32px; padding: calc(var(--feather) + 8px) calc(var(--feather) + clamp(8px, 2vw, 32px)); }
 .lead-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .lead-top h2 { font: 300 clamp(36px, 4.6vw, 60px)/1 var(--sans); letter-spacing: -.035em; margin-top: 10px; }
 .lead-close {
@@ -330,7 +336,8 @@ html:has(.lead-modal[open]) { overflow: hidden; }
 }
 .lead-close:hover { background: var(--ink); color: var(--ground); }
 .lead-close svg { width: 20px; height: 20px; }
-.lead-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; border-top: 1px solid var(--line); }
+.lead-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 40px; border-top: 1px solid var(--line); }
+@media (max-width: 1100px) { .lead-inner { gap: 24px; } .lead-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lead-list li { padding: 20px 0; } }
 .lead-list li { display: grid; gap: 10px; align-content: start; padding: 26px 0; border-bottom: 1px solid var(--line); }
 .lead-list h3 { font: 400 clamp(22px, 2.2vw, 28px)/1.2 var(--serif); letter-spacing: -.01em; }
 .lead-list p { font-size: 15px; line-height: 1.65; color: var(--quiet); }
