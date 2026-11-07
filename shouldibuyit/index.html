@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should I Buy It? | Scott Dickie</title>
+<meta name="description" content="A 14-question gut check before you buy something: need vs. want, budget, borrowing, resale, motives and more, ending in a Clarity Score and a Buy / Wait / Skip verdict.">
+<link rel="icon" href="/assets/favicon.ico">
+<style>
+  :root{
+    --pink:#ff90e8;
+    --yellow:#ffd23f;
+    --green:#7ed957;
+    --red:#ff5c5c;
+    --blue:#8fd3ff;
+    --ink:#0a0a0a;
+    --cream:#fff7ef;
+    --card:#ffffff;
+    --neutral-btn:#eee8dc;
+    --shadow-off: 5px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Helvetica Neue", Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f4ede1;
+    color:var(--ink);
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px;
+    overflow:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:680px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  header.top{
+    width:100%;
+    text-align:center;
+    margin-bottom:16px;
+    flex-shrink:0;
+  }
+  header.top h1{
+    font-size:clamp(30px, 6vw, 46px);
+    margin:0 0 6px;
+    font-weight:900;
+    letter-spacing:-0.5px;
+  }
+  header.top h1 span{
+    background:var(--pink);
+    padding:2px 10px;
+    border:3px solid var(--ink);
+    border-radius:10px;
+    box-shadow: var(--shadow-off) var(--shadow-off) 0 var(--ink);
+    display:inline-block;
+    transform:rotate(-2deg);
+  }
+  header.top p{
+    margin:0;
+    font-size:16px;
+    color:#444;
+    font-weight:500;
+  }
+
+  /* progress */
+  .progress-track{
+    width:100%;
+    height:14px;
+    background:var(--card);
+    border:2.5px solid var(--ink);
+    border-radius:999px;
+    overflow:hidden;
+    margin-bottom:28px;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--pink), var(--yellow));
+    width:0%;
+    transition:width .35s ease;
+  }
+
+  #cardHost{
+    width:100%;
+    flex:1;
+    min-height:0;
+    display:flex;
+  }
+
+  .card{
+    width:100%;
+    background:transparent;
+    padding:12px 6px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    overflow-y:auto;
+    animation: pop .28s ease;
+  }
+  @keyframes pop{
+    from{opacity:0; transform:translateY(10px) scale(.98);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+
+  .card .tag{
+    position:relative;
+    align-self:flex-start;
+    margin-bottom:16px;
+    background:var(--yellow);
+    border:2.5px solid var(--ink);
+    border-radius:8px;
+    padding:4px 12px;
+    font-weight:800;
+    font-size:13px;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+
+  .emoji{
+    font-size:44px;
+    margin-bottom:10px;
+    line-height:1;
+  }
+
+  .qtext{
+    font-size:clamp(21px, 4.4vw, 27px);
+    font-weight:800;
+    margin:0 0 6px;
+    line-height:1.25;
+  }
+  .qsub{
+    font-size:15px;
+    color:#555;
+    margin:0 0 22px;
+    line-height:1.5;
+  }
+
+  .choices{
+    display:flex;
+    flex-direction:column;
+    flex-wrap:wrap;
+    gap:clamp(10px, 2vh, 18px);
+  }
+
+  /* Gumroad-style buttons */
+  .btn{
+    appearance:none;
+    border:3px solid var(--ink);
+    background:var(--card);
+    color:var(--ink);
+    font-weight:800;
+    font-size:clamp(17px, 2.8vw, 23px);
+    padding:clamp(16px, 3.2vh, 26px) clamp(18px, 3vw, 28px);
+    min-height:clamp(56px, 9vh, 76px);
+    border-radius:16px;
+    cursor:pointer;
+    box-shadow:5px 5px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    font-family:inherit;
+    flex:1 1 auto;
+    width:100%;
+    text-align:center;
+  }
+  .btn:hover{
+    transform:translate(-3px,-3px);
+    box-shadow:8px 8px 0 var(--ink);
+  }
+  .btn:active{
+    transform:translate(2px,2px);
+    box-shadow:2px 2px 0 var(--ink);
+  }
+  .btn.yes{background:var(--neutral-btn);}
+  .btn.no{background:var(--neutral-btn); color:var(--ink);}
+  .btn.primary{background:var(--neutral-btn);}
+  .btn.neutral{background:var(--neutral-btn);}
+  .btn.wide{flex:1 1 100%;}
+  .btn.ghost{
+    background:var(--card);
+    box-shadow:none;
+    border:2px solid #ccc;
+    color:#777;
+    font-weight:700;
+    font-size:15px;
+    padding:10px 18px;
+    min-height:auto;
+    width:auto;
+  }
+  .btn.ghost:hover{box-shadow:none; transform:none; border-color:var(--ink); color:var(--ink);}
+
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    margin-top:16px;
+  }
+  .back-link{
+    background:none;
+    border:none;
+    color:#777;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    padding:8px 4px;
+  }
+  .back-link:hover{color:var(--ink);}
+  .counter{
+    font-size:13px;
+    color:#999;
+    font-weight:700;
+  }
+
+  /* select-style (multi option) buttons stacked */
+  .choices.stack{flex-direction:column;}
+  .choices.stack .btn{width:100%;}
+
+  /* results */
+  .result-card{
+    text-align:center;
+  }
+  .verdict-badge{
+    display:inline-block;
+    font-size:15px;
+    font-weight:800;
+    padding:6px 16px;
+    border:2.5px solid var(--ink);
+    border-radius:999px;
+    box-shadow:3px 3px 0 var(--ink);
+    margin-bottom:14px;
+  }
+  .verdict-title{
+    font-size:clamp(28px,7vw,40px);
+    font-weight:900;
+    margin:0 0 10px;
+  }
+  .verdict-msg{
+    font-size:16px;
+    color:#444;
+    margin:0 0 24px;
+    line-height:1.55;
+  }
+
+  .meter-wrap{
+    margin:0 auto 26px;
+    max-width:420px;
+  }
+  .meter-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    font-weight:800;
+    color:#777;
+    margin-bottom:6px;
+  }
+  .meter-track{
+    height:20px;
+    border:2.5px solid var(--ink);
+    border-radius:999px;
+    background:#f1f1f1;
+    overflow:hidden;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .meter-fill{
+    height:100%;
+    transition:width .6s ease;
+  }
+
+  .flags{
+    text-align:left;
+    background:#fff9f0;
+    border:2.5px dashed var(--ink);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-bottom:24px;
+  }
+  .flags h3{
+    margin:0 0 10px;
+    font-size:15px;
+  }
+  .flags ul{
+    margin:0;
+    padding-left:20px;
+    font-size:14px;
+    line-height:1.7;
+  }
+  .flags.empty{
+    background:#f2fff2;
+  }
+
+  .result-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  .site-link{
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    align-self:center;
+    margin-top:16px;
+    padding:12px 22px;
+    background:var(--neutral-btn);
+    border:2.5px solid var(--ink);
+    border-radius:999px;
+    box-shadow:4px 4px 0 var(--ink);
+    font-size:15px;
+    font-weight:800;
+    color:var(--ink);
+    text-decoration:none;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .site-link:hover{
+    transform:translate(-2px,-2px);
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .site-link:active{
+    transform:translate(1px,1px);
+    box-shadow:2px 2px 0 var(--ink);
+  }
+
+  @media (max-width:480px){
+    .card{padding:26px 18px 20px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Should I <span>Buy It?</span></h1>
+  </header>
+
+  <div id="cardHost"></div>
+
+  <a class="site-link" href="https://www.unstuck.services" target="_blank" rel="noopener noreferrer">More tools at Get Unstuck →</a>
+</div>
+
+<script>
+/* ============ QUESTION GRAPH ============ */
+/*
+Each node: {
+  id, tag, emoji, text, sub,
+  type: 'choice' | 'select',
+  options: [{label, value, cls, next}],   // next is id of next node, or 'RESULT'
+  score: fn(value) -> {points, maxPoints, flag}
+}
+*/
+
+const nodes = {
+
+  start: {
+    id:'start', tag:'STEP 1', emoji:'🤔',
+    text:'Is this a want, or a need?',
+    sub:'Be honest — "need" means your life materially doesn\'t work without it.',
+    options:[
+      {label:'It\'s a NEED', value:'need', cls:'neutral', next:'needNow'},
+      {label:'It\'s a WANT', value:'want', cls:'primary', next:'waited24'}
+    ]
+  },
+
+  needNow: {
+    id:'needNow', tag:'STEP 1a', emoji:'⏰',
+    text:'Do you need it right now?',
+    sub:'Like, this-week urgent — not "would be nice to have soon."',
+    options:[
+      {label:'Yes, urgently', value:'yes', cls:'yes', next:'budget'},
+      {label:'No, it can wait', value:'no', cls:'no', next:'budget'}
+    ],
+    score:(v)=>({points: v==='yes'?15:5, max:15, flag: v==='no' ? null : null})
+  },
+
+  waited24: {
+    id:'waited24', tag:'STEP 1b', emoji:'🕐',
+    text:'Did you wait at least 24 hours before deciding to buy it?',
+    sub:'The classic cooling-off rule. Impulse fades fast if you let it.',
+    options:[
+      {label:'Yes, I waited', value:'yes', cls:'yes', next:'budget'},
+      {label:'No, not yet', value:'no', cls:'no', next:'budget'}
+    ],
+    score:(v)=>({points: v==='yes'?10:0, max:10, flag: v==='no' ? 'You haven\'t given it a 24-hour cool-down yet' : null})
+  },
+
+  budget: {
+    id:'budget', tag:'STEP 2', emoji:'💰',
+    text:'Is it within your budget?',
+    sub:'Meaning: buying it won\'t mess with rent, bills, or savings goals.',
+    options:[
+      {label:'Yes, comfortably', value:'yes', cls:'yes', next:'borrow'},
+      {label:'No / it\'s a stretch', value:'no', cls:'no', next:'borrow'}
+    ],
+    score:(v)=>({points: v==='yes'?15:0, max:15, flag: v==='no' ? 'It\'s outside your comfortable budget' : null})
+  },
+
+  borrow: {
+    id:'borrow', tag:'STEP 3', emoji:'🤝',
+    text:'Could you borrow it from a friend, or on Facebook (marketplace/groups)?',
+    sub:'If you only need it once or twice, borrowing might solve this entirely.',
+    options:[
+      {label:'Yes, I probably could', value:'yes', cls:'no', next:'sale'},
+      {label:'No, not realistically', value:'no', cls:'yes', next:'sale'}
+    ],
+    score:(v)=>({points: v==='no'?5:0, max:5, flag: v==='yes' ? 'You could probably just borrow this instead' : null})
+  },
+
+  sale: {
+    id:'sale', tag:'STEP 4', emoji:'🏷️',
+    text:'Have you waited for it to go on sale?',
+    sub:'Patience often pays literally. Not a dealbreaker either way.',
+    options:[
+      {label:'Yes', value:'yes', cls:'yes', next:'used'},
+      {label:'No', value:'no', cls:'no', next:'used'}
+    ],
+    score:(v)=>({points: v==='yes'?5:0, max:5, flag: null})
+  },
+
+  used: {
+    id:'used', tag:'STEP 5', emoji:'🔎',
+    text:'Did you look for it used — Craigslist, eBay, Facebook Marketplace?',
+    sub:'A quick search can cut the price in half, sometimes literally.',
+    options:[
+      {label:'Yes, I checked', value:'yes', cls:'yes', next:'saved'},
+      {label:'No, not yet', value:'no', cls:'no', next:'saved'}
+    ],
+    score:(v)=>({points: v==='yes'?5:0, max:5, flag: v==='no' ? 'Haven\'t checked secondhand options yet' : null})
+  },
+
+  saved: {
+    id:'saved', tag:'STEP 6', emoji:'🐷',
+    text:'Do you already have the money saved for it?',
+    sub:'Not "I\'ll have it by payday" — actually sitting in your account.',
+    options:[
+      {label:'Yes, it\'s ready to go', value:'yes', cls:'yes', next:'own'},
+      {label:'No, not yet', value:'no', cls:'no', next:'own'}
+    ],
+    score:(v)=>({points: v==='yes'?15:0, max:15, flag: v==='no' ? 'The money isn\'t actually saved up yet' : null})
+  },
+
+  own: {
+    id:'own', tag:'STEP 7', emoji:'📦',
+    text:'Do you already own something similar that does the same job?',
+    sub:'Duplicate gadgets/clothes are the #1 source of clutter regret.',
+    options:[
+      {label:'Yes, I have something similar', value:'yes', cls:'no', next:'value'},
+      {label:'No, this fills a real gap', value:'no', cls:'yes', next:'value'}
+    ],
+    score:(v)=>({points: v==='no'?10:0, max:10, flag: v==='yes' ? 'You already own something that does this job' : null})
+  },
+
+  value: {
+    id:'value', tag:'STEP 8', emoji:'✨',
+    text:'Will this add real value to your daily life?',
+    sub:'Not "would be cool" — actually change how your day-to-day goes.',
+    options:[
+      {label:'Yes, genuinely', value:'yes', cls:'yes', next:'freq'},
+      {label:'Not really', value:'no', cls:'no', next:'freq'}
+    ],
+    score:(v)=>({points: v==='yes'?15:0, max:15, flag: v==='no' ? 'You don\'t expect it to add much real value' : null})
+  },
+
+  freq: {
+    id:'freq', tag:'STEP 9', emoji:'📅',
+    text:'How often will you truly use it?',
+    sub:'Picture 3 months from now, honestly — not the aspirational version of you.',
+    type:'select',
+    options:[
+      {label:'Daily', value:'daily', cls:'yes', next:'soothe'},
+      {label:'Weekly', value:'weekly', cls:'yes', next:'soothe'},
+      {label:'Monthly', value:'monthly', cls:'neutral', next:'soothe'},
+      {label:'Rarely', value:'rarely', cls:'no', next:'soothe'}
+    ],
+    score:(v)=>{
+      const map = {daily:15, weekly:10, monthly:5, rarely:0};
+      return {points: map[v], max:15, flag: v==='rarely' ? 'You\'ll likely use this rarely' : null};
+    }
+  },
+
+  soothe: {
+    id:'soothe', tag:'STEP 10', emoji:'😮‍💨',
+    text:'Are you buying this to soothe stress, boredom, or a bad day?',
+    sub:'Retail therapy is real — just worth naming honestly.',
+    options:[
+      {label:'Yes, kind of', value:'yes', cls:'no', next:'impress'},
+      {label:'No, I\'m in a neutral headspace', value:'no', cls:'yes', next:'impress'}
+    ],
+    score:(v)=>({points: v==='no'?10:0, max:10, flag: v==='yes' ? 'This might be an emotional / mood purchase' : null})
+  },
+
+  impress: {
+    id:'impress', tag:'STEP 11', emoji:'📱',
+    text:'Are you trying to impress someone, or following a social media trend?',
+    sub:'Trend-driven buys age the fastest, in your closet and your wallet.',
+    options:[
+      {label:'Yes, a bit', value:'yes', cls:'no', next:'type'},
+      {label:'No, it\'s just for me', value:'no', cls:'yes', next:'type'}
+    ],
+    score:(v)=>({points: v==='no'?10:0, max:10, flag: v==='yes' ? 'Some of this urge is about impressing others / a trend' : null})
+  },
+
+  type: {
+    id:'type', tag:'STEP 12', emoji:'🎈',
+    text:'Is this an experience, or a material object?',
+    sub:'Experiences tend to bring longer-lasting happiness than stuff.',
+    options:[
+      {label:'Experience', value:'experience', cls:'yes', next:'discount'},
+      {label:'Material object', value:'material', cls:'neutral', next:'cooldown'}
+    ],
+    score:(v)=>({points: v==='experience'?5:0, max:5, flag:null})
+  },
+
+  cooldown: {
+    id:'cooldown', tag:'STEP 12a', emoji:'🧊',
+    text:'For a physical object, did you give it a longer cooling-off period matched to its price?',
+    sub:'Bigger price tag = longer wait. $20 might be a day; $2,000 might be a couple of weeks.',
+    options:[
+      {label:'Yes, I waited it out', value:'yes', cls:'yes', next:'discount'},
+      {label:'No, I haven\'t yet', value:'no', cls:'no', next:'discount'}
+    ],
+    score:(v)=>({points: v==='yes'?10:0, max:10, flag: v==='no' ? 'Skipped a price-appropriate cooling-off period' : null})
+  },
+
+  discount: {
+    id:'discount', tag:'STEP 13', emoji:'🎯',
+    text:'If it weren\'t on sale, would you still want to buy it?',
+    sub:'Or is the "deal" itself the thing that\'s exciting you?',
+    options:[
+      {label:'Yes, price aside', value:'yes', cls:'yes', next:'organic'},
+      {label:'Honestly, probably not', value:'no', cls:'no', next:'organic'}
+    ],
+    score:(v)=>({points: v==='yes'?10:0, max:10, flag: v==='no' ? 'The discount itself may be driving the desire' : null})
+  },
+
+  organic: {
+    id:'organic', tag:'STEP 14', emoji:'🌱',
+    text:'If you\'d never seen this, the ad, or a friend with one — would you have ever wanted it on your own?',
+    sub:'Trying to separate genuine desire from planted desire.',
+    options:[
+      {label:'Yes, I\'d have wanted it anyway', value:'yes', cls:'yes', next:'RESULT'},
+      {label:'Honestly, probably not', value:'no', cls:'no', next:'RESULT'}
+    ],
+    score:(v)=>({points: v==='yes'?10:0, max:10, flag: v==='no' ? 'This desire may have been planted by marketing / social exposure' : null})
+  }
+};
+
+/* ============ STATE ============ */
+let history = [];        // stack of node ids visited, for back button
+let answers = {};         // nodeId -> value
+let totalPoints = 0;
+let maxPoints = 0;
+let flags = [];
+
+const cardHost = document.getElementById('cardHost');
+
+// Rough estimate of total steps for progress bar (longest path = 13 screens)
+const TOTAL_STEPS_ESTIMATE = 13;
+
+function startQuiz(){
+  history = ['start'];
+  answers = {};
+  totalPoints = 0;
+  maxPoints = 0;
+  flags = [];
+  render('start');
+}
+
+function currentNode(){
+  return nodes[history[history.length-1]];
+}
+
+function render(nodeId){
+  const node = nodes[nodeId];
+
+  const isSelect = node.type === 'select';
+  const optsHtml = node.options.map(opt => `
+    <button class="btn ${opt.cls}" data-value="${opt.value}" data-next="${opt.next}">${opt.label}</button>
+  `).join('');
+
+  cardHost.innerHTML = `
+    <div class="card">
+      <span class="tag">${node.tag}</span>
+      <div class="emoji">${node.emoji}</div>
+      <h2 class="qtext">${node.text}</h2>
+      <p class="qsub">${node.sub}</p>
+      <div class="choices ${isSelect ? 'stack' : ''}">${optsHtml}</div>
+      <div class="nav-row">
+        <button class="back-link" id="backBtn" ${history.length<=1 ? 'style="visibility:hidden"' : ''}>&larr; Back</button>
+      </div>
+    </div>
+  `;
+
+  cardHost.querySelectorAll('.btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const value = btn.getAttribute('data-value');
+      const next = btn.getAttribute('data-next');
+      answers[node.id] = value;
+
+      if(node.score){
+        const r = node.score(value);
+        totalPoints += r.points;
+        maxPoints += r.max;
+        if(r.flag) flags.push(r.flag);
+      }
+
+      if(next === 'RESULT'){
+        showResult();
+      } else {
+        history.push(next);
+        render(next);
+      }
+    });
+  });
+
+  document.getElementById('backBtn')?.addEventListener('click', goBack);
+}
+
+function goBack(){
+  if(history.length <= 1) return;
+  const leavingId = history.pop();
+  const leavingNode = nodes[leavingId];
+  // undo scoring for the node we're leaving
+  if(leavingNode.score && answers[leavingId] !== undefined){
+    const r = leavingNode.score(answers[leavingId]);
+    totalPoints -= r.points;
+    maxPoints -= r.max;
+    if(r.flag){
+      const idx = flags.lastIndexOf(r.flag);
+      if(idx > -1) flags.splice(idx,1);
+    }
+    delete answers[leavingId];
+  }
+  render(history[history.length-1]);
+}
+
+function showResult(){
+  const pct = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0;
+
+  let verdict, badgeText, badgeColor, meterColor, msg;
+  if(pct >= 75){
+    verdict = 'Buy it! 🎉';
+    badgeText = 'GREEN LIGHT';
+    badgeColor = 'var(--green)';
+    meterColor = 'var(--green)';
+    msg = 'This checks out on almost every front — it\'s within budget, you\'ve thought it through, and it sounds like it\'ll genuinely earn its place in your life. Go for it.';
+  } else if(pct >= 45){
+    verdict = 'Wait it out ⏳';
+    badgeText = 'YELLOW LIGHT';
+    badgeColor = 'var(--yellow)';
+    meterColor = 'var(--yellow)';
+    msg = 'It\'s not a clear yes or no. A few things below are worth sitting with a little longer — revisit this in a few days and see if the pull is still there.';
+  } else {
+    verdict = 'Skip it 🚫';
+    badgeText = 'RED LIGHT';
+    badgeColor = 'var(--red)';
+    meterColor = 'var(--red)';
+    msg = 'A lot of red flags here — budget, value, or motivation-wise. That doesn\'t mean never, but right now this looks more like impulse than intention.';
+  }
+
+  const flagsHtml = flags.length
+    ? `<div class="flags">
+         <h3>🚩 Worth a second look:</h3>
+         <ul>${flags.map(f=>`<li>${f}</li>`).join('')}</ul>
+       </div>`
+    : `<div class="flags empty">
+         <h3>✅ No red flags spotted</h3>
+         <ul><li>Your answers were consistent all the way through.</li></ul>
+       </div>`;
+
+  cardHost.innerHTML = `
+    <div class="card result-card">
+      <div class="verdict-badge" style="background:${badgeColor}">${badgeText}</div>
+      <h2 class="verdict-title">${verdict}</h2>
+      <p class="verdict-msg">${msg}</p>
+
+      <div class="meter-wrap">
+        <div class="meter-label"><span>Impulse buy</span><span>Clear-headed buy</span></div>
+        <div class="meter-track"><div class="meter-fill" style="width:${pct}%; background:${meterColor}"></div></div>
+        <div style="margin-top:8px; font-weight:800; font-size:14px;">Clarity Score: ${pct}/100</div>
+      </div>
+
+      ${flagsHtml}
+
+      <div class="result-actions">
+        <button class="btn primary" id="restartBtn">Start Over</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('restartBtn').addEventListener('click', startQuiz);
+}
+
+startQuiz();
+</script>
+</body>
+</html>
