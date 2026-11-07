@@ -69,8 +69,10 @@
     min-height:0;
     position:relative;
   }
-  /* The button is absolutely sized (Safari won't resolve a % height on a button inside a flex item)
-     and only holds the perspective; the inner div does the 3D turn, which Safari won't do on a button. */
+  /* The button is absolutely positioned and only holds the perspective; the inner div
+     does the 3D turn, which Safari won't do on a button. Sizing comes from fixed insets
+     plus max-height - no height percentages anywhere: mobile engines that mis-resolve
+     a % height in min()/calc() were collapsing the card to a strip. */
   .flip{
     -webkit-appearance:none;
     appearance:none;
@@ -84,7 +86,7 @@
     top:0;
     bottom:8px;            /* room for the hard shadow */
     width:calc(100% - 8px);
-    height:min(460px, calc(100% - 8px));
+    max-height:460px;
     margin:auto 0;
     cursor:pointer;
     perspective:1400px;
