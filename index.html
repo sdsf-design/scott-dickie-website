@@ -202,6 +202,26 @@ main, header, footer { position: relative; z-index: 1; }
 .work-stack.animated .wcard:nth-child(3) { z-index: 3; } .work-stack.animated .wcard:nth-child(4) { z-index: 2; }
 .work-stack.animated .wcard:nth-child(5) { z-index: 1; }
 
+/* ---------- Play: More projects, the Selected work deck with more bounce ---------- */
+.fun-stack .wcard:nth-child(1) { --hue: var(--r1); } .fun-stack .wcard:nth-child(2) { --hue: var(--r4); }
+.fun-stack .wcard:nth-child(3) { --hue: var(--r2); } .fun-stack .wcard:nth-child(4) { --hue: var(--r5); }
+.fun-stack .wcard { cursor: pointer; }
+.fun-stack.animated .wcard { width: clamp(250px, 24vw, 400px); }
+.fun-stack .wcard img { object-position: 50% 50%; }
+.fun-stack .wcard img.top { object-position: 50% 22%; }
+.fun-stack .wcard .co { color: var(--hue); }
+.fun-stack .wcard .t { color: var(--quiet); }
+.fun-stack .wcard:hover, .fun-stack .wcard:focus-visible { box-shadow: 0 0 0 2px var(--hue), 0 24px 60px color-mix(in srgb, var(--hue) 35%, transparent); }
+/* A springy overshoot as the cards land, and they land one after another */
+.fun-stack.animated .wcard { transition: transform 1.25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s, scale .35s cubic-bezier(.34, 1.56, .64, 1); }
+.fun-stack.animated .wcard:nth-child(2) { transition-delay: .09s, 0s, 0s; } .fun-stack.animated .wcard:nth-child(3) { transition-delay: .18s, 0s, 0s; }
+.fun-stack.animated .wcard:nth-child(4) { transition-delay: .27s, 0s, 0s; }
+/* Hover: the card lifts and gives a little wiggle (scale and rotate stack on top of its fanned transform) */
+.fun-stack .wcard:hover, .fun-stack .wcard:focus-visible { scale: 1.05; animation: wiggle .5s ease-in-out; }
+.fun-stack .wcard.boing { animation: boing .45s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -2.5deg; } 60% { rotate: 2deg; } }
+@keyframes boing { 0% { scale: 1.05; } 40% { scale: .94; } 100% { scale: 1.05; } }
+
 /* ---------- Play: one full-screen, minimal section per side project ---------- */
 [data-mode="play"] #projects-section { padding: 0; }
 [data-mode="play"] #projects-section > .head { display: none; }
@@ -461,9 +481,25 @@ html:has(.lead-modal[open]) { overflow: hidden; }
     </div>
   </section>
 
+  <section class="work-stack fun-stack play-only" id="fun-stack" aria-labelledby="more-title">
+    <div class="stage">
+      <div class="stack-text">
+        <p class="label"><b>[03]</b></p>
+        <h2 id="more-title">More projects</h2>
+        <p>A book, a toy, a bench and a very good day on the mountain. The things I make (and do) when nobody&rsquo;s asking.</p>
+      </div>
+      <div class="cards">
+        <div class="wcard" tabindex="0"><img src="assets/play/impact-influence.jpg" alt="The Impact + Influence book cover: a collection of fundamentals for UX designers, by Scott Dickie" width="966" height="1046" loading="lazy"><span class="co">Impact &amp; Influence</span><span class="t">Helping designers learn non-design skills</span></div>
+        <div class="wcard" tabindex="0"><img src="assets/play/gotracks.jpg" alt="GoTracks: a green fold-out play tray printed with a town of roads, on a coffee table" width="1200" height="900" loading="lazy"><span class="co">GoTracks</span><span class="t">Travel toy for kids</span></div>
+        <div class="wcard" tabindex="0"><img src="assets/play/snowboard-bench.jpg" alt="A yellow snowboard on black metal legs, used as a bench in a hallway" width="1200" height="900" loading="lazy"><span class="co">Snowboard bench</span><span class="t">Homemade bench made from a snowboard and metal legs</span></div>
+        <div class="wcard" tabindex="0"><img class="top" src="assets/play/snowboarding.jpg" alt="Scott in a purple unicorn onesie on his snowboard, next to his daughter in pink ski gear" width="900" height="1200" loading="lazy"><span class="co">Snowboarding</span><span class="t">My favorite sport, celebrating the season&rsquo;s last day in the onesie</span></div>
+      </div>
+    </div>
+  </section>
+
   <section class="section play-only" aria-labelledby="making-title">
     <div class="story">
-      <div class="head"><h2 id="making-title"><b>[03]</b> Always making</h2></div>
+      <div class="head"><h2 id="making-title"><b>[04]</b> Always making</h2></div>
       <div class="body">
         <p>I&rsquo;ve been making things for as long as I can remember. The tools keep changing; the feeling doesn&rsquo;t.</p>
         <ol class="timeline">
@@ -610,8 +646,8 @@ for (const input of document.querySelectorAll('input[name="mode"]')) input.addEv
 /* ---- Selected work: the cards sit as a stack (each one peeking out); when the section comes into view,
    after a short pause they fan out to the sides on their own, and the section title and a line about my
    experience fade in where the stack was ---- */
-(() => {
-  const section = document.getElementById("work-stack");
+function cardStack(id, layout) {
+  const section = document.getElementById(id);
   const stage = section.querySelector(".stage");
   const cards = [...section.querySelectorAll(".wcard")];
   const wide = matchMedia("(min-width: 900px) and (min-height: 560px)");
@@ -624,18 +660,15 @@ for (const input of document.querySelectorAll('input[name="mode"]')) input.addEv
     // Fanned spots keep every card fully on screen: two up the left, two up the right, one along the bottom
     // centre. The section grows tall enough that the bottom card clears the text in the middle.
     const cw = cards[0].offsetWidth, ch = cards[0].offsetHeight, w = stage.clientWidth;
-    const h = Math.max(innerHeight, 2 * ch + 380);
-    stage.style.height = h + "px";
-    const xEdge = w / 2 - cw / 2 - 28, yTop = -(h / 2 - ch / 2 - 84), yBottom = h / 2 - ch / 2 - 36;
-    const SPOTS = [[-xEdge, yTop, -4], [xEdge, yTop + 24, 3], [-xEdge, yBottom - 110, 3], [xEdge, yBottom - 90, -3], [0, yBottom, 1.5]];
-    const mid = (cards.length - 1) / 2;
+    if (!cw) return;   // hidden in the other mode
+    const { height, spots, pile } = layout(w, cw, ch);
+    stage.style.height = height + "px";
     cards.forEach((card, i) => {
-      const [fx, fy, fr] = SPOTS[i % SPOTS.length];
-      const [x, y, r] = fanned ? [fx, fy, fr] : [(i - mid) * 40, (i - mid) * 20, (i - mid) * 3.5];
+      const [x, y, r] = fanned ? spots[i % spots.length] : pile(i, cards.length);
       card.style.transform = `translate(-50%, -50%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${r}deg)`;
     });
   }
-  function fan() { fanned = true; section.classList.add("fanned"); place(); }
+  function fan() { fanned = true; section.classList.add("fanned"); place(); section.dispatchEvent(new Event("fanned")); }
   new IntersectionObserver(entries => {
     const e = entries[0];
     if (fanned) return;
@@ -645,8 +678,43 @@ for (const input of document.querySelectorAll('input[name="mode"]')) input.addEv
   addEventListener("resize", place);
   wide.addEventListener?.("change", place);
   reduceMotion.addEventListener?.("change", place);
-  window.updateWorkStack = place;
   place();
+  return place;
+}
+// Work: fanned spots keep every card fully on screen: two up the left, two up the right, one along the bottom
+// centre. The section grows tall enough that the bottom card clears the text in the middle.
+const placeWork = cardStack("work-stack", (w, cw, ch) => {
+  const h = Math.max(innerHeight, 2 * ch + 380);
+  const xEdge = w / 2 - cw / 2 - 28, yTop = -(h / 2 - ch / 2 - 84), yBottom = h / 2 - ch / 2 - 36;
+  return {
+    height: h,
+    spots: [[-xEdge, yTop, -4], [xEdge, yTop + 24, 3], [-xEdge, yBottom - 110, 3], [xEdge, yBottom - 90, -3], [0, yBottom, 1.5]],
+    pile: (i, n) => { const m = (n - 1) / 2; return [(i - m) * 40, (i - m) * 20, (i - m) * 3.5]; },
+  };
+});
+// Play: four cards, two to a side, tossed at jauntier angles from a messier pile
+const placeFun = cardStack("fun-stack", (w, cw, ch) => {
+  const h = Math.max(innerHeight, 2 * ch + 180);
+  const xEdge = w / 2 - cw / 2 - 64, yTop = -(h / 2 - ch / 2 - 88), yBottom = h / 2 - ch / 2 - 56;
+  return {
+    height: h,
+    spots: [[-xEdge, yTop, -7], [xEdge, yTop + 36, 6], [-xEdge + 24, yBottom - 12, 5], [xEdge - 16, yBottom, -6]],
+    pile: (i) => [[-14, 10, -9], [18, -8, 7], [-6, -14, -3], [10, 12, 12]][i % 4],
+  };
+});
+window.updateWorkStack = () => { placeWork(); placeFun(); };
+// Play extras: confetti as each card lands, and a boing plus a burst when a card is clicked
+(() => {
+  const section = document.getElementById("fun-stack");
+  const cards = [...section.querySelectorAll(".wcard")];
+  const burstAt = (el, n) => { const r = el.getBoundingClientRect(); bits.pop(r.left + r.width / 2, r.top + r.height / 2, n); };
+  section.addEventListener("fanned", () => cards.forEach((c, i) => setTimeout(() => burstAt(c, 14), 650 + i * 90)));
+  for (const c of cards) {
+    const boing = () => { c.classList.remove("boing"); void c.offsetWidth; c.classList.add("boing"); burstAt(c, 22); };
+    c.addEventListener("click", boing);
+    c.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); boing(); } });
+    c.addEventListener("animationend", () => c.classList.remove("boing"));
+  }
 })();
 
 /* ---- Play: twinkling four-point stars across the night ground (from the mockup) ---- */
