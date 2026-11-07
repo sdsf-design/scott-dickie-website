@@ -303,6 +303,39 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
   .videos { grid-template-columns: 1fr; }
 }
 
+/* ---------- leadership principles: a glass sheet over the blurred hero ---------- */
+html:has(.lead-modal[open]) { overflow: hidden; }
+.lead-modal {
+  width: min(880px, calc(100vw - 2 * var(--gutter))); max-height: calc(100svh - 2 * var(--gutter));
+  margin: auto; padding: 0; border: 0; color: var(--ink); overflow: auto; overscroll-behavior: contain;
+  background: color-mix(in srgb, var(--paper) 62%, transparent);
+  backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55), 0 0 0 1px var(--line), 0 30px 90px rgba(22, 35, 59, .28);
+}
+.lead-modal::backdrop {
+  background: rgba(232, 235, 240, .28);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+[data-mode="play"] .lead-modal::backdrop { background: rgba(17, 19, 42, .4); }
+.lead-modal[open], .lead-modal[open]::backdrop { animation: lead-in .35s cubic-bezier(.2, .8, .2, 1); }
+@keyframes lead-in { from { opacity: 0; transform: translateY(12px) scale(.985); } }
+.lead-modal[open]::backdrop { animation-name: lead-fade; }
+@keyframes lead-fade { from { opacity: 0; } }
+.lead-inner { display: grid; gap: 32px; padding: clamp(28px, 5vw, 56px); }
+.lead-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.lead-top h2 { font: 300 clamp(36px, 4.6vw, 60px)/1 var(--sans); letter-spacing: -.035em; margin-top: 10px; }
+.lead-close {
+  flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; cursor: pointer;
+  color: var(--ink); background: transparent; box-shadow: inset 0 0 0 1px var(--line); transition: background .3s, color .3s;
+}
+.lead-close:hover { background: var(--ink); color: var(--ground); }
+.lead-close svg { width: 20px; height: 20px; }
+.lead-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; border-top: 1px solid var(--line); }
+.lead-list li { display: grid; gap: 10px; align-content: start; padding: 26px 0; border-bottom: 1px solid var(--line); }
+.lead-list h3 { font: 400 clamp(22px, 2.2vw, 28px)/1.2 var(--serif); letter-spacing: -.01em; }
+.lead-list p { font-size: 15px; line-height: 1.65; color: var(--quiet); }
+@media (max-width: 700px) { .lead-list { grid-template-columns: 1fr; } }
+
 @media (prefers-reduced-motion: reduce) {
   .disc { animation: none !important; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -458,6 +491,24 @@ footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
 <footer>
   <div class="row"><span>&copy; Scott Dickie</span><span><a class="work-only" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">LinkedIn ↗</a><a class="play-only" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Spotify ↗</a></span></div>
 </footer>
+
+<dialog class="lead-modal" id="leadership" aria-labelledby="lead-title">
+  <div class="lead-inner">
+    <div class="lead-top">
+      <div>
+        <p class="label"><b>&gt;</b> how I lead</p>
+        <h2 id="lead-title">Leadership principles</h2>
+      </div>
+      <button class="lead-close" type="button" aria-label="Close leadership principles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
+    </div>
+    <ol class="lead-list">
+      <li><p class="label"><b>01</b></p><h3>Shape the Future</h3><p>I lead with a clear, compelling vision that inspires teams to imagine what&rsquo;s next and build toward it. I see leadership as setting a bold course while staying open to evolution. Change is constant, and I make it energizing by helping teams see how their work shapes what comes next.</p></li>
+      <li><p class="label"><b>02</b></p><h3>Design with Intent</h3><p>I treat design as a strategic force that bridges creativity and business outcomes. I focus on clarity, storytelling, and execution ensuring every decision connects user value to business goals.</p></li>
+      <li><p class="label"><b>03</b></p><h3>Lead with Clarity and Trust</h3><p>I build high-performing teams by giving people ownership, context, and trust. Clear frameworks and responsibilities enables teams to execute with high quality and can take bold action. I balance autonomy with accountability and lead by example.</p></li>
+      <li><p class="label"><b>04</b></p><h3>Keep Experimenting</h3><p>I stay close to the work through prototyping, building, and learning alongside my teams. Experimentation fuels my leadership; it keeps me sharp, curious, and grounded in what&rsquo;s possible.</p></li>
+    </ol>
+  </div>
+</dialog>
 
 <canvas id="bits" aria-hidden="true"></canvas>
 
@@ -669,6 +720,22 @@ const bits = (() => {
 // The page always opens on Work; ?mode=play opens Play directly.
 const startMode = new URLSearchParams(location.search).get("mode");
 applyMode(startMode === "play" ? "play" : "work", false);
+</script>
+<script>
+/* Leadership principles open as a glass modal over the hero; the link still works without JS */
+(() => {
+  const dlg = document.getElementById("leadership");
+  if (!dlg || typeof dlg.showModal !== "function") return;
+  const open = () => { if (!dlg.open) dlg.showModal(); };
+  document.querySelectorAll('a[href="leadership.html"]').forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); open(); }));
+  dlg.querySelector(".lead-close").addEventListener("click", () => dlg.close());
+  // A click on the blurred backdrop (outside the sheet) closes it
+  dlg.addEventListener("click", (e) => {
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+  if (location.hash === "#leadership") open();
+})();
 </script>
 </body>
 </html>
