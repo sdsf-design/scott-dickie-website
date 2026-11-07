@@ -43,7 +43,7 @@
     align-items:center;
   }
 
-  header.top{width:100%; text-align:center; margin-bottom:12px; flex-shrink:0;}
+  header.top{width:100%; text-align:center; margin-bottom:24px; flex-shrink:0;}
   header.top h1{
     font-size:clamp(30px, 6vw, 46px);
     margin:0 0 6px;
@@ -60,25 +60,6 @@
     transform:rotate(-2deg);
   }
   header.top p{margin:10px 0 0; font-size:16px; color:#444; font-weight:500;}
-
-  /* progress, as in the wizard */
-  .progress-track{
-    width:100%;
-    height:14px;
-    background:var(--card);
-    border:2.5px solid var(--ink);
-    border-radius:999px;
-    overflow:hidden;
-    margin:6px 0 22px;
-    box-shadow:3px 3px 0 var(--ink);
-    flex-shrink:0;
-  }
-  .progress-fill{
-    height:100%;
-    background:linear-gradient(90deg, var(--pink), var(--yellow));
-    width:0%;
-    transition:width .35s ease;
-  }
 
   /* ---------- the flip card ---------- */
   .stage{
@@ -226,8 +207,6 @@
     <p>Read the setup, then tap the card for the punchline.</p>
   </header>
 
-  <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress"></div></div>
-
   <div class="stage">
     <button class="flip" id="card" type="button" aria-label="Flip the card to see the punchline">
       <div class="face front">
@@ -303,8 +282,7 @@ const els = {
   emoji: document.getElementById('emoji'),
   setup: document.getElementById('setup'),
   punch: document.getElementById('punch'),
-  counter: document.getElementById('counter'),
-  progress: document.getElementById('progress')
+  counter: document.getElementById('counter')
 };
 
 // Start where the link says (#7 opens joke 7), otherwise at the first joke
@@ -329,7 +307,6 @@ function show(i){
   els.setup.textContent = setup;
   els.punch.textContent = punch;
   els.counter.innerHTML = '<b>' + (index + 1) + '</b> / ' + JOKES.length;
-  els.progress.style.width = ((index + 1) / JOKES.length * 100) + '%';
   history.replaceState(null, '', '#' + (index + 1));
   card.classList.remove('pop');
   void card.offsetWidth;
