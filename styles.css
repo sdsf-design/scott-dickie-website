@@ -94,6 +94,7 @@ img {
 .main-nav a {
   font-size: 15px;
   color: var(--text-primary);
+  white-space: nowrap;
 }
 
 .main-nav a.active {
