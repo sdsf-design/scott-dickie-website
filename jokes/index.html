@@ -380,7 +380,7 @@ function setFlipped(next){
 const playBtn = document.getElementById('play');
 const voice = new Audio();
 const PAUSE_MS = 3000;   // setup -> punchline
-const NEXT_MS = 2000;    // punchline -> next joke
+const NEXT_MS = 3000;    // punchline -> next joke
 const VOICED = new Set(JOKES.map((_, i) => i + 1));   // joke numbers that have saved clips in audio/ (all of them)
 let run = 0, pauseTimer = null;
 
