@@ -380,7 +380,7 @@ function setFlipped(next){
 const playBtn = document.getElementById('play');
 const voice = new Audio();
 const PAUSE_MS = 3000;
-const VOICED = new Set([1]);   // joke numbers that have clips in audio/
+const VOICED = new Set(JOKES.map((_, i) => i + 1));   // joke numbers that have saved clips in audio/ (all of them)
 let run = 0, pauseTimer = null;
 
 function setPlaying(on){
@@ -475,5 +475,6 @@ card.addEventListener('touchend', e => {
 
 show(index);
 </script>
+<script src="../projects-menu.js"></script>
 </body>
 </html>
