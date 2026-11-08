@@ -1,8 +1,9 @@
 // Projects mega menu: a grid icon in the top nav that opens the same glass sheet as the homepage's
-// leadership principles, listing what Scott is building in large type. Self-contained (styles,
-// fonts and dialog are injected here) so every page only needs a trigger and this script.
+// leadership principles, listing what Scott is building in large type. Styles are in projects-menu.css;
+// this script builds the sheet and wires up the triggers.
 //
-// Trigger: <button class="pm-trigger" type="button" data-projects-menu>…</button> anywhere in the header.
+// Trigger: <button class="pm-trigger" type="button" data-projects-menu aria-label="Projects">(grid svg)</button>
+// in the header, with projects-menu.css linked in <head>.
 // Pages without one get a floating trigger in the top-right corner.
 (() => {
   const base = new URL(".", document.currentScript.src);
@@ -18,95 +19,14 @@
   const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg>';
   const CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 
-  const css = `
-.pm-trigger, .pm {
-  --pm-ground: #e8ebf0; --pm-paper: #f3f5f8; --pm-ink: #16233b; --pm-quiet: #55617a; --pm-pushed: #b4531a;
-  --pm-line: rgba(22, 35, 59, .16); --pm-gutter: clamp(16px, 4vw, 48px);
-  --pm-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --pm-mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-}
-[data-mode="play"] .pm-trigger, [data-mode="play"] .pm {
-  --pm-ground: #11132a; --pm-paper: #1a1d3a; --pm-ink: #f3eefc; --pm-quiet: #aeb3d0; --pm-pushed: #ffd166;
-  --pm-line: rgba(243, 238, 252, .18);
-}
-.pm-trigger {
-  display: grid; place-items: center; width: 40px; height: 40px; padding: 0; margin: 0; border: 0; border-radius: 0;
-  cursor: pointer; color: var(--pm-ink); background: transparent; box-shadow: inset 0 0 0 1px var(--pm-line);
-  transition: background .3s, color .3s; flex: none;
-}
-.pm-trigger:hover, .pm-trigger[aria-expanded="true"] { background: var(--pm-ink); color: var(--pm-ground); }
-.pm-trigger:focus-visible { outline: 2px solid var(--pm-pushed); outline-offset: 2px; }
-.pm-trigger svg { width: 18px; height: 18px; }
-.pm-trigger--float {
-  position: fixed; z-index: 60; top: max(12px, env(safe-area-inset-top, 0px)); right: 12px;
-  background: color-mix(in srgb, var(--pm-paper) 80%, transparent);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-
-html:has(.pm[open]) { overflow: hidden; }
-.pm {
-  --feather: clamp(28px, 4vw, 64px);
-  width: min(1320px, 100vw - var(--pm-gutter)); max-width: none; max-height: calc(100svh - var(--pm-gutter));
-  margin: auto; padding: 0; border: 0; color: var(--pm-ink); font: 16px/1.6 var(--pm-sans);
-  overflow: auto; overscroll-behavior: contain; scrollbar-width: none;
-  background: color-mix(in srgb, var(--pm-paper) 62%, transparent);
-  backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent), linear-gradient(to bottom, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent), linear-gradient(to bottom, transparent, #000 var(--feather), #000 calc(100% - var(--feather)), transparent);
-  mask-composite: intersect;
-}
-.pm::-webkit-scrollbar { display: none; }
-.pm::backdrop { background: rgba(232, 235, 240, .28); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-[data-mode="play"] .pm::backdrop { background: rgba(17, 19, 42, .4); }
-.pm[open] { animation: pm-in .35s cubic-bezier(.2, .8, .2, 1); }
-.pm[open]::backdrop { animation: pm-fade .35s cubic-bezier(.2, .8, .2, 1); }
-@keyframes pm-in { from { opacity: 0; transform: translateY(12px) scale(.985); } }
-@keyframes pm-fade { from { opacity: 0; } }
-.pm *, .pm *::before, .pm *::after { box-sizing: border-box; }
-.pm h2, .pm h3, .pm p, .pm ol { margin: 0; }
-.pm-inner { display: grid; gap: 32px; padding: calc(var(--feather) + 8px) calc(var(--feather) + clamp(8px, 2vw, 32px)); }
-.pm-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.pm-label { font: 12px/1.4 var(--pm-mono); color: var(--pm-quiet); letter-spacing: .02em; }
-.pm-label b { font-weight: 400; color: var(--pm-pushed); }
-.pm-top h2 { font: 300 clamp(36px, 4.6vw, 60px)/1 var(--pm-sans); letter-spacing: -.035em; margin-top: 10px; color: var(--pm-ink); }
-.pm-close {
-  flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 0; cursor: pointer;
-  color: var(--pm-ink); background: transparent; box-shadow: inset 0 0 0 1px var(--pm-line); transition: background .3s, color .3s;
-}
-.pm-close:hover { background: var(--pm-ink); color: var(--pm-ground); }
-.pm-close:focus-visible { outline: 2px solid var(--pm-pushed); outline-offset: 2px; }
-.pm-close svg { width: 20px; height: 20px; }
-.pm-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; border-top: 1px solid var(--pm-line); }
-.pm-list li { border-bottom: 1px solid var(--pm-line); }
-.pm-list a {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px 16px; align-items: end;
-  padding: 30px 0 28px; color: inherit; text-decoration: none;
-}
-.pm-list .pm-label { grid-column: 1 / -1; }
-.pm-list h3 {
-  font: 300 clamp(40px, 5.6vw, 84px)/.98 var(--pm-sans); letter-spacing: -.04em; color: var(--pm-ink);
-  text-wrap: balance; transition: color .3s, transform .4s cubic-bezier(.2, .8, .2, 1);
-}
-.pm-list .pm-go { font: 300 clamp(28px, 3vw, 44px)/1 var(--pm-sans); color: var(--pm-quiet); transition: color .3s, transform .4s cubic-bezier(.2, .8, .2, 1); }
-.pm-list p.pm-note { grid-column: 1 / -1; font-size: 15px; line-height: 1.6; color: var(--pm-quiet); max-width: 34em; }
-.pm-list a:hover h3, .pm-list a:focus-visible h3 { color: var(--pm-pushed); transform: translateX(6px); }
-.pm-list a:hover .pm-go, .pm-list a:focus-visible .pm-go { color: var(--pm-pushed); transform: translate(4px, -4px); }
-.pm-list a:focus-visible { outline: 2px solid var(--pm-pushed); outline-offset: 4px; }
-.pm-list a[aria-current="page"] .pm-label::after { content: " · you are here"; }
-@media (max-width: 760px) {
-  .pm-inner { gap: 24px; }
-  .pm-list { grid-template-columns: 1fr; }
-  .pm-list a { padding: 22px 0 20px; gap: 10px 12px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pm[open], .pm[open]::backdrop { animation: none; }
-  .pm-list h3, .pm-list .pm-go { transition: none; }
-}`;
-
-  const style = document.createElement("style");
-  style.textContent = css;
-  document.head.appendChild(style);
+  // The styles live in projects-menu.css, linked in each page's <head> so the icon never flashes
+  // unstyled. Pages that forget the link still get it here.
+  if (![...document.styleSheets].some((s) => s.href && s.href.includes("projects-menu.css"))) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = new URL("projects-menu.css", base).href;
+    document.head.appendChild(link);
+  }
 
   // Fonts the sheet is set in; harmless if the page already loads them
   const font = document.createElement("link");

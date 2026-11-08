@@ -427,12 +427,13 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 </style>
+  <link rel="stylesheet" href="projects-menu.css" />
 </head>
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
 
 <header class="top">
-  <button type="button" data-projects-menu aria-label="Projects"></button>
+  <button class="pm-trigger" type="button" data-projects-menu aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg></button>
   <fieldset class="mode">
     <legend>Page style</legend>
     <input type="radio" name="mode" id="mode-work" value="work" checked><label for="mode-work">Work</label>
