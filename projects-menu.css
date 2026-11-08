@@ -58,29 +58,42 @@ html:has(.pm[open]) { overflow: hidden; }
 .pm-close:hover { background: var(--pm-ink); color: var(--pm-ground); }
 .pm-close:focus-visible { outline: 2px solid var(--pm-pushed); outline-offset: 2px; }
 .pm-close svg { width: 20px; height: 20px; }
-.pm-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; border-top: 1px solid var(--pm-line); }
-.pm-list li { border-bottom: 1px solid var(--pm-line); }
-.pm-list a {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px 16px; align-items: end;
-  padding: 30px 0 28px; color: inherit; text-decoration: none;
+/* Work and Play: each a heading over a grid of project cards (thumbnail, number, title, one line) */
+.pm-group { display: grid; gap: 20px; }
+.pm-group + .pm-group { margin-top: 24px; }
+.pm-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--pm-line); }
+.pm-group-title { font: 300 clamp(26px, 2.8vw, 36px)/1 var(--pm-sans); letter-spacing: -.03em; color: var(--pm-ink); margin: 0; }
+.pm-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 32px 24px; }
+.pm-list a { display: grid; gap: 8px; align-content: start; color: inherit; text-decoration: none; }
+.pm-thumb {
+  display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; margin-bottom: 8px;
+  background: var(--pm-paper); box-shadow: 0 0 0 1px var(--pm-line); transition: transform .5s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
 }
-.pm-list .pm-label { grid-column: 1 / -1; }
-.pm-list h3 {
-  font: 300 clamp(40px, 5.6vw, 84px)/.98 var(--pm-sans); letter-spacing: -.04em; color: var(--pm-ink);
-  text-wrap: balance; transition: color .3s, transform .4s cubic-bezier(.2, .8, .2, 1);
+.pm-top-crop { object-position: center 20%; }
+/* Music has no screenshot: a record, like the homepage player (circle sizes are of the half-height) */
+.pm-record {
+  background:
+    radial-gradient(circle closest-side, #e8ebf0 0 4%, #b4531a 5% 30%, transparent 31%),
+    radial-gradient(circle closest-side, transparent 0 86%, #16233b 87%),
+    repeating-radial-gradient(circle closest-side, #1b1d22 0 1.5px, #2c2f37 1.5px 3px);
 }
-.pm-list .pm-go { font: 300 clamp(28px, 3vw, 44px)/1 var(--pm-sans); color: var(--pm-quiet); transition: color .3s, transform .4s cubic-bezier(.2, .8, .2, 1); }
-.pm-list p.pm-note { grid-column: 1 / -1; font-size: 15px; line-height: 1.6; color: var(--pm-quiet); max-width: 34em; }
-.pm-list a:hover h3, .pm-list a:focus-visible h3 { color: var(--pm-pushed); transform: translateX(6px); }
-.pm-list a:hover .pm-go, .pm-list a:focus-visible .pm-go { color: var(--pm-pushed); transform: translate(4px, -4px); }
-.pm-list a:focus-visible { outline: 2px solid var(--pm-pushed); outline-offset: 4px; }
+.pm-list h3 { font: 300 clamp(24px, 2.2vw, 32px)/1.08 var(--pm-sans); letter-spacing: -.03em; color: var(--pm-ink); text-wrap: balance; transition: color .3s; }
+.pm-nw { white-space: nowrap; }
+.pm-go { display: inline-block; font-size: .8em; color: var(--pm-quiet); transition: color .3s, transform .4s cubic-bezier(.2, .8, .2, 1); }
+.pm-list p.pm-note { font-size: 14px; line-height: 1.5; color: var(--pm-quiet); }
+.pm-list a:hover .pm-thumb, .pm-list a:focus-visible .pm-thumb { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--pm-ink); }
+.pm-list a:hover h3, .pm-list a:focus-visible h3, .pm-list a:hover .pm-go, .pm-list a:focus-visible .pm-go { color: var(--pm-pushed); }
+.pm-list a:hover .pm-go, .pm-list a:focus-visible .pm-go { transform: translateX(4px); }
+.pm-list a:focus-visible { outline: 2px solid var(--pm-pushed); outline-offset: 6px; }
 .pm-list a[aria-current="page"] .pm-label::after { content: " · you are here"; }
 @media (max-width: 760px) {
   .pm-inner { gap: 24px; }
-  .pm-list { grid-template-columns: 1fr; }
-  .pm-list a { padding: 22px 0 20px; gap: 10px 12px; }
+  .pm-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+  .pm-list h3 { font-size: 22px; }
+  .pm-list p.pm-note { font-size: 13px; }
 }
+@media (max-width: 420px) { .pm-list { gap: 20px 12px; } .pm-list h3 { font-size: 19px; } .pm-list p.pm-note { font-size: 12px; } .pm-thumb { margin-bottom: 4px; } }
 @media (prefers-reduced-motion: reduce) {
   .pm[open], .pm[open]::backdrop { animation: none; }
-  .pm-list h3, .pm-list .pm-go { transition: none; }
+  .pm-list h3, .pm-go, .pm-thumb { transition: none; }
 }
