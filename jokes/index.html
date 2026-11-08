@@ -38,7 +38,8 @@
   .wrap{
     width:100%;
     max-width:680px;
-    height:100%;
+    flex:1;
+    min-height:0;   /* fills what the top bar leaves */
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -223,9 +224,16 @@
   .counter{font-size:15px; font-weight:800; color:#777; text-align:center;}
   .counter b{color:var(--ink); font-size:20px;}
 
-  .site-link{
+  /* Top-left bar: projects menu first, then the way home */
+  .page-nav{
+    align-self:stretch;
     flex-shrink:0;
-    margin-top:16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:12px;
+  }
+  .site-link{
     font-size:14px;
     font-weight:800;
     color:#777;
@@ -258,7 +266,8 @@
     .arrow{width:68px; height:68px; box-shadow:4px 4px 0 var(--ink);}
     .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
     .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
-    .site-link{grid-column:1 / -1; grid-row:4; justify-self:center; margin-top:4px; font-size:13px;}
+    .page-nav{margin-bottom:4px;}
+    .site-link{font-size:13px;}
     .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
     .line{font-size:22px;}
     .back .line{font-size:26px;}
@@ -271,6 +280,10 @@
 </style>
 </head>
 <body>
+<nav class="page-nav">
+  <button type="button" data-projects-menu aria-label="Projects"></button>
+  <a class="site-link" href="/">&larr; Back to scott-dickie.com</a>
+</nav>
 <div class="wrap">
   <header class="top">
     <h1>Joke <span>Flip!</span></h1>
@@ -311,7 +324,6 @@
     </button>
   </div>
 
-  <a class="site-link" href="/">&larr; Back to scott-dickie.com</a>
 </div>
 
 <script>
