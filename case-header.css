@@ -41,3 +41,6 @@ body { background: var(--bg); }
   .case-top .contact .long { display: none; }
   .case-top .contact .short { display: inline; }
 }
+
+/* Projects mega menu trigger (projects-menu.js): the left end of the top bar */
+.case-top .pm-trigger { grid-column: 1; grid-row: 1; justify-self: start; }

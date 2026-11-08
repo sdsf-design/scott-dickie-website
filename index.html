@@ -77,6 +77,9 @@ main, header, footer { position: relative; z-index: 1; }
 [data-mode="play"] .links a:hover { background: var(--rainbow); background-size: 200% 100%; color: #11132a; animation: flow 5s linear infinite; }
 .links a.contact-link { margin-left: 8px; background: var(--ink); color: var(--ground); box-shadow: inset 0 0 0 1px var(--ink); }
 .links a.contact-link:hover { background: var(--pushed); box-shadow: inset 0 0 0 1px var(--pushed); }
+.links .pm-trigger { width: auto; height: auto; padding: 0 12px; margin-right: 8px; align-self: stretch; }
+/* Phones: the Projects icon needs room, so the header controls tighten up */
+@media (max-width: 480px) { .mode, .links { font-size: 12px; } .mode label { padding-inline: 8px; gap: 6px; } .links a { padding-inline: 8px; } .links a.contact-link { margin-left: 4px; } .links .pm-trigger { padding: 0 9px; margin-right: 4px; } .cl-me { display: none; } }
 .links a { white-space: nowrap; }
 @media (max-width: 480px) { .top { gap: 8px; } .links a { padding: 11px 9px; font-size: 12px; } .links a.contact-link { margin-left: 4px; } }
 
@@ -418,9 +421,10 @@ html:has(.contact-modal[open]) { overflow: hidden; }
     <input type="radio" name="mode" id="mode-play" value="play"><label for="mode-play">Play</label>
   </fieldset>
   <nav class="links" aria-label="Main">
+    <button type="button" data-projects-menu aria-label="Projects"></button>
     <a class="work-only" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">LinkedIn ↗</a>
     <a class="play-only" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Spotify ↗</a>
-    <a class="contact-link" href="contact.html">Contact me</a>
+    <a class="contact-link" href="contact.html">Contact<span class="cl-me"> me</span></a>
   </nav>
 </header>
 
@@ -916,5 +920,6 @@ applyMode(startMode === "play" ? "play" : "work", false);
   if (location.hash === "#contact") open();
 })();
 </script>
+<script src="projects-menu.js"></script>
 </body>
 </html>
