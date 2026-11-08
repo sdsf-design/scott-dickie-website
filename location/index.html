@@ -231,7 +231,7 @@ body.intro-on { overflow: hidden; }
 .intro-top .badge { font-family: var(--f-mono); font-size: 9.5px; border: 1px solid #6c6c6c; border-radius: 3px; padding: 0 4px; color: #bdbdbd; }
 .intro-vf-wrap { display: grid; place-items: center; width: 100%; min-height: 0; }
 .intro-vf {
-  position: relative; width: min(84vw, 52vh, 380px); aspect-ratio: 1; max-width: 100%;
+  position: relative; width: min(84vw, 48vh, 380px); aspect-ratio: 1; max-width: 100%;
   background: #000; border-radius: 6px; overflow: hidden;
   box-shadow: 0 0 0 1px rgba(255,255,255,.22), 0 20px 50px -20px rgba(0,0,0,.9);
 }
@@ -248,7 +248,7 @@ body.intro-on { overflow: hidden; }
   font-family: var(--f-mono); font-size: 12px; line-height: 1.5; color: #c9c9c9; }
 .intro-mid { display: grid; justify-items: center; gap: 10px; }
 .rec-big {
-  width: min(26vw, 104px); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  width: min(42vw, 168px, 22vh); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
   background: radial-gradient(circle at 50% 30%, #fdfcfa, #e9e7e2 72%);
   box-shadow: 0 0 0 6px rgba(255,255,255,.08), 0 0 0 1px #d2d0ca, 0 18px 40px -10px rgba(0,0,0,.8), inset 0 2px 0 #fff;
   display: grid; place-items: center; touch-action: manipulation; transition: transform .1s;
@@ -286,8 +286,6 @@ body.intro-on { overflow: hidden; }
   </div>
   <div class="intro-mid">
     <button class="rec-big" id="introRec" type="button" aria-label="Take picture of the TV"><i></i></button>
-    <b>Take Picture</b>
-    <p>Fit the TV picture in the square.</p>
   </div>
   <button class="intro-skip" id="introSkip" type="button">See the map first</button>
 </div>
