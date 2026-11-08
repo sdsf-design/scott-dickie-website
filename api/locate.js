@@ -88,7 +88,8 @@ export default async function handler(req, res) {
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) return res.status(429).json({ error: "rate_limited" });
     if (err instanceof Anthropic.BadRequestError) return res.status(400).json({ error: "image_rejected" });
-    if (err instanceof Anthropic.AuthenticationError) return res.status(503).json({ error: "not_configured" });
+    if (err instanceof Anthropic.AuthenticationError) return res.status(503).json({ error: "key_rejected" });
+    if (err instanceof Anthropic.PermissionDeniedError) return res.status(503).json({ error: "key_rejected" });
     console.error("locate failed", err instanceof Anthropic.APIError ? `${err.status} ${err.message}` : err);
     return res.status(502).json({ error: "upstream_error" });
   }

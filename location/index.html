@@ -434,6 +434,7 @@ async function prepImage(blob) {
 const ERR = {
   offline: "Couldn't reach the server. Check your connection, then press ● again.",
   not_configured: "LOC-1 isn't switched on here yet. Try again later.",
+  key_rejected: "LOC-1's connection to Claude was refused. Try again later.",
   upstream_error: "Claude didn't answer in time. Press ● to shoot again.",
   not_granted: "Claude access is off for this page. Turn it on in the artifact's permissions, then press ● again.",
   sampling_disabled: "Claude isn't available on this account, so scenes can't be identified here.",
