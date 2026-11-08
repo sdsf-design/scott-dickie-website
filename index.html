@@ -66,7 +66,23 @@ main, header, footer { position: relative; z-index: 1; }
 .mode label:hover { color: var(--pushed); }
 .mode input:checked + label { background: var(--ink); color: var(--ground); }
 .mode input:focus-visible + label { outline: 2px solid var(--pushed); outline-offset: 1px; }
-[data-mode="play"] .mode input:checked + label { background: var(--rainbow); background-size: 200% 100%; color: #11132a; animation: flow 5s linear infinite; }
+/* Play, when chosen: a mesh gradient, four soft colour blobs drifting over each other on a warm base */
+[data-mode="play"] .mode input:checked + label {
+  color: #11132a; background-color: var(--r3); background-repeat: no-repeat;
+  background-image:
+    radial-gradient(closest-side, var(--r1), transparent),
+    radial-gradient(closest-side, var(--r5), transparent),
+    radial-gradient(closest-side, var(--r4), transparent),
+    radial-gradient(closest-side, var(--r6), transparent);
+  background-size: 110% 260%, 120% 280%, 100% 240%, 115% 270%;
+  animation: mesh 7s ease-in-out infinite alternate;
+}
+@keyframes mesh {
+  0%   { background-position: 0% 0%,     100% 100%, 100% 0%,   0% 100%; }
+  33%  { background-position: 100% 30%,   0% 70%,    20% 100%,  80% 0%; }
+  66%  { background-position: 60% 100%,  30% 0%,    0% 40%,    100% 60%; }
+  100% { background-position: 0% 70%,    100% 20%,  70% 0%,    30% 100%; }
+}
 @keyframes flow { to { background-position: 200% 0; } }
 
 /* Projects menu icon on the left of the bar, a square the same height as the Work / Play switch in the middle */
