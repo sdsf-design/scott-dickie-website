@@ -75,6 +75,10 @@ main, header, footer { position: relative; z-index: 1; }
 .links a { text-decoration: none; padding: 11px 18px; box-shadow: inset 0 0 0 1px var(--line); transition: background .3s, color .3s; }
 .links a:hover { background: var(--ink); color: var(--ground); }
 [data-mode="play"] .links a:hover { background: var(--rainbow); background-size: 200% 100%; color: #11132a; animation: flow 5s linear infinite; }
+.links a.contact-link { margin-left: 8px; background: var(--ink); color: var(--ground); box-shadow: inset 0 0 0 1px var(--ink); }
+.links a.contact-link:hover { background: var(--pushed); box-shadow: inset 0 0 0 1px var(--pushed); }
+.links a { white-space: nowrap; }
+@media (max-width: 480px) { .top { gap: 8px; } .links a { padding: 11px 9px; font-size: 12px; } .links a.contact-link { margin-left: 4px; } }
 
 /* ---------- hero: portrait left, name and story right ---------- */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: center; padding: 24px var(--gutter) 48px; min-height: calc(100svh - 64px); }
@@ -364,6 +368,40 @@ html:has(.lead-modal[open]) { overflow: hidden; }
 .lead-list p { font-size: 15px; line-height: 1.65; color: var(--quiet); }
 @media (max-width: 700px) { .lead-list { grid-template-columns: 1fr; } }
 
+/* ---------- contact: the same glass sheet, holding a short form ---------- */
+html:has(.contact-modal[open]) { overflow: hidden; }
+.contact-modal { width: min(880px, 100vw - var(--gutter)); }
+.contact-form { display: grid; gap: 28px; border-top: 1px solid var(--line); padding-top: 28px; }
+.contact-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.contact-form legend, .contact-form .field > label { display: block; margin-bottom: 12px; padding: 0; }
+.needs { display: flex; flex-wrap: wrap; gap: 8px; }
+.needs input { position: absolute; opacity: 0; pointer-events: none; }
+.needs label {
+  font: 14px/1 var(--mono); padding: 13px 18px; cursor: pointer; color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line); transition: background .25s, color .25s, box-shadow .25s;
+}
+.needs label:hover { box-shadow: inset 0 0 0 1px var(--ink); }
+.needs input:checked + label { background: var(--ink); color: var(--ground); box-shadow: inset 0 0 0 1px var(--ink); }
+.needs input:focus-visible + label { outline: 2px solid var(--pushed); outline-offset: 2px; }
+.contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 32px; }
+@media (max-width: 700px) { .contact-row { grid-template-columns: 1fr; } }
+.contact-form input[type="text"], .contact-form input[type="email"], .contact-form textarea {
+  width: 100%; font: 16px/1.5 var(--sans); color: var(--ink); padding: 12px 14px; border: 0; border-radius: 0;
+  background: color-mix(in srgb, var(--paper) 82%, transparent); box-shadow: inset 0 0 0 1px var(--line);
+  transition: box-shadow .25s, background .25s;
+}
+.contact-form textarea { min-height: 180px; resize: vertical; }
+.contact-form input:focus, .contact-form textarea:focus { outline: none; box-shadow: inset 0 0 0 1px var(--ink); background: color-mix(in srgb, var(--paper) 85%, transparent); }
+.contact-send { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; }
+.contact-send button {
+  font: 14px/1 var(--mono); padding: 15px 28px; border: 0; border-radius: 0; cursor: pointer;
+  background: var(--ink); color: var(--ground); transition: background .3s, color .3s;
+}
+.contact-send button:hover { background: var(--pushed); }
+[data-mode="play"] .contact-send button:hover { background: var(--rainbow); background-size: 200% 100%; color: #11132a; animation: flow 5s linear infinite; }
+.contact-done { font: 400 clamp(22px, 2.2vw, 28px)/1.3 var(--serif); padding: 28px 0 8px; border-top: 1px solid var(--line); }
+.contact-done p + p { font: 15px/1.65 var(--sans); color: var(--quiet); margin-top: 10px; }
+
 @media (prefers-reduced-motion: reduce) {
   .disc { animation: none !important; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -382,6 +420,7 @@ html:has(.lead-modal[open]) { overflow: hidden; }
   <nav class="links" aria-label="Main">
     <a class="work-only" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">LinkedIn ↗</a>
     <a class="play-only" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Spotify ↗</a>
+    <a class="contact-link" href="contact.html">Contact me</a>
   </nav>
 </header>
 
@@ -553,6 +592,41 @@ html:has(.lead-modal[open]) { overflow: hidden; }
       <li><p class="label"><b>03</b></p><h3>Lead with Clarity and Trust</h3><p>I build high-performing teams by giving people ownership, context, and trust. Clear frameworks and responsibilities enables teams to execute with high quality and can take bold action. I balance autonomy with accountability and lead by example.</p></li>
       <li><p class="label"><b>04</b></p><h3>Keep Experimenting</h3><p>I stay close to the work through prototyping, building, and learning alongside my teams. Experimentation fuels my leadership; it keeps me sharp, curious, and grounded in what&rsquo;s possible.</p></li>
     </ol>
+  </div>
+</dialog>
+
+<dialog class="lead-modal contact-modal" id="contact" aria-labelledby="contact-title">
+  <div class="lead-inner">
+    <div class="lead-top">
+      <div>
+        <p class="label"><b>&gt;</b> say hello</p>
+        <h2 id="contact-title">Contact me</h2>
+      </div>
+      <button class="lead-close" type="button" aria-label="Close contact form"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
+    </div>
+    <form class="contact-form" id="contact-form" novalidate>
+      <fieldset>
+        <legend class="label"><b>01</b> What do you need?</legend>
+        <div class="needs">
+          <input type="radio" name="need" id="need-app" value="Product Design & Build" checked><label for="need-app">Product Design &amp; Build</label>
+          <input type="radio" name="need" id="need-consulting" value="Consulting"><label for="need-consulting">Consulting</label>
+          <input type="radio" name="need" id="need-coaching" value="Coaching"><label for="need-coaching">Coaching</label>
+          <input type="radio" name="need" id="need-else" value="Something else"><label for="need-else">Something else</label>
+        </div>
+      </fieldset>
+      <div class="contact-row">
+        <div class="field"><label class="label" for="c-name"><b>02</b> Name</label><input type="text" id="c-name" name="name" autocomplete="name" required></div>
+        <div class="field"><label class="label" for="c-email"><b>03</b> Email</label><input type="email" id="c-email" name="email" autocomplete="email" required></div>
+      </div>
+      <div class="field"><label class="label" for="c-msg"><b>04</b> Tell me about it</label><textarea id="c-msg" name="message" required></textarea></div>
+      <div class="contact-send">
+        <button type="submit">Send →</button>
+      </div>
+    </form>
+    <div class="contact-done" id="contact-done" hidden>
+      <p>Your email app should be open with your note ready to go.</p>
+      <p>Hit send there and I&rsquo;ll get back to you soon.</p>
+    </div>
   </div>
 </dialog>
 
@@ -814,6 +888,32 @@ applyMode(startMode === "play" ? "play" : "work", false);
     if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
   });
   if (location.hash === "#leadership") open();
+})();
+
+/* Contact opens the same glass sheet; contact.html redirects here for direct visits */
+(() => {
+  const CONTACT_EMAIL = "scottddickie@gmail.com";
+  const dlg = document.getElementById("contact");
+  if (!dlg || typeof dlg.showModal !== "function") return;
+  const form = document.getElementById("contact-form");
+  const done = document.getElementById("contact-done");
+  const open = () => { if (!dlg.open) { form.hidden = false; done.hidden = true; dlg.showModal(); } };
+  document.querySelectorAll('a[href="contact.html"]').forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); open(); }));
+  dlg.querySelector(".lead-close").addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", (e) => {
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const d = new FormData(form);
+    const subject = `${d.get("need")} — from ${d.get("name")}`;
+    const body = `${d.get("message")}\n\n${d.get("name")}\n${d.get("email")}`;
+    location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    form.hidden = true; done.hidden = false;
+  });
+  if (location.hash === "#contact") open();
 })();
 </script>
 </body>

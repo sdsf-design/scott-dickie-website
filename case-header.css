@@ -24,3 +24,20 @@ body { background: var(--bg); }
 .case-top .close:focus-visible, .case-top .face:focus-visible { outline: 2px solid #b4531a; outline-offset: 2px; }
 .case-top .close svg { width: 20px; height: 20px; }
 @media (max-width: 600px) { .case-top .face { width: 64px; height: 68px; } }
+
+/* Contact me: sits left of the close button, filled with the ink like the homepage's nav button */
+.case-top .contact {
+  grid-column: 3; grid-row: 1; justify-self: end; margin-right: 48px;
+  display: grid; place-items: center; height: 40px; padding: 0 18px; white-space: nowrap;
+  font: 13px/1 "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #e8ebf0; background: #16233b; text-decoration: none; transition: background .3s;
+}
+.case-top .close { grid-row: 1; }
+.case-top .contact:hover { background: #b4531a; }
+.case-top .contact:focus-visible { outline: 2px solid #b4531a; outline-offset: 2px; }
+.case-top .contact .short { display: none; }
+@media (max-width: 600px) {
+  .case-top .contact { padding: 0 10px; font-size: 12px; margin-right: 46px; }
+  .case-top .contact .long { display: none; }
+  .case-top .contact .short { display: inline; }
+}
