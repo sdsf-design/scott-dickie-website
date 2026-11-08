@@ -220,7 +220,7 @@ button.key:active:not(:disabled) .cap, button.key:active:not(:disabled) .knob, a
 body.intro-on { overflow: hidden; }
 .intro {
   position: fixed; inset: 0; z-index: 50; background: var(--screen); color: #f1f1f1;
-  display: grid; grid-template-rows: auto 1fr auto; justify-items: center;
+  display: grid; grid-template-rows: auto 1fr auto auto; justify-items: center; row-gap: 16px;
   padding: calc(18px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   transition: opacity .45s ease, visibility .45s;
 }
@@ -229,9 +229,26 @@ body.intro-on { overflow: hidden; }
 .intro > *:not(canvas) { position: relative; }
 .intro-top { display: flex; align-items: center; gap: 8px; font-weight: 300; font-size: 19px; letter-spacing: .04em; }
 .intro-top .badge { font-family: var(--f-mono); font-size: 9.5px; border: 1px solid #6c6c6c; border-radius: 3px; padding: 0 4px; color: #bdbdbd; }
-.intro-mid { display: grid; justify-items: center; align-content: center; gap: 18px; }
+.intro-vf-wrap { display: grid; place-items: center; width: 100%; min-height: 0; }
+.intro-vf {
+  position: relative; width: min(84vw, 52vh, 380px); aspect-ratio: 1; max-width: 100%;
+  background: #000; border-radius: 6px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.22), 0 20px 50px -20px rgba(0,0,0,.9);
+}
+.intro-vf video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.intro-vf .br { position: absolute; width: 22px; height: 22px; border: 0 solid rgba(255,255,255,.9); pointer-events: none; }
+.intro-vf .br.tl { top: 10px; left: 10px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.intro-vf .br.tr { top: 10px; right: 10px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.intro-vf .br.bl { bottom: 10px; left: 10px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.intro-vf .br.brr { bottom: 10px; right: 10px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+.intro-vf .live { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .14em;
+  display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 4px #000; }
+.intro-vf .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+.intro-vf .msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center;
+  font-family: var(--f-mono); font-size: 12px; line-height: 1.5; color: #c9c9c9; }
+.intro-mid { display: grid; justify-items: center; gap: 10px; }
 .rec-big {
-  width: min(42vw, 168px); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  width: min(26vw, 104px); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
   background: radial-gradient(circle at 50% 30%, #fdfcfa, #e9e7e2 72%);
   box-shadow: 0 0 0 6px rgba(255,255,255,.08), 0 0 0 1px #d2d0ca, 0 18px 40px -10px rgba(0,0,0,.8), inset 0 2px 0 #fff;
   display: grid; place-items: center; touch-action: manipulation; transition: transform .1s;
@@ -241,8 +258,8 @@ body.intro-on { overflow: hidden; }
 .rec-big:focus-visible { outline: 3px solid var(--orange); outline-offset: 6px; }
 .rec-big i { width: 38%; aspect-ratio: 1; border-radius: 50%; background: var(--orange); box-shadow: inset 0 -3px 6px rgba(0,0,0,.2); }
 @keyframes recpulse { 50% { box-shadow: 0 0 0 16px rgba(240,78,35,.14), 0 0 0 1px #d2d0ca, 0 18px 40px -10px rgba(0,0,0,.8), inset 0 2px 0 #fff; } }
-.intro-mid b { font-weight: 400; font-size: 22px; letter-spacing: .01em; }
-.intro-mid p { margin: -10px 0 0; font-family: var(--f-mono); font-size: 12px; color: #b5b5b5; text-align: center; max-width: 30ch; line-height: 1.5; text-shadow: 0 1px 8px #000; }
+.intro-mid b { font-weight: 400; font-size: 20px; letter-spacing: .01em; }
+.intro-mid p { margin: 0; font-family: var(--f-mono); font-size: 12px; color: #b5b5b5; text-align: center; max-width: 30ch; line-height: 1.5; text-shadow: 0 1px 8px #000; }
 .intro-skip { font: inherit; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: #cfcfcf;
   background: rgba(0,0,0,.5); border: 1px solid #444; border-radius: 4px; padding: 7px 12px; cursor: pointer; }
 .intro-skip:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
@@ -259,10 +276,18 @@ body.intro-on { overflow: hidden; }
 <div class="intro" id="intro">
   <canvas id="introCv" aria-hidden="true"></canvas>
   <div class="intro-top">LOC—1 <span class="badge">tv</span></div>
+  <div class="intro-vf-wrap">
+    <div class="intro-vf" id="introVf">
+      <video id="introVideo" playsinline muted autoplay hidden></video>
+      <span class="br tl"></span><span class="br tr"></span><span class="br bl"></span><span class="br brr"></span>
+      <span class="live" id="introLive" hidden>LIVE</span>
+      <div class="msg" id="introMsg">Starting camera…</div>
+    </div>
+  </div>
   <div class="intro-mid">
     <button class="rec-big" id="introRec" type="button" aria-label="Take picture of the TV"><i></i></button>
     <b>Take Picture</b>
-    <p>Point at the TV. LOC-1 finds where the scene was filmed.</p>
+    <p>Fit the TV picture in the square.</p>
   </div>
   <button class="intro-skip" id="introSkip" type="button">See the map first</button>
 </div>
@@ -479,6 +504,14 @@ async function grabFrame() {
   if (!v.videoWidth) return null;
   const c = document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight;
   c.getContext("2d").drawImage(v, 0, 0);
+  return await new Promise((r) => c.toBlob(r, "image/jpeg", 0.92));
+}
+// The centre square of the frame: exactly what the intro viewfinder shows.
+async function grabSquare(v) {
+  if (!v.videoWidth) return null;
+  const s = Math.min(v.videoWidth, v.videoHeight);
+  const c = document.createElement("canvas"); c.width = s; c.height = s;
+  c.getContext("2d").drawImage(v, (v.videoWidth - s) / 2, (v.videoHeight - s) / 2, s, s, 0, 0, s, s);
   return await new Promise((r) => c.toBlob(r, "image/jpeg", 0.92));
 }
 
@@ -921,10 +954,16 @@ function closeIntro() {
   $("intro").classList.add("gone");
   document.body.classList.remove("intro-on");
 }
-$("introRec").addEventListener("click", () => {
+$("introRec").addEventListener("click", async () => {
+  const iv = $("introVideo");
+  if (S.stream && iv.videoWidth) {          // live square is showing: shoot what's in it
+    const blob = await grabSquare(iv);
+    closeIntro();
+    if (blob) { analyze(blob); return; }
+    S.mode = "live"; render(); return;
+  }
   closeIntro();
-  if (S.stream) { S.mode = "live"; render(); return; }  // live viewfinder is ready: frame the TV first
-  $("camInput").click();                               // otherwise the phone's camera opens straight away
+  $("camInput").click();                    // no live camera: open the phone's camera instead
 });
 $("introSkip").addEventListener("click", closeIntro);
 
@@ -932,7 +971,14 @@ $("introSkip").addEventListener("click", closeIntro);
 render();
 (async () => {
   const ok = await startCamera();
-  if (ok) { S.mode = "live"; render(); }
+  if (ok) {
+    const iv = $("introVideo");
+    iv.srcObject = S.stream; iv.hidden = false; await iv.play().catch(() => {});
+    $("introMsg").hidden = true; $("introLive").hidden = false;
+    S.mode = "live"; render();
+  } else {
+    $("introMsg").textContent = "Camera is off. Allow camera access for this site, or press the button to use your phone's camera.";
+  }
 })();
 })();
 </script>
