@@ -2,3 +2,4 @@
 # Local secrets written by `elevenlabs onboard`
 /.env.local
 .venv/
+node_modules/
