@@ -193,6 +193,31 @@
   }
   .arrow:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
   .arrow:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
+  .middle{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .play{
+    appearance:none;
+    width:clamp(60px, 14vw, 78px);
+    height:clamp(60px, 14vw, 78px);
+    border:3px solid var(--ink);
+    border-radius:50%;
+    background:var(--yellow);
+    color:var(--ink);
+    box-shadow:5px 5px 0 var(--ink);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .play svg{width:44%; height:44%;}
+  .play .stop-icon, .play.playing .play-icon{display:none;}
+  .play.playing .stop-icon{display:block;}
+  .play.playing{background:var(--pink);}
+  .play.waiting{animation:wait 1s ease-in-out infinite;}
+  @keyframes wait{50%{transform:scale(1.08);}}
+  @media (hover:hover){ .play:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
+  .play:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
+  .play:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
+  .play.no-voice{visibility:hidden;}   /* keeps its spot so the arrows don't shift */
   .counter{font-size:15px; font-weight:800; color:#777; text-align:center;}
   .counter b{color:var(--ink); font-size:20px;}
 
@@ -229,7 +254,8 @@
     .stage{grid-column:2; grid-row:2; height:100%;}
     #next{grid-column:3; grid-row:2;}
     .arrow{width:68px; height:68px; box-shadow:4px 4px 0 var(--ink);}
-    .counter{grid-column:1 / -1; grid-row:3; margin-top:6px;}
+    .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
+    .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
     .site-link{grid-column:1 / -1; grid-row:4; justify-self:center; margin-top:4px; font-size:13px;}
     .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
     .line{font-size:22px;}
@@ -238,6 +264,7 @@
   @media (prefers-reduced-motion: reduce){
     .inner, .face{transition:none;}
     .flip.pop{animation:none;}
+    .play.waiting{animation:none;}
   }
 </style>
 </head>
@@ -270,7 +297,13 @@
     <button class="arrow prev" id="prev" type="button" aria-label="Previous joke">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
     </button>
-    <div class="counter" id="counter" aria-live="polite"></div>
+    <div class="middle">
+      <button class="play" id="play" type="button" aria-label="Read the joke out loud">
+        <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
+        <svg class="stop-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>
+      </button>
+      <div class="counter" id="counter" aria-live="polite"></div>
+    </div>
     <button class="arrow next" id="next" type="button" aria-label="Next joke">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </button>
@@ -339,8 +372,64 @@ function setFlipped(next){
   card.setAttribute('aria-label', flipped ? 'Flip the card back to the setup' : 'Flip the card to see the punchline');
 }
 
+// ---------- read-aloud: setup, a 3 second pause, then flip and say the punchline ----------
+// Clips are pre-made by make-audio.py (jokes/audio/N-setup.mp3, N-punch.mp3).
+// One <audio> element is reused so iOS lets the punchline play after the pause.
+const playBtn = document.getElementById('play');
+const voice = new Audio();
+const PAUSE_MS = 3000;
+const VOICED = new Set([1]);   // joke numbers that have clips in audio/
+let run = 0, pauseTimer = null;
+
+function setPlaying(on){
+  playBtn.classList.toggle('playing', on);
+  if (!on) playBtn.classList.remove('waiting');
+  playBtn.setAttribute('aria-label', on ? 'Stop reading' : 'Read the joke out loud');
+}
+
+function stopVoice(){
+  run++;
+  clearTimeout(pauseTimer);
+  voice.pause();
+  voice.onended = voice.onerror = null;
+  setPlaying(false);
+}
+
+function say(src, id){
+  return new Promise((resolve, reject) => {
+    voice.onended = () => resolve();
+    voice.onerror = () => reject(new Error('missing clip ' + src));
+    voice.src = src;
+    voice.play().catch(reject);
+  }).then(() => { if (id !== run) throw 'stopped'; });
+}
+
+async function readJoke(){
+  const id = ++run, n = index + 1;
+  if (flipped) setFlipped(false);
+  setPlaying(true);
+  try {
+    await say('/jokes/audio/' + n + '-setup.mp3', id);
+    playBtn.classList.add('waiting');
+    await new Promise(r => { pauseTimer = setTimeout(r, PAUSE_MS); });
+    if (id !== run) return;
+    playBtn.classList.remove('waiting');
+    setFlipped(true);
+    await say('/jokes/audio/' + n + '-punch.mp3', id);
+  } catch (e) {
+    if (id === run && e !== 'stopped') console.warn(e);
+  }
+  if (id === run) setPlaying(false);
+}
+
+playBtn.addEventListener('click', () => playBtn.classList.contains('playing') ? stopVoice() : readJoke());
+
 function show(i){
+  stopVoice();
   index = (i + JOKES.length) % JOKES.length;
+  const voiced = VOICED.has(index + 1);
+  playBtn.classList.toggle('no-voice', !voiced);
+  playBtn.disabled = !voiced;
   // Turn the card back to its front with no animation first, so the next punchline never shows mid-flip
   card.classList.add('instant');
   setFlipped(false);
@@ -358,7 +447,7 @@ function show(i){
 }
 
 card.addEventListener('animationend', () => card.classList.remove('pop'));
-card.addEventListener('click', () => setFlipped(!flipped));
+card.addEventListener('click', () => { stopVoice(); setFlipped(!flipped); });
 document.getElementById('prev').addEventListener('click', () => show(index - 1));
 document.getElementById('next').addEventListener('click', () => show(index + 1));
 
