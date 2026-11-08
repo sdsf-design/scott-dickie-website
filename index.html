@@ -70,7 +70,8 @@ main, header, footer { position: relative; z-index: 1; }
 @keyframes flow { to { background-position: 200% 0; } }
 
 /* The middle of the bar: the Projects menu icon, then the Work / Play switch */
-.center { grid-column: 2; display: flex; gap: 8px; align-items: stretch; }
+.center { grid-column: 2; display: flex; gap: 8px; align-items: stretch; height: 35px; }
+.center .mode { height: 100%; box-sizing: border-box; }
 .links { grid-column: 3; justify-self: end; display: flex; font: 13px/1 var(--mono); }
 /* Same box as the Work / Play switch: hairline square, inverted on hover. */
 .links a { text-decoration: none; padding: 11px 18px; box-shadow: inset 0 0 0 1px var(--line); transition: background .3s, color .3s; }
@@ -78,9 +79,9 @@ main, header, footer { position: relative; z-index: 1; }
 [data-mode="play"] .links a:hover { background: var(--rainbow); background-size: 200% 100%; color: #11132a; animation: flow 5s linear infinite; }
 .links a.contact-link { margin-left: 8px; background: var(--ink); color: var(--ground); box-shadow: inset 0 0 0 1px var(--ink); }
 .links a.contact-link:hover { background: var(--pushed); box-shadow: inset 0 0 0 1px var(--pushed); }
-.center .pm-trigger { width: auto; height: auto; padding: 0 12px; }
+.center .pm-trigger { height: 100%; width: auto; aspect-ratio: 1; padding: 0; box-sizing: border-box; }
 /* Phones: the Projects icon needs room, so the header controls tighten up */
-@media (max-width: 480px) { .mode, .links { font-size: 12px; } .mode label { padding-inline: 8px; gap: 6px; } .links a { padding-inline: 8px; } .links a.contact-link { margin-left: 4px; } .center { gap: 4px; } .center .pm-trigger { padding: 0 9px; } .cl-me { display: none; } }
+@media (max-width: 480px) { .mode, .links { font-size: 12px; } .mode label { padding-inline: 8px; gap: 6px; } .links a { padding-inline: 8px; } .links a.contact-link { margin-left: 4px; } .center { gap: 4px; height: 33px; } .cl-me { display: none; } }
 .links a { white-space: nowrap; }
 @media (max-width: 480px) { .top { gap: 8px; } .links a { padding: 11px 9px; font-size: 12px; } .links a.contact-link { margin-left: 4px; } }
 
@@ -426,7 +427,6 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   </div>
   <nav class="links" aria-label="Main">
     <a class="work-only" href="https://www.linkedin.com/in/scottdickie" target="_blank" rel="noopener">LinkedIn ↗</a>
-    <a class="play-only" href="https://open.spotify.com/artist/6jqikQgONs84wX2NNFq4wU" target="_blank" rel="noopener">Spotify ↗</a>
     <a class="contact-link" href="contact.html">Contact<span class="cl-me"> me</span></a>
   </nav>
 </header>
