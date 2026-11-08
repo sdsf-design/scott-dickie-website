@@ -300,7 +300,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
     </button>
     <div class="middle">
-      <button class="play" id="play" type="button" aria-label="Read the joke out loud">
+      <button class="play" id="play" type="button" aria-label="Read the jokes out loud">
         <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
         <svg class="stop-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>
       </button>
@@ -379,14 +379,15 @@ function setFlipped(next){
 // One <audio> element is reused so iOS lets the punchline play after the pause.
 const playBtn = document.getElementById('play');
 const voice = new Audio();
-const PAUSE_MS = 3000;
+const PAUSE_MS = 3000;   // setup -> punchline
+const NEXT_MS = 2000;    // punchline -> next joke
 const VOICED = new Set(JOKES.map((_, i) => i + 1));   // joke numbers that have saved clips in audio/ (all of them)
 let run = 0, pauseTimer = null;
 
 function setPlaying(on){
   playBtn.classList.toggle('playing', on);
   if (!on) playBtn.classList.remove('waiting');
-  playBtn.setAttribute('aria-label', on ? 'Stop reading' : 'Read the joke out loud');
+  playBtn.setAttribute('aria-label', on ? 'Stop reading' : 'Read the jokes out loud');
 }
 
 function stopVoice(){
@@ -406,28 +407,48 @@ function say(src, id){
   }).then(() => { if (id !== run) throw 'stopped'; });
 }
 
+function pause(ms, id){
+  return new Promise(r => { pauseTimer = setTimeout(r, ms); })
+    .then(() => { if (id !== run) throw 'stopped'; });
+}
+
+// One press reads this joke, then keeps going joke by joke until the last one
 async function readJoke(){
-  const id = ++run, n = index + 1;
-  if (flipped) setFlipped(false);
+  const id = ++run;
+  clearTimeout(pauseTimer);
   setPlaying(true);
   try {
-    await say('/jokes/audio/' + n + '-setup.mp3', id);
-    playBtn.classList.add('waiting');
-    await new Promise(r => { pauseTimer = setTimeout(r, PAUSE_MS); });
-    if (id !== run) return;
-    playBtn.classList.remove('waiting');
-    setFlipped(true);
-    await say('/jokes/audio/' + n + '-punch.mp3', id);
+    for (;;) {
+      const n = index + 1;
+      if (flipped) setFlipped(false);
+      await say('/jokes/audio/' + n + '-setup.mp3', id);
+      playBtn.classList.add('waiting');
+      await pause(PAUSE_MS, id);
+      playBtn.classList.remove('waiting');
+      setFlipped(true);
+      await say('/jokes/audio/' + n + '-punch.mp3', id);
+      if (index === JOKES.length - 1 || !VOICED.has(index + 2)) break;
+      await pause(NEXT_MS, id);
+      show(index + 1, true);
+    }
   } catch (e) {
     if (id === run && e !== 'stopped') console.warn(e);
   }
   if (id === run) setPlaying(false);
 }
 
-playBtn.addEventListener('click', () => playBtn.classList.contains('playing') ? stopVoice() : readJoke());
+const isPlaying = () => playBtn.classList.contains('playing');
+playBtn.addEventListener('click', () => isPlaying() ? stopVoice() : readJoke());
 
-function show(i){
-  stopVoice();
+// Arrows, keys and swipes: while reading, skip to that joke and keep reading
+function go(delta){
+  const wasPlaying = isPlaying();
+  show(index + delta);
+  if (wasPlaying && VOICED.has(index + 1)) readJoke();
+}
+
+function show(i, keepReading){
+  if (!keepReading) stopVoice();
   index = (i + JOKES.length) % JOKES.length;
   const voiced = VOICED.has(index + 1);
   playBtn.classList.toggle('no-voice', !voiced);
@@ -450,13 +471,13 @@ function show(i){
 
 card.addEventListener('animationend', () => card.classList.remove('pop'));
 card.addEventListener('click', () => { stopVoice(); setFlipped(!flipped); });
-document.getElementById('prev').addEventListener('click', () => show(index - 1));
-document.getElementById('next').addEventListener('click', () => show(index + 1));
+document.getElementById('prev').addEventListener('click', () => go(-1));
+document.getElementById('next').addEventListener('click', () => go(1));
 
 // Keyboard: arrows to move, space or enter flips (the card button handles those when focused)
 addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
-  else if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
   else if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) { e.preventDefault(); setFlipped(!flipped); }
 });
 
@@ -469,7 +490,7 @@ card.addEventListener('touchend', e => {
   startX = null;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
     e.preventDefault();   // a swipe is not also a tap-to-flip
-    show(index + (dx < 0 ? 1 : -1));
+    go(dx < 0 ? 1 : -1);
   }
 });
 
