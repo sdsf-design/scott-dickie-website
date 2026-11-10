@@ -791,11 +791,11 @@ function cardStack(id, layout) {
 // Work: fanned spots keep every card fully on screen: two up the left, two up the right, one along the bottom
 // centre. The section grows tall enough that the bottom card clears the text in the middle.
 const placeWork = cardStack("work-stack", (w, cw, ch) => {
-  const h = Math.max(innerHeight, 2 * ch + 380);
-  const xEdge = w / 2 - cw / 2 - 28, yTop = -(h / 2 - ch / 2 - 8), yBottom = h / 2 - ch / 2 - 36;
+  const h = Math.max(innerHeight, 2 * ch + 320);
+  const xEdge = w / 2 - cw / 2 - 64, yTop = -(h / 2 - ch / 2 - 8), yBottom = h / 2 - ch / 2 - 36;
   return {
     height: h,
-    spots: [[-xEdge, yTop, -4], [xEdge, yTop + 24, 3], [-xEdge, yBottom - 110, 3], [xEdge, yBottom - 90, -3], [0, yBottom, 1.5]],
+    spots: [[-xEdge, yTop, -4], [xEdge, yTop + 24, 3], [-xEdge, yBottom - 190, 3], [xEdge, yBottom - 170, -3], [0, yBottom, 1.5]],
     pile: (i, n) => { const m = (n - 1) / 2; return [(i - m) * 40, (i - m) * 20, (i - m) * 3.5]; },
   };
 });
