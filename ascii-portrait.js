@@ -648,7 +648,7 @@ const EFFECTS = {
 
   gaze: {
     label: "Gaze",
-    hint: "The eyes follow your cursor. Above the mouth the face smiles, below it frowns.",
+    hint: "The eyes follow your cursor. Below the mouth the face smiles, above it frowns.",
     enter() { gaze.mood = 0; },
     frame() {
       if (headPose.on) {
@@ -666,8 +666,8 @@ const EFFECTS = {
       }
       gaze.x += (gaze.tx - gaze.x) * .32;
       gaze.y += (gaze.ty - gaze.y) * .32;
-      // Above the mouth is a smile (+1), below is a frown (-1), with a short blend across the mouth itself.
-      const mood = pointer.on ? Math.max(-1, Math.min(1, (faceT + faceH * MOUTH.y - py) / (faceH * .05))) : 0;
+      // Below the mouth is a smile (+1), above is a frown (-1), with a short blend across the mouth itself.
+      const mood = pointer.on ? Math.max(-1, Math.min(1, (py - (faceT + faceH * MOUTH.y)) / (faceH * .05))) : 0;
       gaze.mood += (mood - gaze.mood) * .09;
     },
     cell(c) {
