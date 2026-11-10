@@ -25,6 +25,7 @@
       { name: "Get Unstuck", note: "AI-powered help through tough decisions", url: "https://www.unstuck.services/", img: "assets/videos/unstuck-demo-poster.jpg", external: true },
       { name: "Should I buy it?", note: "A 14-question gut check before you buy something", url: "shouldibuyit/index.html", img: "assets/play/shouldibuyit.jpg" },
       { name: "Dad jokes for kids", note: "Joke Flip: flip the card for the punchline", url: "jokes/index.html", img: "assets/play/jokes.jpg" },
+      { name: "IceBreaker", note: "Questions to get kids talking, with a follow-up on the back", url: "icebreaker/index.html", img: "assets/play/icebreaker.jpg" },
       { name: "Impact & Influence", note: "Helping designers learn non-design skills", url: MORE, img: "assets/play/impact-influence.jpg" },
       { name: "GoTracks", note: "Travel toy for kids", url: MORE, img: "assets/play/gotracks.jpg" },
       { name: "Snowboard bench", note: "Homemade bench from a snowboard and metal legs", url: MORE, img: "assets/play/snowboard-bench.jpg" },

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IceBreaker | Scott Dickie</title>
+<meta name="description" content="30 conversation starters for kids: read the question, tap the card for a follow-up.">
+<link rel="icon" href="/assets/favicon.ico">
+<style>
+  /* Same look as Joke Flip: cream ground, ink outlines, hard offset shadows */
+  :root{
+    --pink:#ff90e8;
+    --yellow:#ffd23f;
+    --green:#7ed957;
+    --blue:#8fd3ff;
+    --ink:#0a0a0a;
+    --card:#ffffff;
+    --neutral-btn:#eee8dc;
+    --shadow-off:5px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Helvetica Neue", Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+    background:#f4ede1;
+    color:var(--ink);
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;   /* no double-tap zoom when tapping the arrows quickly */
+  }
+  .wrap{
+    width:100%;
+    max-width:680px;
+    flex:1;
+    min-height:0;   /* fills what the top bar leaves */
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  header.top{width:100%; text-align:center; margin-bottom:24px; flex-shrink:0;}
+  header.top h1{
+    font-size:clamp(30px, 6vw, 46px);
+    margin:0 0 6px;
+    font-weight:900;
+    letter-spacing:-0.5px;
+  }
+  header.top h1 span{
+    background:var(--blue);
+    padding:2px 10px;
+    border:3px solid var(--ink);
+    border-radius:10px;
+    box-shadow:var(--shadow-off) var(--shadow-off) 0 var(--ink);
+    display:inline-block;
+    transform:rotate(-2deg);
+  }
+  header.top p{margin:10px 0 0; font-size:16px; color:#444; font-weight:500;}
+
+  /* ---------- the flip card ---------- */
+  .stage{
+    width:100%;
+    flex:1;
+    min-height:0;
+    position:relative;
+  }
+  /* The button is absolutely positioned and only holds the perspective; the inner div
+     does the 3D turn, which Safari won't do on a button. Sizing comes from fixed insets
+     plus max-height - no height percentages anywhere: mobile engines that mis-resolve
+     a % height in min()/calc() were collapsing the card to a strip. */
+  .flip{
+    -webkit-appearance:none;
+    appearance:none;
+    border:0;
+    padding:0;
+    background:none;
+    font:inherit;
+    color:inherit;
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:8px;            /* room for the hard shadow */
+    width:calc(100% - 8px);
+    max-height:460px;
+    margin:auto 0;
+    cursor:pointer;
+    perspective:1400px;
+    -webkit-perspective:1400px;
+  }
+  .inner{
+    position:absolute;
+    inset:0;
+    transform-style:preserve-3d;
+    -webkit-transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.3, 1.4, .5, 1);
+  }
+  .flip.flipped .inner{transform:rotateY(180deg);}
+  .flip.instant .inner, .flip.instant .face{transition:none;}
+  /* Backup for browsers that ignore backface-visibility: swap faces as the card passes edge-on
+     (the easing reaches 90° at 75ms of the 600ms turn, in both directions) */
+  .face{transition:visibility 0s linear 75ms;}
+  .back, .flip.flipped .front{visibility:hidden;}
+  .flip.flipped .back{visibility:visible;}
+  .flip.pop{animation:pop .3s ease;}
+  @keyframes pop{
+    from{opacity:0; transform:translateY(10px) scale(.97);}
+    to{opacity:1; transform:none;}
+  }
+  .face{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    padding:clamp(24px, 5vw, 44px);
+    text-align:center;
+    border:3px solid var(--ink);
+    border-radius:22px;
+    box-shadow:8px 8px 0 var(--ink);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    overflow:hidden;
+  }
+  .front{background:var(--card); transform:rotateY(0deg);}   /* its own 3D layer, so Safari hides it when turned away */
+  .back{background:var(--yellow); transform:rotateY(180deg);}
+  @media (hover:hover){ .flip:hover .face{box-shadow:10px 10px 0 var(--ink);} }
+  .flip:focus-visible{outline:none;}
+  .flip:focus-visible .face{outline:3px dashed var(--ink); outline-offset:6px;}
+
+  .tag{
+    background:var(--yellow);
+    border:2.5px solid var(--ink);
+    border-radius:8px;
+    padding:4px 12px;
+    font-weight:800;
+    font-size:13px;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .back .tag{background:var(--pink);}
+  .emoji{font-size:clamp(44px, 9vh, 64px); line-height:1;}
+  .line{
+    margin:0;
+    font-size:clamp(22px, 4.6vw, 32px);
+    font-weight:800;
+    line-height:1.25;
+    text-wrap:balance;
+  }
+  .back .line{font-size:clamp(24px, 5.2vw, 38px); font-weight:900;}
+  .hint{
+    font-size:14px;
+    font-weight:800;
+    color:#777;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .back .hint{color:#5a4a00;}
+  .front .hint::before{content:"👆";}
+
+  /* ---------- big arrows ---------- */
+  .controls{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-top:22px;
+    flex-shrink:0;
+  }
+  .arrow{
+    appearance:none;
+    width:clamp(76px, 18vw, 104px);
+    height:clamp(76px, 18vw, 104px);
+    border:3px solid var(--ink);
+    border-radius:50%;
+    background:var(--neutral-btn);
+    color:var(--ink);
+    box-shadow:6px 6px 0 var(--ink);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .arrow svg{width:46%; height:46%;}
+  @media (hover:hover){
+    .arrow:hover{transform:translate(-3px,-3px); box-shadow:9px 9px 0 var(--ink); background:var(--pink);}
+    .arrow.next:hover{background:var(--green);}
+  }
+  .arrow:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
+  .arrow:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
+  .middle{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .play{
+    appearance:none;
+    width:clamp(60px, 14vw, 78px);
+    height:clamp(60px, 14vw, 78px);
+    border:3px solid var(--ink);
+    border-radius:50%;
+    background:var(--yellow);
+    color:var(--ink);
+    box-shadow:5px 5px 0 var(--ink);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .play svg{width:44%; height:44%;}
+  .play .stop-icon, .play.playing .play-icon{display:none;}
+  .play.playing .stop-icon{display:block;}
+  .play.playing{background:var(--pink);}
+  .play.waiting{animation:wait 1s ease-in-out infinite;}
+  @keyframes wait{50%{transform:scale(1.08);}}
+  @media (hover:hover){ .play:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
+  .play:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
+  .play:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
+  .counter{font-size:15px; font-weight:800; color:#777; text-align:center;}
+  .counter b{color:var(--ink); font-size:20px;}
+
+  /* Top-left bar: projects menu first, then the way home */
+  .page-nav{
+    align-self:stretch;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:12px;
+  }
+  .site-link{
+    font-size:14px;
+    font-weight:800;
+    color:#777;
+    text-decoration:none;
+  }
+  .site-link:hover{color:var(--ink);}
+
+  @media (max-height:640px){
+    header.top p{display:none;}
+    .emoji{display:none;}
+  }
+  /* Phones on their side: arrows flank the card instead of taking a row under it */
+  @media (max-height:520px) and (orientation:landscape){
+    body{padding:10px max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));}
+    .wrap{
+      max-width:960px;
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      grid-template-rows:auto minmax(0,1fr) auto auto;
+      column-gap:20px;
+      align-items:center;
+    }
+    header.top{grid-column:1 / -1; margin-bottom:8px;}
+    header.top h1{font-size:26px;}
+    header.top h1 span{border-width:2.5px; box-shadow:3px 3px 0 var(--ink);}
+    .controls{display:contents;}
+    #prev{grid-column:1; grid-row:2;}
+    .stage{grid-column:2; grid-row:2; height:100%;}
+    #next{grid-column:3; grid-row:2;}
+    .arrow{width:68px; height:68px; box-shadow:4px 4px 0 var(--ink);}
+    .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
+    .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
+    .page-nav{margin-bottom:4px;}
+    .site-link{font-size:13px;}
+    .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
+    .line{font-size:22px;}
+    .back .line{font-size:26px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .inner, .face{transition:none;}
+    .flip.pop{animation:none;}
+    .play.waiting{animation:none;}
+  }
+</style>
+  <link rel="stylesheet" href="../projects-menu.css" />
+</head>
+<body>
+<nav class="page-nav">
+  <button class="pm-trigger" type="button" data-projects-menu aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg></button>
+  <a class="site-link" href="/">&larr; Back to scott-dickie.com</a>
+</nav>
+<div class="wrap">
+  <header class="top">
+    <h1>Ice<span>Breaker</span></h1>
+    <p>Questions to get kids talking</p>
+  </header>
+
+  <div class="stage">
+    <button class="flip" id="card" type="button" aria-label="Flip the card for a follow-up question">
+     <div class="inner">
+      <div class="face front">
+        <span class="tag" id="tagFront">QUESTION 1</span>
+        <div class="emoji" id="emoji" aria-hidden="true"></div>
+        <p class="line" id="setup"></p>
+        <span class="hint">Tap for a follow-up</span>
+      </div>
+      <div class="face back" aria-hidden="true">
+        <span class="tag">FOLLOW-UP</span>
+        <p class="line" id="punch" aria-live="polite"></p>
+        <span class="hint">Tap to flip back</span>
+      </div>
+     </div>
+    </button>
+  </div>
+
+  <div class="controls">
+    <button class="arrow prev" id="prev" type="button" aria-label="Previous question">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="middle">
+      <button class="play" id="shuffle" type="button" aria-label="Random question">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+      </button>
+      <div class="counter" id="counter" aria-live="polite"></div>
+    </div>
+    <button class="arrow next" id="next" type="button" aria-label="Next question">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<script>
+// [type, emoji, question, follow-up]
+const PROMPTS = [
+  ["WOULD YOU RATHER", "🦅", "Would you rather be able to fly or be invisible?", "Where's the first place you'd go?"],
+  ["WHAT IF", "🐶", "What if your pet could talk for one day?", "What do you think it would complain about?"],
+  ["TELL ME", "😄", "What made you laugh the hardest this week?", "Can you act it out for me?"],
+  ["IMAGINE", "🚀", "If you could visit any planet, which one would you pick?", "What would you pack for the trip?"],
+  ["BIG QUESTION", "🤝", "What makes someone a really good friend?", "When were you a good friend to someone?"],
+  ["WOULD YOU RATHER", "🐉", "Would you rather have a pet dragon or a pet unicorn?", "What would you name it, and what would it eat?"],
+  ["WHAT IF", "🏫", "What if you were the teacher for a day?", "What would you teach, and what new rule would you make?"],
+  ["TELL ME", "💪", "What's something you're really good at?", "How did you get so good at it?"],
+  ["IMAGINE", "🍦", "If you invented a new ice cream flavor, what would it be?", "What would you call it?"],
+  ["WOULD YOU RATHER", "🌊", "Would you rather live under the sea or on the moon?", "What would you miss most about home?"],
+  ["WHAT IF", "📏", "What if you woke up three inches tall?", "How would you get your breakfast?"],
+  ["TELL ME", "🏔️", "What's something hard you did that made you proud?", "What helped you keep going?"],
+  ["IMAGINE", "🎨", "If you could have any job when you grow up, what would it be?", "What would a normal day at work look like?"],
+  ["BIG QUESTION", "😊", "What's one thing that always makes you happy?", "Could we do it together this week?"],
+  ["WOULD YOU RATHER", "🗣️", "Would you rather talk to animals or speak every language?", "Who would you talk to first, and what would you say?"],
+  ["WHAT IF", "💰", "What if you found a million dollars?", "Who would you share it with?"],
+  ["TELL ME", "💛", "Who was kind to you lately?", "How could you be kind to someone tomorrow?"],
+  ["IMAGINE", "🎬", "If your life were a movie, what would it be called?", "Who would play you?"],
+  ["WOULD YOU RATHER", "⏳", "Would you rather go back in time or into the future?", "What year would you pick, and why?"],
+  ["WHAT IF", "🎉", "What if you could invent a brand-new holiday?", "How would everyone celebrate it?"],
+  ["TELL ME", "🌟", "What's your favorite memory from this year?", "What made it so special?"],
+  ["IMAGINE", "🦸", "If you had a superpower just for helping people, what would it be?", "Who would you help first?"],
+  ["WOULD YOU RATHER", "🧸", "Would you rather your toys come alive or your drawings come alive?", "Which one would cause more trouble?"],
+  ["WHAT IF", "🛏️", "What if you could design your dream bedroom?", "What's the one wild thing it would have?"],
+  ["TELL ME", "🌧️", "What's something that worries you sometimes?", "What helps you feel better when it does?"],
+  ["BIG QUESTION", "🌍", "If you could change one thing about the world, what would it be?", "What's one small step we could take?"],
+  ["WOULD YOU RATHER", "🍕", "Would you rather eat only pizza forever or never have dessert again?", "What food would you rescue if all the others disappeared?"],
+  ["WHAT IF", "🦖", "What if dinosaurs still lived today?", "Which one would you want as a neighbor?"],
+  ["IMAGINE", "🧙", "If you were a wizard for a day, what spell would you cast first?", "What would go wrong?"],
+  ["BIG QUESTION", "❤️", "What's something you love about our family?", "What's something new we should try together?"]
+];
+
+const card = document.getElementById('card');
+const back = card.querySelector('.back');
+const els = {
+  tag: document.getElementById('tagFront'),
+  emoji: document.getElementById('emoji'),
+  question: document.getElementById('setup'),
+  follow: document.getElementById('punch'),
+  counter: document.getElementById('counter')
+};
+
+// Start where the link says (#7 opens question 7), otherwise at the first one
+let index = Math.min(Math.max((parseInt(location.hash.slice(1), 10) || 1) - 1, 0), PROMPTS.length - 1);
+let flipped = false;
+
+function setFlipped(next){
+  flipped = next;
+  card.classList.toggle('flipped', flipped);
+  back.setAttribute('aria-hidden', String(!flipped));
+  card.setAttribute('aria-label', flipped ? 'Flip the card back to the question' : 'Flip the card for a follow-up question');
+}
+
+function show(i){
+  index = (i + PROMPTS.length) % PROMPTS.length;
+  // Turn the card back to its front with no animation first, so the next follow-up never shows mid-flip
+  card.classList.add('instant');
+  setFlipped(false);
+  const [type, emoji, question, follow] = PROMPTS[index];
+  els.tag.textContent = type;
+  els.emoji.textContent = emoji;
+  els.question.textContent = question;
+  els.follow.textContent = follow;
+  els.counter.innerHTML = '<b>' + (index + 1) + '</b> / ' + PROMPTS.length;
+  history.replaceState(null, '', '#' + (index + 1));
+  card.classList.remove('pop');
+  void card.offsetWidth;
+  card.classList.remove('instant');
+  card.classList.add('pop');
+}
+const go = (delta) => show(index + delta);
+
+// Shuffle: jump to any other question
+document.getElementById('shuffle').addEventListener('click', () => {
+  show(index + 1 + Math.floor(Math.random() * (PROMPTS.length - 1)));
+});
+
+card.addEventListener('animationend', () => card.classList.remove('pop'));
+card.addEventListener('click', () => setFlipped(!flipped));
+document.getElementById('prev').addEventListener('click', () => go(-1));
+document.getElementById('next').addEventListener('click', () => go(1));
+
+// Keyboard: arrows to move, space or enter flips (the card button handles those when focused)
+addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  else if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) { e.preventDefault(); setFlipped(!flipped); }
+});
+
+// Swipe left or right on a phone to change questions
+let startX = null, startY = null;
+card.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+card.addEventListener('touchend', e => {
+  if (startX === null) return;
+  const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+  startX = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    e.preventDefault();   // a swipe is not also a tap-to-flip
+    go(dx < 0 ? 1 : -1);
+  }
+});
+
+show(index);
+</script>
+<script src="../projects-menu.js"></script>
+</body>
+</html>
