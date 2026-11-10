@@ -61,8 +61,6 @@ main, header, footer { position: relative; z-index: 1; }
 .mode legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .mode input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
 .mode label { padding: 9px 16px; cursor: pointer; color: var(--ink); display: flex; gap: 8px; align-items: center; transition: background .3s, color .3s; }
-.mode label::before { content: "○"; opacity: .6; }
-.mode input:checked + label::before { content: "●"; opacity: 1; }
 .mode label:hover { color: var(--pushed); }
 .mode input:checked + label { background: var(--ink); color: var(--ground); }
 .mode input:focus-visible + label { outline: 2px solid var(--pushed); outline-offset: 1px; }
@@ -197,6 +195,7 @@ main, header, footer { position: relative; z-index: 1; }
 .work-stack { position: relative; padding: 72px var(--gutter); border-top: 1px solid var(--line); }
 #work-stack { border-top: 0; padding-top: 24px; }
 #story-section { border-top: 0; }
+[data-mode="play"] :is(.section, .work-stack, .project + .project) { border-top: 0; }
 /* Selected work cards: 10% narrower than before, with the image cropped (same height, sides trimmed) rather than scaled down */
 #work-stack .wcard img { aspect-ratio: 9 / 8; }
 #work-stack .cards { grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); }
