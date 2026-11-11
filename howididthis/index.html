@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How I built this | Scott Dickie</title>
+<meta name="description" content="The prompts, inspiration and updates behind the new scott-dickie.com, built with Claude Code.">
+<link rel="icon" href="../assets/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@300;400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="../case-header.css">
+<link rel="stylesheet" href="../projects-menu.css">
+<style>
+/* Same daylight tokens as the homepage's Work side: navy ink, ginger accent, monospaced labels. */
+:root {
+  --ground: #e8ebf0; --paper: #f3f5f8; --ink: #16233b; --quiet: #55617a; --pushed: #b4531a;
+  --line: rgba(22, 35, 59, .16);
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --gutter: clamp(16px, 4vw, 48px);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; overflow-x: clip; }
+body { background: var(--ground); color: var(--ink); font: 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-underline-offset: 4px; text-decoration-color: var(--pushed); }
+h1, h2, h3, p { margin: 0; }
+:focus-visible { outline: 2px solid var(--pushed); outline-offset: 2px; }
+.label { font: 12px/1.4 var(--mono); color: var(--quiet); letter-spacing: .02em; }
+.label b { font-weight: 400; color: var(--pushed); }
+.wrap { width: min(880px, 100%); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ---------- intro ---------- */
+.intro { padding: clamp(40px, 8vh, 96px) 0 56px; display: grid; gap: 22px; }
+.intro h1 { font: 300 clamp(44px, 7vw, 92px)/.95 var(--sans); letter-spacing: -.04em; }
+.intro .role { font: 400 clamp(18px, 1.8vw, 22px)/1.45 var(--serif); color: var(--quiet); max-width: 34em; }
+.intro .role em { color: var(--ink); }
+.stats { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.stats li { padding: 16px 12px 0 0; display: grid; gap: 4px; align-content: start; }
+.stats b { font: 300 clamp(28px, 3.6vw, 40px)/1 var(--sans); letter-spacing: -.03em; }
+.stats span { font: 12px/1.4 var(--mono); color: var(--quiet); }
+@media (max-width: 600px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; } }
+
+/* ---------- sections ---------- */
+section { padding: 56px 0; }
+.head { display: grid; gap: 10px; margin-bottom: 28px; }
+.head h2 { font: 300 clamp(30px, 4vw, 48px)/1.05 var(--sans); letter-spacing: -.035em; }
+.body { display: grid; gap: 18px; color: var(--quiet); font-size: 15.5px; }
+.body strong { color: var(--ink); font-weight: 500; }
+
+/* A prompt, shown the way it was typed: a chat input box with a label on top and a send button in the corner */
+.prompt { position: relative; margin: 0; padding: 40px 60px 20px 20px; background: #fbfcfd; border-radius: 18px;
+  box-shadow: 0 0 0 1px var(--line), 0 12px 32px rgba(22, 35, 59, .08); font: 13.5px/1.7 var(--mono); color: var(--ink); }
+.prompt::before { content: "Prompt"; position: absolute; top: 14px; left: 20px; font: 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--quiet); }
+.prompt::after { content: "↑"; position: absolute; right: 14px; bottom: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--ground); font: 15px/1 var(--sans); }
+.prompt cite { display: block; margin-top: 12px; font-style: normal; font-size: 11.5px; color: var(--quiet); }
+.prompt mark { background: none; color: var(--pushed); }
+/* The line under a featured prompt: what it led to */
+.why { font-size: 15px; color: var(--quiet); padding-left: 14px; border-left: 2px solid var(--pushed); }
+.why strong { color: var(--ink); font-weight: 500; }
+
+/* Inspiration: three notes side by side */
+.notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.note { padding: 18px; border-radius: 14px; background: var(--paper); box-shadow: 0 0 0 1px var(--line); display: grid; gap: 8px; align-content: start; }
+.note h3 { font: 400 19px/1.3 var(--serif); }
+.note p { font-size: 14px; color: var(--quiet); }
+.ascii { font: 11px/1.05 var(--mono); color: var(--ink); white-space: pre; margin: 0 0 4px; }
+@media (max-width: 760px) { .notes { grid-template-columns: 1fr; } }
+
+/* Timeline: a date rail on the left, what happened on the right */
+.timeline { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.timeline > li { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--line); }
+.timeline .when { font: 12px/1.6 var(--mono); color: var(--pushed); display: grid; gap: 2px; align-content: start; }
+.timeline .when span { color: var(--quiet); }
+.timeline h3 { font: 400 clamp(21px, 2.2vw, 26px)/1.25 var(--serif); margin-bottom: 8px; }
+.timeline .what { display: grid; gap: 14px; color: var(--quiet); font-size: 15px; }
+.updates { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font: 12.5px/1.55 var(--mono); }
+.updates li { display: grid; grid-template-columns: 14px minmax(0, 1fr); color: var(--ink); }
+.updates li::before { content: "+"; color: var(--pushed); }
+@media (max-width: 640px) { .timeline > li { grid-template-columns: 1fr; gap: 8px; } }
+
+/* Verbatim prompts: a quiet chat log */
+.log { display: grid; gap: 10px; }
+.log .prompt { font-size: 13px; }
+
+/* Stack */
+.stack { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.stack li { padding: 16px 16px 16px 0; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.stack b { font: 400 15px/1.4 var(--sans); color: var(--ink); }
+.stack span { font-size: 14px; color: var(--quiet); }
+@media (max-width: 600px) { .stack { grid-template-columns: 1fr; } }
+
+footer { padding: 28px var(--gutter) calc(36px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); font: 12px/1.5 var(--mono); color: var(--quiet); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+footer a { text-decoration: none; } footer a:hover { color: var(--pushed); }
+</style>
+</head>
+<body>
+<header class="case-top">
+  <button class="pm-trigger" type="button" data-projects-menu aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg></button>
+  <a class="face" href="../index.html" aria-label="Scott Dickie, back to the homepage"><canvas id="case-face" aria-hidden="true"></canvas></a>
+  <a class="contact" href="../index.html#contact"><span class="long">Contact me</span><span class="short">Contact</span></a>
+  <a class="close" href="../index.html" aria-label="Close and go back to the homepage">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>
+  </a>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="intro">
+      <p class="label"><b>&gt;</b> how i built this</p>
+      <h1>How I built this</h1>
+      <p class="role">I designed and built the new scott-dickie.com by talking to <em>Claude Code</em>: one prompt at a time, checking each change in the browser, then shipping it. Here are the prompts, the ideas behind them and every update along the way.</p>
+      <ul class="stats">
+        <li><b>114</b><span>commits</span></li>
+        <li><b>69</b><span>since the new homepage, Nov 5</span></li>
+        <li><b>7</b><span>apps and services</span></li>
+        <li><b>1</b><span>ASCII face, everywhere</span></li>
+      </ul>
+    </div>
+
+    <section aria-labelledby="stack-title">
+      <div class="head"><p class="label"><b>[01]</b></p><h2 id="stack-title">Process &amp; tools</h2></div>
+      <div class="body">
+        <p>I described what I wanted in plain words, Claude Code wrote the code and checked it in a browser, and I reacted to what I saw. When a change looked right, it was committed and pushed live. These are the tools I used along the way.</p>
+        <ul class="stack">
+          <li><b>Claude Code</b><span>In the Claude desktop app: writing the code, checking it in a browser and committing</span></li>
+          <li><b>Plain HTML, CSS and JavaScript</b><span>No framework and no build step, so every page is one file you can read</span></li>
+          <li><b>Canvas</b><span>The ASCII portrait, the record&rsquo;s wave and Play&rsquo;s star field</span></li>
+          <li><b>GitHub and Vercel</b><span>Each push to main deploys on its own</span></li>
+          <li><b>Claude API</b><span>Behind LOC-1&rsquo;s scene finder</span></li>
+          <li><b>Suno, eMastered and FL Studio</b><span>For the songs on the record player</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section aria-labelledby="brief-title">
+      <div class="head"><p class="label"><b>[02]</b></p><h2 id="brief-title">The brief</h2></div>
+      <div class="body">
+        <p>The old site was a straightforward portfolio. I wanted the homepage to show how I actually work now: hands on, curious and making things with AI. This is the prompt that started the redesign.</p>
+        <p class="prompt">&hellip;using the <mark>ascii portraits</mark>, <mark>3d interactions</mark>, create a new website design with the current content on the work side, but add a new toggle with a <mark>&ldquo;Play&rdquo;</mark> option that will change the visual design (make the colors more colorful while keeping the branding similar)<cite>The kickoff prompt, Nov 5</cite></p>
+        <p class="why"><strong>One identity, two audiences.</strong> Work is for the people hiring me. Play is for everything I make after hours. Same face, same type and grid, different mood.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="ideas-title">
+      <div class="head"><p class="label"><b>[03]</b></p><h2 id="ideas-title">Inspiration</h2></div>
+      <div class="notes">
+        <div class="note">
+<pre class="ascii" aria-hidden="true">  .:=+**+=:.
+ :*%@@@@@@%*:
+ +@@#=--=#@@+
+ *@@ o  o @@*
+ :#@@.__.@@#:
+  .=*####*=.</pre>
+          <h3>The portrait is the brand</h3>
+          <p>Instead of a logo, the identity comes from my face drawn in characters: monospaced type, flannel navy ink and beard ginger for anything you disturb. It reacts to your cursor, your camera and a shake.</p>
+        </div>
+        <div class="note">
+<pre class="ascii" aria-hidden="true">  WORK    PLAY
+  ----    ----
+  day     night
+  navy    color
+  calm    bounce</pre>
+          <h3>Work by day, Play by night</h3>
+          <p>One page, two moods. Work is the daylight version for hiring managers. Play is the same type and grid at night, with more color, a star field and livelier motion for side projects.</p>
+        </div>
+        <div class="note">
+<pre class="ascii" aria-hidden="true">   .-""""-.
+  /  .--.  \
+ |  ( () )  |
+  \  '--'  /
+   '-....-'</pre>
+          <h3>Things you can touch</h3>
+          <p>Every project shows the real thing, not a screenshot of it: a spinning record that plays my songs, a joke deck you can flip, a decision wizard you can try.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="timeline-title">
+      <div class="head"><p class="label"><b>[04]</b></p><h2 id="timeline-title">The updates</h2></div>
+      <ol class="timeline">
+        <li>
+          <p class="when">Jul 27&ndash;28<span>10 commits</span></p>
+          <div class="what">
+            <h3>Rebuild the old site as plain files</h3>
+            <p>First, I moved the existing portfolio onto plain HTML, CSS and JavaScript in GitHub, hosted on Vercel, so every later change could be a quick prompt.</p>
+            <ul class="updates">
+              <li>Recreated scott-dickie.com as a static site</li>
+              <li>Linked a detail page to each case study card</li>
+              <li>Added YouTube videos beside My Story</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Oct 27&ndash;30<span>33 commits</span></p>
+          <div class="what">
+            <h3>A record player for my music</h3>
+            <p>The music page went through the most iterations. It started as a list of songs with lyrics and ended as a spinning record with a live wave drawn from the audio, timed to land just ahead of the beat.</p>
+            <ul class="updates">
+              <li>Redesigned the page around a spinning record</li>
+              <li>Swapped a pixel visualizer for a soft Siri-style wave</li>
+              <li>Drove the wave from live audio with spring easing</li>
+              <li>Tuned the audio delay to 68ms so the wave leads the beat</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Nov 5<span>5 commits</span></p>
+          <div class="what">
+            <h3>The new homepage</h3>
+            <p>The kickoff prompt became an ASCII portrait with a Work / Play switch. Then came the craft: the face had to read clearly and keep up with you.</p>
+            <p class="prompt">make the ascii design more detailed, it&rsquo;s hard to see the details of the eyes on the light background</p>
+            <p class="why"><strong>Name the exact problem.</strong> On the light Work background the face washed out. Pointing at the eyes led to a finer grid and to each character being pushed lighter or darker against its neighbors, so the glasses, eyes and smile read clearly.</p>
+            <p class="prompt">improve the performance of the ascii interactions so it keeps up with the cursor and video</p>
+            <p class="why"><strong>Feel is part of the design.</strong> Claude timed the portrait frame by frame and found that drawing cost jumps sharply below 3.2px per character. Settling the grid there made the face about 3.5&times; faster while keeping nearly all of the detail.</p>
+            <ul class="updates">
+              <li>ASCII portrait with Work and Play modes</li>
+              <li>Faster drawing and darker characters for Work</li>
+              <li>A sharper, wider Get Unstuck screenshot</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Nov 6<span>25 commits</span></p>
+          <div class="what">
+            <h3>Selected work as a deck of cards</h3>
+            <p>The case studies became a stack of cards that fans out on its own once you scroll to it. The case study pages got a new top bar with a small face that turns to follow your cursor.</p>
+            <p class="prompt">create a new version of the selected works section that looks like the attached where the thumbnail image is present and the title underneath in a subtle card design. have all of the cards stacked on top of each other when you scroll down (but not completely on top so the user can see peeks of all the cards, then the cards move out to the sides and text about my experience and the section title appear in the middle. don&rsquo;t use the dark theme from this example.<cite>Sent with a reference screenshot</cite></p>
+            <p class="why"><strong>Take the idea, not the look.</strong> One prompt set the layout, the motion and the story the section tells, and said what to leave behind from the reference.</p>
+            <ul class="updates">
+              <li>Cards fan out after a short pause, fully on screen</li>
+              <li>Leadership principles open in a glass sheet over the hero</li>
+              <li>Play got a More projects deck and a Get Unstuck demo video</li>
+              <li>Should I Buy It? moved in at /shouldibuyit</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Nov 7<span>25 commits</span></p>
+          <div class="what">
+            <h3>Jokes, contact and a projects menu</h3>
+            <p>Side projects started landing on the site as fast as I could think of them.</p>
+            <ul class="updates">
+              <li>Joke Flip at /jokes, with a voice that reads all 35 jokes</li>
+              <li>A Contact me form, reachable from every page</li>
+              <li>A Projects mega menu in the top bar of every page</li>
+              <li>Play&rsquo;s selected state drifts as a mesh gradient</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Nov 8<span>5 commits</span></p>
+          <div class="what">
+            <h3>LOC-1</h3>
+            <p>A handheld-style tool that uses Claude to work out where a TV scene was filmed.</p>
+            <ul class="updates">
+              <li>LOC-1 at /location with a live square viewfinder</li>
+              <li>Clear errors for a missing or rejected API key</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <p class="when">Nov 10<span>9 commits</span></p>
+          <div class="what">
+            <h3>IceBreaker and a tighter homepage</h3>
+            <p>A conversation game for kids, then a round of polish so the work shows up sooner.</p>
+            <p class="prompt">reduce the size of the project cards by 10% but crop the images in order to do that not shrink them</p>
+            <ul class="updates">
+              <li>IceBreaker: 30 questions, a raffle to pick who answers, voice mode</li>
+              <li>Removed the section lines and renamed &ldquo;Designed for&rdquo; to &ldquo;Worked at&rdquo;</li>
+              <li>Pulled the Selected work cards up and closer together</li>
+              <li>Dropped the dots from the Work / Play switch</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="prompts-title">
+      <div class="head"><p class="label"><b>[05]</b></p><h2 id="prompts-title">More prompts, word for word</h2></div>
+      <div class="body">
+        <p>Most prompts were short and specific. I looked at the page, said what bugged me and checked the result.</p>
+        <div class="log">
+          <p class="prompt">now update the top navigation for the selected work pages. Use the same background color page as the index, in the top nav put a circle X icon in the top right in the same style as the linkedin button, and include a smaller version of the ascii face in the top middle in head turn mode</p>
+          <p class="prompt">now make the cards 15% larger</p>
+          <p class="prompt">remove the circle around the X just use the box</p>
+          <p class="prompt">Remove the breakline to the second section and move up the project cards so you can see it after scrolling less</p>
+          <p class="prompt">move the selected work cards higher and also move up the dropdown and camera buttons closer to the animation (4px underneath it)</p>
+          <p class="prompt">make the cards in the selected projects section closer together like the Play version</p>
+          <p class="prompt">the dropdown height below the animation is too tall, use the previous height</p>
+          <p class="prompt">remove the dot next to Work and Play in the toggle</p>
+          <p class="prompt">Yes, push live</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer><span>&copy; Scott Dickie</span><a href="../index.html">Back to the homepage</a></footer>
+
+<script src="../portraits.js"></script>
+<script src="../ascii-portrait.js"></script>
+<script src="../case-header.js"></script>
+<script src="../projects-menu.js"></script>
+</body>
+</html>
