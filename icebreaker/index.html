@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IceBreaker | Scott Dickie</title>
-<meta name="description" content="120 conversation starters for kids: read the question, tap the card for a follow-up.">
+<meta name="description" content="240 conversation starters for kids: read the question, tap the card for a follow-up.">
 <link rel="icon" href="/assets/favicon.ico">
 <style>
   /* Same look as Joke Flip: cream ground, ink outlines, hard offset shadows */
@@ -45,7 +45,7 @@
     align-items:center;
   }
 
-  header.top{width:100%; text-align:center; margin-bottom:24px; flex-shrink:0;}
+  header.top{width:100%; text-align:center; margin-bottom:18px; flex-shrink:0;}
   header.top h1{
     font-size:clamp(30px, 6vw, 46px);
     margin:0 0 6px;
@@ -261,6 +261,7 @@
       align-items:center;
     }
     header.top{grid-column:1 / -1; margin-bottom:8px;}
+    .topic-now{margin-top:2px; font-size:13px;}
     header.top h1{font-size:26px;}
     header.top h1 span{border-width:2.5px; box-shadow:3px 3px 0 var(--ink);}
     .controls{display:contents;}
@@ -275,6 +276,48 @@
     .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
     .line{font-size:22px;}
     .back .line{font-size:26px;}
+  }
+
+  /* ---------- start screen: pick one of the six topics ---------- */
+  .topics{
+    width:100%; max-width:560px; flex:1; min-height:0; overflow:auto;
+    display:flex; flex-direction:column; align-items:center; padding:0 6px 10px;
+  }
+  .topics[hidden], body.picking .wrap{display:none;}
+  .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
+  .topic-grid{width:100%; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px;}
+  .topic-tile{
+    appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
+    color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
+    padding:16px 16px 14px; min-height:118px;
+    display:flex; flex-direction:column; justify-content:space-between; gap:8px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .topic-tile .t-emoji{font-size:34px; line-height:1;}
+  .topic-tile .t-name{font-size:18px; font-weight:900; line-height:1.15;}
+  .topic-tile .t-count{font-size:13px; font-weight:800; opacity:.7;}
+  @media (hover:hover){ .topic-tile:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
+  .topic-tile:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
+  .topic-tile:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
+  .topic-tile.random{
+    grid-column:1 / -1; min-height:0; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;
+    background:#fff;
+    background-image:linear-gradient(90deg, #c9a7ff, #7ed957, #8fd3ff, #ff90e8, #ffb26b, #ffd23f);
+    background-size:100% 10px; background-repeat:no-repeat; background-position:bottom;
+    padding-bottom:22px;
+  }
+  .topic-tile.random .t-text{display:flex; flex-direction:column; gap:4px;}
+  body.picking .topics .pop-in{animation:pop .3s ease both;}
+  .topic-now{
+    appearance:none; border:0; background:none; font-family:inherit; cursor:pointer;
+    margin:8px 0 0; padding:2px 6px; font-size:14px; font-weight:800; color:#555;
+  }
+  .topic-now u{color:#888; text-underline-offset:3px;}
+  .topic-now:focus-visible{outline:3px dashed var(--ink); border-radius:6px;}
+  @media (max-height:700px){
+    .topic-tile{min-height:96px; padding:12px 14px;}
+    .topic-tile .t-emoji{font-size:28px;}
+    .topics .lead{margin-bottom:12px;}
   }
 
   /* ---------- players: the card's border is split into one colored side per player ---------- */
@@ -377,9 +420,17 @@
     <span class="badge" id="playersBadge"></span>
   </button>
 </nav>
+<section class="topics" id="topics" hidden aria-labelledby="topicsTitle">
+  <header class="top">
+    <h1 id="topicsTitle">Ice<span>Breaker</span></h1>
+  </header>
+  <p class="lead">Pick a topic</p>
+  <div class="topic-grid" id="topicGrid"></div>
+</section>
 <div class="wrap">
   <header class="top">
     <h1>Ice<span>Breaker</span></h1>
+    <button class="topic-now" type="button" id="topicNow" aria-label="Change topic"></button>
   </header>
 
   <div class="stage">
@@ -432,128 +483,257 @@
 </dialog>
 
 <script>
-// [type, emoji, question, follow-up]
+// Topics, in the order "All" shows them. Each question keeps its number (and its audio clips) whatever its topic.
+const TOPICS = [
+  { id: 'magic',   name: 'Superpowers & Magic', color: '#c9a7ff' },
+  { id: 'animals', name: 'Animals & Nature',    color: '#7ed957' },
+  { id: 'places',  name: 'Places & Adventures', color: '#8fd3ff' },
+  { id: 'friends', name: 'Friends & Feelings',  color: '#ff90e8' },
+  { id: 'family',  name: 'Family & Home',       color: '#ffb26b' },
+  { id: 'me',      name: 'Me & My Dreams',      color: '#ffd23f' }
+];
+// [topic, type, emoji, question, follow-up]
 const PROMPTS = [
-  ["WOULD YOU RATHER", "🦅", "Would you rather be able to fly or be invisible?", "Where's the first place you'd go?"],
-  ["WHAT IF", "🐶", "What if your pet could talk for one day?", "What do you think it would complain about?"],
-  ["TELL ME", "😄", "What made you laugh the hardest this week?", "Can you act it out for me?"],
-  ["IMAGINE", "🚀", "If you could visit any planet, which one would you pick?", "What would you pack for the trip?"],
-  ["BIG QUESTION", "🤝", "What makes someone a really good friend?", "When were you a good friend to someone?"],
-  ["WOULD YOU RATHER", "🐉", "Would you rather have a pet dragon or a pet unicorn?", "What would you name it, and what would it eat?"],
-  ["WHAT IF", "🏫", "What if you were the teacher for a day?", "What would you teach, and what new rule would you make?"],
-  ["TELL ME", "💪", "What's something you're really good at?", "How did you get so good at it?"],
-  ["IMAGINE", "🍦", "If you invented a new ice cream flavor, what would it be?", "What would you call it?"],
-  ["WOULD YOU RATHER", "🌊", "Would you rather live under the sea or on the moon?", "What would you miss most about home?"],
-  ["WHAT IF", "📏", "What if you woke up three inches tall?", "How would you get your breakfast?"],
-  ["TELL ME", "🏔️", "What's something hard you did that made you proud?", "What helped you keep going?"],
-  ["IMAGINE", "🎨", "If you could have any job when you grow up, what would it be?", "What would a normal day at work look like?"],
-  ["BIG QUESTION", "😊", "What's one thing that always makes you happy?", "Could we do it together this week?"],
-  ["WOULD YOU RATHER", "🗣️", "Would you rather talk to animals or speak every language?", "Who would you talk to first, and what would you say?"],
-  ["WHAT IF", "💰", "What if you found a million dollars?", "Who would you share it with?"],
-  ["TELL ME", "💛", "Who was kind to you lately?", "How could you be kind to someone tomorrow?"],
-  ["IMAGINE", "🎬", "If your life were a movie, what would it be called?", "Who would play you?"],
-  ["WOULD YOU RATHER", "⏳", "Would you rather go back in time or into the future?", "What year would you pick, and why?"],
-  ["WHAT IF", "🎉", "What if you could invent a brand-new holiday?", "How would everyone celebrate it?"],
-  ["TELL ME", "🌟", "What's your favorite memory from this year?", "What made it so special?"],
-  ["IMAGINE", "🦸", "If you had a superpower just for helping people, what would it be?", "Who would you help first?"],
-  ["WOULD YOU RATHER", "🧸", "Would you rather your toys come alive or your drawings come alive?", "Which one would cause more trouble?"],
-  ["WHAT IF", "🛏️", "What if you could design your dream bedroom?", "What's the one wild thing it would have?"],
-  ["TELL ME", "🌧️", "What's something that worries you sometimes?", "What helps you feel better when it does?"],
-  ["BIG QUESTION", "🌍", "If you could change one thing about the world, what would it be?", "What's one small step we could take?"],
-  ["WOULD YOU RATHER", "🍕", "Would you rather eat only pizza forever or never have dessert again?", "What food would you rescue if all the others disappeared?"],
-  ["WHAT IF", "🦖", "What if dinosaurs still lived today?", "Which one would you want as a neighbor?"],
-  ["IMAGINE", "🧙", "If you were a wizard for a day, what spell would you cast first?", "What would go wrong?"],
-  ["BIG QUESTION", "❤️", "What's something you love about our family?", "What's something new we should try together?"],
-  ["WOULD YOU RATHER", "🐙", "Would you rather have eight arms like an octopus or a tail like a monkey?", "What's the first thing you'd do with them?"],
-  ["WHAT IF", "🌙", "What if you could stay up as late as you wanted for a whole week?", "What would you do at midnight?"],
-  ["TELL ME", "🎒", "What's the best part of your school day?", "And what's the hardest part?"],
-  ["IMAGINE", "🏝️", "If you were stuck on an island, what three things would you bring?", "Who would you want there with you?"],
-  ["BIG QUESTION", "🦁", "What does it mean to be brave?", "When have you been brave?"],
-  ["WOULD YOU RATHER", "🌋", "Would you rather explore a volcano or a deep, dark cave?", "What do you think you'd find?"],
-  ["WHAT IF", "👽", "What if an alien landed in our backyard?", "What would you show it first?"],
-  ["TELL ME", "🎮", "What's your favorite game to play right now?", "Can you teach me how to play?"],
-  ["IMAGINE", "🎢", "If you built your own theme park, what would the best ride be?", "What would you name the park?"],
-  ["BIG QUESTION", "🙏", "What are three things you're thankful for today?", "Which one would you never trade?"],
-  ["WOULD YOU RATHER", "❄️", "Would you rather it snowed every day or was summer all year?", "What would you do on the very first day?"],
-  ["WHAT IF", "🔁", "What if you and I switched places for a day?", "What would you make me do?"],
-  ["TELL ME", "📚", "What's the best story you've ever read or heard?", "Which character would you want to be?"],
-  ["IMAGINE", "🤖", "If you had a robot helper, what job would you give it?", "What would you name it?"],
-  ["BIG QUESTION", "🫂", "What do you do when a friend is sad?", "What helps you when you're sad?"],
-  ["WOULD YOU RATHER", "🐘", "Would you rather be as big as an elephant or as tiny as an ant?", "What would be the best part?"],
-  ["WHAT IF", "⏸️", "What if you could pause time?", "What would you do while everyone was frozen?"],
-  ["TELL ME", "🤪", "What's the silliest thing that's ever happened to you?", "Who was there to see it?"],
-  ["IMAGINE", "🍳", "If you ran a restaurant, what would be on the menu?", "What would the special of the day be?"],
-  ["BIG QUESTION", "🌱", "What's something you want to get better at?", "What's one small way you could practice?"],
-  ["WOULD YOU RATHER", "🐬", "Would you rather swim with dolphins or ride a camel in the desert?", "What would you bring along?"],
-  ["WHAT IF", "🏎️", "What if you could run as fast as a car?", "Where would you race to first?"],
-  ["TELL ME", "👫", "Who is your best friend, and what makes them great?", "What's your favorite thing to do together?"],
-  ["IMAGINE", "🎸", "If you started a band, what would it be called?", "What instrument would you play?"],
-  ["BIG QUESTION", "🏡", "What makes our home a happy place?", "What could make it even happier?"],
-  ["WOULD YOU RATHER", "🧭", "Would you rather be a famous explorer or a famous inventor?", "What would you discover or invent?"],
-  ["WHAT IF", "🧠", "What if you could read minds for a day?", "Whose mind would you read first?"],
-  ["TELL ME", "🍽️", "What's your favorite meal that we make at home?", "What should we cook together next?"],
-  ["IMAGINE", "🗺️", "If you could travel anywhere in the world, where would you go?", "What would you want to see there?"],
-  ["BIG QUESTION", "🤗", "What's the nicest thing someone has ever said to you?", "How did it make you feel?"],
-  ["WOULD YOU RATHER", "🧁", "Would you rather bake a giant cake or build a giant fort?", "Who would you invite?"],
-  ["WHAT IF", "🍬", "What if candy grew on trees?", "What would you plant in our yard?"],
-  ["TELL ME", "💭", "What do you like to dream about?", "What's the weirdest dream you've ever had?"],
-  ["IMAGINE", "🧞", "If you had three wishes, what would they be?", "Which one would you use first?"],
-  ["BIG QUESTION", "⭐", "What makes you special?", "What do you think makes me special?"],
-  ["WOULD YOU RATHER", "🎈", "Would you rather travel by hot air balloon or by submarine?", "Where would you go?"],
-  ["WHAT IF", "🌳", "What if trees could talk?", "What would the oldest tree tell us?"],
-  ["TELL ME", "👶", "What do you remember about being really little?", "What do you think you were like?"],
-  ["IMAGINE", "🏅", "If you could win a gold medal for anything, what would it be for?", "What would your victory dance look like?"],
-  ["BIG QUESTION", "💌", "If you could say thank you to anyone, who would it be?", "Should we tell them this week?"],
-  ["WOULD YOU RATHER", "🦒", "Would you rather have a neck as long as a giraffe's or ears as big as an elephant's?", "How would it change your day?"],
-  ["WHAT IF", "🔮", "What if you could see one day into the future?", "What would you want to know?"],
-  ["TELL ME", "🎁", "What's the best gift you've ever given someone?", "How did they react?"],
-  ["IMAGINE", "✍️", "If you wrote a book, what would it be about?", "Who would be the main character?"],
-  ["BIG QUESTION", "👂", "What does it mean to be a good listener?", "Who's a really good listener in your life?"],
-  ["WOULD YOU RATHER", "🏕️", "Would you rather camp in a tent in the woods or sleep in a castle tower?", "What would the best part be?"],
-  ["WHAT IF", "🪐", "What if gravity turned off for an hour?", "What would float away first?"],
-  ["TELL ME", "🪀", "What's your favorite thing you own?", "Why is it so special to you?"],
-  ["IMAGINE", "🏙️", "If you were the mayor of our town, what would you change?", "What new place would you build?"],
-  ["BIG QUESTION", "🧗", "What's something that's hard for you but easy for other people?", "What's something easy for you that's hard for others?"],
-  ["WOULD YOU RATHER", "🐸", "Would you rather jump like a frog or climb walls like a gecko?", "Where would you go first?"],
-  ["WHAT IF", "📱", "What if there were no screens for a whole month?", "What would you do instead?"],
-  ["TELL ME", "💡", "What's something new you learned this week?", "Can you teach it to me?"],
-  ["IMAGINE", "🐣", "If you could be any animal for a day, which would you be?", "What would you do first?"],
-  ["BIG QUESTION", "🤝", "What should you do if you see someone being left out?", "Have you ever done that?"],
-  ["WOULD YOU RATHER", "🎤", "Would you rather sing in front of a huge crowd or dance in front of your whole school?", "What song would you pick?"],
-  ["WHAT IF", "💧", "What if it rained something other than water?", "What would you want it to rain?"],
-  ["TELL ME", "🎂", "What was your favorite birthday ever?", "What made it so good?"],
-  ["IMAGINE", "🕰️", "If you could meet anyone from history, who would it be?", "What would you ask them?"],
-  ["BIG QUESTION", "⚽", "What does it mean to be a good sport?", "When is it hard to be one?"],
-  ["WOULD YOU RATHER", "🕹️", "Would you rather live inside a cartoon or inside a video game?", "Which character would you hang out with?"],
-  ["WHAT IF", "🚐", "What if our house could drive anywhere?", "Where would we park it first?"],
-  ["TELL ME", "🏆", "Who is your hero?", "What do you admire most about them?"],
-  ["IMAGINE", "🛝", "If you designed a brand-new playground, what would it have?", "What would the best part be?"],
-  ["BIG QUESTION", "🎀", "Which is better: giving a present or getting one?", "Why do you think so?"],
-  ["WOULD YOU RATHER", "🦉", "Would you rather stay awake all night like an owl or sleep all winter like a bear?", "What would you do while everyone else was asleep?"],
-  ["WHAT IF", "👻", "What if you met a friendly ghost?", "What would you ask it?"],
-  ["TELL ME", "😠", "What's something that makes you really mad?", "What helps you calm down?"],
-  ["IMAGINE", "🌌", "If you could name a star, what would you call it?", "Why that name?"],
-  ["BIG QUESTION", "🧩", "Why do you think people are so different from each other?", "What's something that makes you different?"],
-  ["WOULD YOU RATHER", "🥦", "Would you rather eat a bowl of broccoli or a spoonful of hot sauce?", "What's the strangest food you've ever tried?"],
-  ["WHAT IF", "🎶", "What if you could only talk by singing for a whole day?", "What would you sing first?"],
-  ["TELL ME", "✈️", "What's your favorite trip we've taken together?", "Where should we go next?"],
-  ["IMAGINE", "🎭", "If you designed your own superhero costume, what would it look like?", "What would your superhero name be?"],
-  ["BIG QUESTION", "💛", "How do you know when someone loves you?", "How do you show people you love them?"],
-  ["WOULD YOU RATHER", "🚁", "Would you rather drive a race car or fly a helicopter?", "Who would you take for a ride?"],
-  ["WHAT IF", "🗳️", "What if animals could vote?", "Which animal would be president?"],
-  ["TELL ME", "🧱", "What's your favorite thing to make or build?", "What would you build if you had all the supplies in the world?"],
-  ["IMAGINE", "📺", "If you had your own TV show, what would it be about?", "Who would be your first guest?"],
-  ["BIG QUESTION", "🤫", "Is it ever okay to keep a secret?", "What would you do if a secret made you feel worried?"],
-  ["WOULD YOU RATHER", "🐟", "Would you rather have a dog that can fly or a fish that can walk?", "What would you name it?"],
-  ["WHAT IF", "🖍️", "What if you could invent a brand-new color?", "What would you call it?"],
-  ["TELL ME", "🐛", "What's the coolest animal or bug you've ever seen up close?", "Where did you see it?"],
-  ["IMAGINE", "🌲", "If you lived in a treehouse, what would it have inside?", "Who would be allowed in?"],
-  ["BIG QUESTION", "🧑", "What do you want to be like when you're a grown-up?", "What do you want to stay the same about you?"],
-  ["WOULD YOU RATHER", "☔", "Would you rather spend a rainy day inside playing games or a sunny day at the beach?", "What would we do first?"],
-  ["WHAT IF", "🕷️", "What if you could walk on walls and ceilings?", "Where would you go first?"],
-  ["TELL ME", "😴", "What's the best part of your bedtime?", "What would make bedtime even better?"],
-  ["IMAGINE", "📜", "If you could make one rule that everyone in the world had to follow, what would it be?", "Why that rule?"],
-  ["BIG QUESTION", "🕊️", "What does it mean to forgive someone?", "Is it easy or hard for you?"]
+  ["magic", "WOULD YOU RATHER", "🦅", "Would you rather be able to fly or be invisible?", "Where's the first place you'd go?"],
+  ["animals", "WHAT IF", "🐶", "What if your pet could talk for one day?", "What do you think it would complain about?"],
+  ["friends", "TELL ME", "😄", "What made you laugh the hardest this week?", "Can you act it out for me?"],
+  ["places", "IMAGINE", "🚀", "If you could visit any planet, which one would you pick?", "What would you pack for the trip?"],
+  ["friends", "BIG QUESTION", "🤝", "What makes someone a really good friend?", "When were you a good friend to someone?"],
+  ["animals", "WOULD YOU RATHER", "🐉", "Would you rather have a pet dragon or a pet unicorn?", "What would you name it, and what would it eat?"],
+  ["me", "WHAT IF", "🏫", "What if you were the teacher for a day?", "What would you teach, and what new rule would you make?"],
+  ["me", "TELL ME", "💪", "What's something you're really good at?", "How did you get so good at it?"],
+  ["me", "IMAGINE", "🍦", "If you invented a new ice cream flavor, what would it be?", "What would you call it?"],
+  ["places", "WOULD YOU RATHER", "🌊", "Would you rather live under the sea or on the moon?", "What would you miss most about home?"],
+  ["magic", "WHAT IF", "📏", "What if you woke up three inches tall?", "How would you get your breakfast?"],
+  ["me", "TELL ME", "🏔️", "What's something hard you did that made you proud?", "What helped you keep going?"],
+  ["me", "IMAGINE", "🎨", "If you could have any job when you grow up, what would it be?", "What would a normal day at work look like?"],
+  ["friends", "BIG QUESTION", "😊", "What's one thing that always makes you happy?", "Could we do it together this week?"],
+  ["animals", "WOULD YOU RATHER", "🗣️", "Would you rather talk to animals or speak every language?", "Who would you talk to first, and what would you say?"],
+  ["me", "WHAT IF", "💰", "What if you found a million dollars?", "Who would you share it with?"],
+  ["friends", "TELL ME", "💛", "Who was kind to you lately?", "How could you be kind to someone tomorrow?"],
+  ["me", "IMAGINE", "🎬", "If your life were a movie, what would it be called?", "Who would play you?"],
+  ["magic", "WOULD YOU RATHER", "⏳", "Would you rather go back in time or into the future?", "What year would you pick, and why?"],
+  ["me", "WHAT IF", "🎉", "What if you could invent a brand-new holiday?", "How would everyone celebrate it?"],
+  ["family", "TELL ME", "🌟", "What's your favorite memory from this year?", "What made it so special?"],
+  ["magic", "IMAGINE", "🦸", "If you had a superpower just for helping people, what would it be?", "Who would you help first?"],
+  ["magic", "WOULD YOU RATHER", "🧸", "Would you rather your toys come alive or your drawings come alive?", "Which one would cause more trouble?"],
+  ["family", "WHAT IF", "🛏️", "What if you could design your dream bedroom?", "What's the one wild thing it would have?"],
+  ["friends", "TELL ME", "🌧️", "What's something that worries you sometimes?", "What helps you feel better when it does?"],
+  ["me", "BIG QUESTION", "🌍", "If you could change one thing about the world, what would it be?", "What's one small step we could take?"],
+  ["family", "WOULD YOU RATHER", "🍕", "Would you rather eat only pizza forever or never have dessert again?", "What food would you rescue if all the others disappeared?"],
+  ["animals", "WHAT IF", "🦖", "What if dinosaurs still lived today?", "Which one would you want as a neighbor?"],
+  ["magic", "IMAGINE", "🧙", "If you were a wizard for a day, what spell would you cast first?", "What would go wrong?"],
+  ["family", "BIG QUESTION", "❤️", "What's something you love about our family?", "What's something new we should try together?"],
+  ["animals", "WOULD YOU RATHER", "🐙", "Would you rather have eight arms like an octopus or a tail like a monkey?", "What's the first thing you'd do with them?"],
+  ["family", "WHAT IF", "🌙", "What if you could stay up as late as you wanted for a whole week?", "What would you do at midnight?"],
+  ["me", "TELL ME", "🎒", "What's the best part of your school day?", "And what's the hardest part?"],
+  ["places", "IMAGINE", "🏝️", "If you were stuck on an island, what three things would you bring?", "Who would you want there with you?"],
+  ["friends", "BIG QUESTION", "🦁", "What does it mean to be brave?", "When have you been brave?"],
+  ["animals", "WOULD YOU RATHER", "🌋", "Would you rather explore a volcano or a deep, dark cave?", "What do you think you'd find?"],
+  ["magic", "WHAT IF", "👽", "What if an alien landed in our backyard?", "What would you show it first?"],
+  ["me", "TELL ME", "🎮", "What's your favorite game to play right now?", "Can you teach me how to play?"],
+  ["places", "IMAGINE", "🎢", "If you built your own theme park, what would the best ride be?", "What would you name the park?"],
+  ["family", "BIG QUESTION", "🙏", "What are three things you're thankful for today?", "Which one would you never trade?"],
+  ["animals", "WOULD YOU RATHER", "❄️", "Would you rather it snowed every day or was summer all year?", "What would you do on the very first day?"],
+  ["family", "WHAT IF", "🔁", "What if you and I switched places for a day?", "What would you make me do?"],
+  ["me", "TELL ME", "📚", "What's the best story you've ever read or heard?", "Which character would you want to be?"],
+  ["me", "IMAGINE", "🤖", "If you had a robot helper, what job would you give it?", "What would you name it?"],
+  ["friends", "BIG QUESTION", "🫂", "What do you do when a friend is sad?", "What helps you when you're sad?"],
+  ["animals", "WOULD YOU RATHER", "🐘", "Would you rather be as big as an elephant or as tiny as an ant?", "What would be the best part?"],
+  ["magic", "WHAT IF", "⏸️", "What if you could pause time?", "What would you do while everyone was frozen?"],
+  ["me", "TELL ME", "🤪", "What's the silliest thing that's ever happened to you?", "Who was there to see it?"],
+  ["me", "IMAGINE", "🍳", "If you ran a restaurant, what would be on the menu?", "What would the special of the day be?"],
+  ["me", "BIG QUESTION", "🌱", "What's something you want to get better at?", "What's one small way you could practice?"],
+  ["animals", "WOULD YOU RATHER", "🐬", "Would you rather swim with dolphins or ride a camel in the desert?", "What would you bring along?"],
+  ["magic", "WHAT IF", "🏎️", "What if you could run as fast as a car?", "Where would you race to first?"],
+  ["friends", "TELL ME", "👫", "Who is your best friend, and what makes them great?", "What's your favorite thing to do together?"],
+  ["me", "IMAGINE", "🎸", "If you started a band, what would it be called?", "What instrument would you play?"],
+  ["family", "BIG QUESTION", "🏡", "What makes our home a happy place?", "What could make it even happier?"],
+  ["places", "WOULD YOU RATHER", "🧭", "Would you rather be a famous explorer or a famous inventor?", "What would you discover or invent?"],
+  ["magic", "WHAT IF", "🧠", "What if you could read minds for a day?", "Whose mind would you read first?"],
+  ["family", "TELL ME", "🍽️", "What's your favorite meal that we make at home?", "What should we cook together next?"],
+  ["places", "IMAGINE", "🗺️", "If you could travel anywhere in the world, where would you go?", "What would you want to see there?"],
+  ["friends", "BIG QUESTION", "🤗", "What's the nicest thing someone has ever said to you?", "How did it make you feel?"],
+  ["family", "WOULD YOU RATHER", "🧁", "Would you rather bake a giant cake or build a giant fort?", "Who would you invite?"],
+  ["magic", "WHAT IF", "🍬", "What if candy grew on trees?", "What would you plant in our yard?"],
+  ["me", "TELL ME", "💭", "What do you like to dream about?", "What's the weirdest dream you've ever had?"],
+  ["magic", "IMAGINE", "🧞", "If you had three wishes, what would they be?", "Which one would you use first?"],
+  ["me", "BIG QUESTION", "⭐", "What makes you special?", "What do you think makes me special?"],
+  ["places", "WOULD YOU RATHER", "🎈", "Would you rather travel by hot air balloon or by submarine?", "Where would you go?"],
+  ["animals", "WHAT IF", "🌳", "What if trees could talk?", "What would the oldest tree tell us?"],
+  ["family", "TELL ME", "👶", "What do you remember about being really little?", "What do you think you were like?"],
+  ["me", "IMAGINE", "🏅", "If you could win a gold medal for anything, what would it be for?", "What would your victory dance look like?"],
+  ["friends", "BIG QUESTION", "💌", "If you could say thank you to anyone, who would it be?", "Should we tell them this week?"],
+  ["animals", "WOULD YOU RATHER", "🦒", "Would you rather have a neck as long as a giraffe's or ears as big as an elephant's?", "How would it change your day?"],
+  ["magic", "WHAT IF", "🔮", "What if you could see one day into the future?", "What would you want to know?"],
+  ["friends", "TELL ME", "🎁", "What's the best gift you've ever given someone?", "How did they react?"],
+  ["me", "IMAGINE", "✍️", "If you wrote a book, what would it be about?", "Who would be the main character?"],
+  ["friends", "BIG QUESTION", "👂", "What does it mean to be a good listener?", "Who's a really good listener in your life?"],
+  ["places", "WOULD YOU RATHER", "🏕️", "Would you rather camp in a tent in the woods or sleep in a castle tower?", "What would the best part be?"],
+  ["magic", "WHAT IF", "🪐", "What if gravity turned off for an hour?", "What would float away first?"],
+  ["me", "TELL ME", "🪀", "What's your favorite thing you own?", "Why is it so special to you?"],
+  ["places", "IMAGINE", "🏙️", "If you were the mayor of our town, what would you change?", "What new place would you build?"],
+  ["me", "BIG QUESTION", "🧗", "What's something that's hard for you but easy for other people?", "What's something easy for you that's hard for others?"],
+  ["animals", "WOULD YOU RATHER", "🐸", "Would you rather jump like a frog or climb walls like a gecko?", "Where would you go first?"],
+  ["family", "WHAT IF", "📱", "What if there were no screens for a whole month?", "What would you do instead?"],
+  ["me", "TELL ME", "💡", "What's something new you learned this week?", "Can you teach it to me?"],
+  ["animals", "IMAGINE", "🐣", "If you could be any animal for a day, which would you be?", "What would you do first?"],
+  ["friends", "BIG QUESTION", "🤝", "What should you do if you see someone being left out?", "Have you ever done that?"],
+  ["me", "WOULD YOU RATHER", "🎤", "Would you rather sing in front of a huge crowd or dance in front of your whole school?", "What song would you pick?"],
+  ["magic", "WHAT IF", "💧", "What if it rained something other than water?", "What would you want it to rain?"],
+  ["family", "TELL ME", "🎂", "What was your favorite birthday ever?", "What made it so good?"],
+  ["places", "IMAGINE", "🕰️", "If you could meet anyone from history, who would it be?", "What would you ask them?"],
+  ["friends", "BIG QUESTION", "⚽", "What does it mean to be a good sport?", "When is it hard to be one?"],
+  ["places", "WOULD YOU RATHER", "🕹️", "Would you rather live inside a cartoon or inside a video game?", "Which character would you hang out with?"],
+  ["places", "WHAT IF", "🚐", "What if our house could drive anywhere?", "Where would we park it first?"],
+  ["me", "TELL ME", "🏆", "Who is your hero?", "What do you admire most about them?"],
+  ["places", "IMAGINE", "🛝", "If you designed a brand-new playground, what would it have?", "What would the best part be?"],
+  ["friends", "BIG QUESTION", "🎀", "Which is better: giving a present or getting one?", "Why do you think so?"],
+  ["animals", "WOULD YOU RATHER", "🦉", "Would you rather stay awake all night like an owl or sleep all winter like a bear?", "What would you do while everyone else was asleep?"],
+  ["magic", "WHAT IF", "👻", "What if you met a friendly ghost?", "What would you ask it?"],
+  ["friends", "TELL ME", "😠", "What's something that makes you really mad?", "What helps you calm down?"],
+  ["magic", "IMAGINE", "🌌", "If you could name a star, what would you call it?", "Why that name?"],
+  ["friends", "BIG QUESTION", "🧩", "Why do you think people are so different from each other?", "What's something that makes you different?"],
+  ["family", "WOULD YOU RATHER", "🥦", "Would you rather eat a bowl of broccoli or a spoonful of hot sauce?", "What's the strangest food you've ever tried?"],
+  ["magic", "WHAT IF", "🎶", "What if you could only talk by singing for a whole day?", "What would you sing first?"],
+  ["family", "TELL ME", "✈️", "What's your favorite trip we've taken together?", "Where should we go next?"],
+  ["magic", "IMAGINE", "🎭", "If you designed your own superhero costume, what would it look like?", "What would your superhero name be?"],
+  ["friends", "BIG QUESTION", "💛", "How do you know when someone loves you?", "How do you show people you love them?"],
+  ["places", "WOULD YOU RATHER", "🚁", "Would you rather drive a race car or fly a helicopter?", "Who would you take for a ride?"],
+  ["animals", "WHAT IF", "🗳️", "What if animals could vote?", "Which animal would be president?"],
+  ["me", "TELL ME", "🧱", "What's your favorite thing to make or build?", "What would you build if you had all the supplies in the world?"],
+  ["me", "IMAGINE", "📺", "If you had your own TV show, what would it be about?", "Who would be your first guest?"],
+  ["friends", "BIG QUESTION", "🤫", "Is it ever okay to keep a secret?", "What would you do if a secret made you feel worried?"],
+  ["animals", "WOULD YOU RATHER", "🐟", "Would you rather have a dog that can fly or a fish that can walk?", "What would you name it?"],
+  ["magic", "WHAT IF", "🖍️", "What if you could invent a brand-new color?", "What would you call it?"],
+  ["animals", "TELL ME", "🐛", "What's the coolest animal or bug you've ever seen up close?", "Where did you see it?"],
+  ["places", "IMAGINE", "🌲", "If you lived in a treehouse, what would it have inside?", "Who would be allowed in?"],
+  ["me", "BIG QUESTION", "🧑", "What do you want to be like when you're a grown-up?", "What do you want to stay the same about you?"],
+  ["family", "WOULD YOU RATHER", "☔", "Would you rather spend a rainy day inside playing games or a sunny day at the beach?", "What would we do first?"],
+  ["magic", "WHAT IF", "🕷️", "What if you could walk on walls and ceilings?", "Where would you go first?"],
+  ["family", "TELL ME", "😴", "What's the best part of your bedtime?", "What would make bedtime even better?"],
+  ["me", "IMAGINE", "📜", "If you could make one rule that everyone in the world had to follow, what would it be?", "Why that rule?"],
+  ["friends", "BIG QUESTION", "🕊️", "What does it mean to forgive someone?", "Is it easy or hard for you?"],
+  ["magic", "WOULD YOU RATHER", "🫧", "Would you rather breathe underwater or see in the dark?", "What would you explore first?"],
+  ["magic", "WHAT IF", "🪞", "What if your reflection could talk back?", "What would it say about you?"],
+  ["magic", "IMAGINE", "🧹", "If you had a flying broom, where would you fly at night?", "Who would you bring along?"],
+  ["magic", "WOULD YOU RATHER", "🔥", "Would you rather control fire or control water?", "What would you use it for?"],
+  ["magic", "WHAT IF", "🏢", "What if you could grow as tall as a building whenever you wanted?", "What would you look at from up there?"],
+  ["magic", "IMAGINE", "🗝️", "If you found a key that opened any door, which door would you open?", "What do you hope is behind it?"],
+  ["magic", "WOULD YOU RATHER", "🦘", "Would you rather jump over houses or run across water?", "Where would you go first?"],
+  ["magic", "WHAT IF", "🌀", "What if you could teleport anywhere, but only for five minutes?", "Where would you pop in?"],
+  ["magic", "IMAGINE", "🎩", "If you were a magician, what would your best trick be?", "Who would you trick first?"],
+  ["magic", "WHAT IF", "🍃", "What if you could understand every sound, even the wind?", "What do you think the wind would say?"],
+  ["magic", "WOULD YOU RATHER", "⏰", "Would you rather never have to sleep or never have to eat?", "What would you do with all that extra time?"],
+  ["magic", "IMAGINE", "🧪", "If you could make a magic potion, what would it do?", "What would you put in it?"],
+  ["magic", "WHAT IF", "👯", "What if you could make a copy of yourself?", "What job would you give your copy?"],
+  ["magic", "WOULD YOU RATHER", "💪", "Would you rather be super strong or super fast?", "How would you help someone with it?"],
+  ["magic", "IMAGINE", "🏰", "If you had a magic castle that could appear anywhere, where would you put it?", "What secret room would it have?"],
+  ["magic", "WHAT IF", "🐝", "What if you could shrink small enough to ride on a bee?", "Where would you ask it to take you?"],
+  ["magic", "WOULD YOU RATHER", "🦎", "Would you rather change your size or change your color like a chameleon?", "When would you use it?"],
+  ["magic", "IMAGINE", "☁️", "If you could ride a cloud, where would it take you?", "What do you think a cloud would feel like?"],
+  ["magic", "WHAT IF", "🍫", "What if everything you touched turned to chocolate?", "What's the first thing you'd touch on purpose?"],
+  ["animals", "WOULD YOU RATHER", "🐧", "Would you rather be a penguin in the snow or a parrot in the jungle?", "What would your day be like?"],
+  ["animals", "WHAT IF", "🐢", "What if you could ride a giant turtle across the ocean?", "Where would you go?"],
+  ["animals", "TELL ME", "🐕", "What's your favorite animal, and why?", "What's one cool fact you know about it?"],
+  ["animals", "IMAGINE", "🦁", "If you ran a zoo, what animals would you have?", "How would you keep them happy?"],
+  ["animals", "BIG QUESTION", "🌍", "Why do you think we should take care of nature?", "What's one thing we can do to help?"],
+  ["animals", "WOULD YOU RATHER", "🐈", "Would you rather be a busy bee or a lazy cat?", "What would you do all day?"],
+  ["animals", "WHAT IF", "🐦", "What if birds could talk to us?", "What do you think they'd tell us?"],
+  ["animals", "TELL ME", "🌸", "What's your favorite thing to do outside?", "What should we do outside this weekend?"],
+  ["animals", "IMAGINE", "🔍", "If you discovered a new animal, what would it look like?", "What would you name it?"],
+  ["animals", "BIG QUESTION", "🐾", "Do you think animals have feelings?", "How can you tell when an animal is happy?"],
+  ["animals", "WOULD YOU RATHER", "🦈", "Would you rather swim with sharks in a cage or hold a big snake?", "How brave would you feel?"],
+  ["animals", "WHAT IF", "🐜", "What if ants were as big as dogs?", "Would you want one as a pet?"],
+  ["animals", "TELL ME", "🌦️", "What's your favorite kind of weather?", "What do you love to do in it?"],
+  ["animals", "IMAGINE", "🌻", "If you had a giant garden, what would you grow?", "What would you do with it all?"],
+  ["animals", "BIG QUESTION", "🌊", "Why do you think the ocean is so important?", "What would you like to learn about it?"],
+  ["animals", "WOULD YOU RATHER", "🦓", "Would you rather have stripes like a zebra or spots like a leopard?", "What color would you pick?"],
+  ["animals", "WHAT IF", "🐋", "What if you could talk with a whale?", "What would you ask it?"],
+  ["animals", "TELL ME", "🍂", "What's your favorite season?", "What's the best thing about it?"],
+  ["animals", "IMAGINE", "🧬", "If you could mix two animals together, which would you pick?", "What could your new animal do?"],
+  ["animals", "WOULD YOU RATHER", "🐿️", "Would you rather live in a tree like a squirrel or underground like a rabbit?", "What would your home look like?"],
+  ["animals", "WHAT IF", "⛈️", "What if you could choose the weather for a day?", "What weather would you make?"],
+  ["animals", "TELL ME", "🪴", "Have you ever taken care of a plant or an animal?", "What did you learn from it?"],
+  ["animals", "BIG QUESTION", "🦋", "What's the most amazing thing about nature?", "Where have you seen it?"],
+  ["places", "WOULD YOU RATHER", "🏔️", "Would you rather climb the tallest mountain or explore the biggest jungle?", "What would you pack?"],
+  ["places", "WHAT IF", "🛰️", "What if you lived on a space station?", "What would you miss most about Earth?"],
+  ["places", "TELL ME", "📍", "What's the coolest place you've ever been?", "What made it so cool?"],
+  ["places", "IMAGINE", "🏗️", "If you could build a city anywhere, where would it be?", "What would you call it?"],
+  ["places", "WOULD YOU RATHER", "🚂", "Would you rather take a train across the country or a boat across the ocean?", "Who would you bring?"],
+  ["places", "WHAT IF", "👑", "What if you lived in a real castle?", "Which room would be yours?"],
+  ["places", "TELL ME", "🏞️", "What's your favorite place in our town?", "Why do you like it so much?"],
+  ["places", "IMAGINE", "🛸", "If you visited a planet with aliens, what would they be like?", "What would you bring them as a gift?"],
+  ["places", "WOULD YOU RATHER", "🗼", "Would you rather visit Paris or Tokyo?", "What would you want to see there?"],
+  ["places", "WHAT IF", "🕳️", "What if you found a secret tunnel under our house?", "Where do you think it would lead?"],
+  ["places", "TELL ME", "🧭", "Have you ever gotten lost?", "How did you find your way?"],
+  ["places", "IMAGINE", "🏴‍☠️", "If you were a pirate captain, what would your ship be called?", "What treasure would you look for?"],
+  ["places", "WOULD YOU RATHER", "🌴", "Would you rather live on a tropical island or in a snowy cabin?", "What would you do all day?"],
+  ["places", "WHAT IF", "🛶", "What if we took a canoe trip down a long river?", "What do you think we'd see?"],
+  ["places", "IMAGINE", "🚢", "If you designed your own cruise ship, what would it have?", "What would the best part be?"],
+  ["places", "WOULD YOU RATHER", "🎡", "Would you rather spend a day at a carnival or a day at a water park?", "What's the first ride you'd go on?"],
+  ["places", "WHAT IF", "🔴", "What if you were the first kid on Mars?", "What would you do first?"],
+  ["places", "TELL ME", "🥾", "What's the best adventure you've ever had?", "What made it an adventure?"],
+  ["places", "IMAGINE", "🔭", "If you were an explorer, what would you want to discover?", "What would you name it?"],
+  ["places", "WOULD YOU RATHER", "🌆", "Would you rather explore a big city or a quiet forest?", "What would you look for?"],
+  ["places", "WHAT IF", "💎", "What if you found a real treasure map?", "Who would you take with you to find it?"],
+  ["places", "TELL ME", "🚗", "What's the best part of a long car ride?", "What's the hardest part?"],
+  ["places", "IMAGINE", "🛻", "If you could drive any vehicle on a road trip, what would it be?", "Where would we go?"],
+  ["places", "WOULD YOU RATHER", "🏛️", "Would you rather visit a dinosaur museum or a space museum?", "What would you look for first?"],
+  ["places", "WHAT IF", "🧊", "What if you visited the North Pole?", "What would you do there?"],
+  ["friends", "TELL ME", "🥰", "What's something a friend did that made you feel good?", "How did you thank them?"],
+  ["friends", "BIG QUESTION", "🤔", "What should you do if you and a friend disagree?", "What's a good way to make up?"],
+  ["friends", "WOULD YOU RATHER", "🎉", "Would you rather have one best friend or lots of good friends?", "Why?"],
+  ["friends", "TELL ME", "😳", "What's something that makes you feel shy?", "What helps you feel braver?"],
+  ["friends", "BIG QUESTION", "🙌", "What does it mean to be a good teammate?", "When have you been one?"],
+  ["friends", "IMAGINE", "📕", "If you could be friends with a character from any book or movie, who would it be?", "What would you do together?"],
+  ["friends", "TELL ME", "😢", "What's something that made you sad this week?", "What helped you feel better?"],
+  ["friends", "BIG QUESTION", "🗣️", "Why is it important to say sorry?", "Is it hard for you to say?"],
+  ["friends", "WHAT IF", "💬", "What if everyone said exactly what they were feeling?", "Would that be good or bad?"],
+  ["friends", "TELL ME", "🎭", "What's a feeling you had today?", "What made you feel that way?"],
+  ["friends", "BIG QUESTION", "🧡", "What's the kindest thing you've ever seen someone do?", "How did it make you feel?"],
+  ["friends", "WOULD YOU RATHER", "📓", "Would you rather help a friend with homework or cheer them up when they're sad?", "Which do you think matters more?"],
+  ["friends", "TELL ME", "👋", "How do you make a new friend?", "What's the first thing you'd say?"],
+  ["friends", "BIG QUESTION", "😤", "What do you do when you feel frustrated?", "What helps the most?"],
+  ["friends", "IMAGINE", "✉️", "If you wrote a note to a friend, what would it say?", "Who would you give it to?"],
+  ["friends", "TELL ME", "😆", "Who makes you laugh the most?", "What do they do that's so funny?"],
+  ["friends", "BIG QUESTION", "⚖️", "What does it mean to be fair?", "When is it hard to be fair?"],
+  ["friends", "WHAT IF", "🎈", "What if you gave everyone in your class a compliment?", "What would you say to the person next to you?"],
+  ["friends", "TELL ME", "🫶", "Who do you feel safe talking to?", "What makes them easy to talk to?"],
+  ["friends", "BIG QUESTION", "🌟", "What's one way you can be a good friend tomorrow?", "Who will you try it with?"],
+  ["family", "TELL ME", "👵", "What's your favorite thing to do with your grandparents?", "What would you like to ask them?"],
+  ["family", "WOULD YOU RATHER", "🍿", "Would you rather have a family movie night or a family game night?", "What would we watch or play?"],
+  ["family", "IMAGINE", "🚪", "If you could add one room to our house, what would it be?", "What would we do in it?"],
+  ["family", "TELL ME", "📸", "What's your favorite family photo?", "What do you remember about that day?"],
+  ["family", "WHAT IF", "🧑‍🍳", "What if you were in charge of dinner for a week?", "What would we eat?"],
+  ["family", "BIG QUESTION", "🤲", "What's one way you help our family?", "What's one new way you could help?"],
+  ["family", "TELL ME", "🎄", "What's your favorite holiday tradition?", "What new tradition should we start?"],
+  ["family", "WOULD YOU RATHER", "🥞", "Would you rather have pancakes or waffles every Saturday?", "What toppings would you pick?"],
+  ["family", "IMAGINE", "🐕‍🦺", "If our family got a new pet, what should it be?", "What would you name it?"],
+  ["family", "TELL ME", "🧹", "What's your least favorite chore?", "How could we make it more fun?"],
+  ["family", "WHAT IF", "📅", "What if every Sunday were family adventure day?", "What should our first adventure be?"],
+  ["family", "BIG QUESTION", "👨‍👩‍👧", "What makes someone part of a family?", "Who feels like family to you?"],
+  ["family", "TELL ME", "🤣", "What's the funniest thing that's happened in our family?", "Who laughed the hardest?"],
+  ["family", "WOULD YOU RATHER", "🏨", "Would you rather go camping as a family or stay in a fancy hotel?", "What would we do first?"],
+  ["family", "IMAGINE", "🛡️", "If our family had its own flag, what would be on it?", "What would our family motto be?"],
+  ["family", "TELL ME", "🎵", "What song reminds you of our family?", "When do we sing or play it?"],
+  ["family", "WHAT IF", "🍪", "What if we opened a family bakery?", "What would be our best seller?"],
+  ["family", "BIG QUESTION", "💝", "How can we show each other we care, even on busy days?", "What's something small you'd like more of?"],
+  ["family", "TELL ME", "🌅", "What's your favorite part of the weekend?", "What should we do this weekend?"],
+  ["family", "WOULD YOU RATHER", "🧺", "Would you rather have a picnic in the park or breakfast in bed?", "What would we eat?"],
+  ["family", "IMAGINE", "🎬", "If our family were in a movie, who would play each of us?", "What would the movie be about?"],
+  ["family", "TELL ME", "🧑‍🏫", "What's something you'd like to learn from me?", "What could you teach me?"],
+  ["family", "BIG QUESTION", "🕯️", "What does home feel like to you?", "What's your favorite spot in our house?"],
+  ["me", "TELL ME", "📝", "What's your favorite subject at school?", "What makes it fun?"],
+  ["me", "IMAGINE", "🏫", "If you could design your own school, what would you learn there?", "What would lunch be like?"],
+  ["me", "WOULD YOU RATHER", "🎹", "Would you rather learn to play the piano or learn to skateboard?", "How would you practice?"],
+  ["me", "BIG QUESTION", "🌤️", "What's something you used to be afraid of but aren't anymore?", "How did you get over it?"],
+  ["me", "TELL ME", "🔤", "What are three words that describe you?", "Which one do you like best?"],
+  ["me", "WHAT IF", "🗓️", "What if you could plan your whole day tomorrow?", "What would you do first?"],
+  ["me", "IMAGINE", "🎯", "If you could learn any skill instantly, what would it be?", "What would you do with it?"],
+  ["me", "TELL ME", "📈", "What's something you've gotten better at this year?", "How did you do it?"],
+  ["me", "BIG QUESTION", "🪞", "What makes you feel most like yourself?", "When do you feel that way?"],
+  ["me", "WOULD YOU RATHER", "🖊️", "Would you rather write a story or draw a comic?", "What would it be about?"]
 ];
 
 const card = document.getElementById('card');
@@ -566,9 +746,13 @@ const els = {
   counter: document.getElementById('counter')
 };
 
-// Start where the link says (#7 opens question 7), otherwise at the first one
-let index = Math.min(Math.max((parseInt(location.hash.slice(1), 10) || 1) - 1, 0), PROMPTS.length - 1);
+// A link to a question (#7) opens it in its topic; otherwise the page starts on the topic screen
+const linked = parseInt(location.hash.slice(1), 10);
+let index = linked >= 1 && linked <= PROMPTS.length ? linked - 1 : 0;
 let flipped = false;
+let topic = PROMPTS[index][0];
+let deck = [];   // question numbers (0-based) in the chosen topic, in order
+const topicOf = id => TOPICS.find(t => t.id === id);
 
 function setFlipped(next){
   flipped = next;
@@ -578,16 +762,16 @@ function setFlipped(next){
 }
 
 function show(i){
-  index = (i + PROMPTS.length) % PROMPTS.length;
+  index = i;
   // Turn the card back to its front with no animation first, so the next follow-up never shows mid-flip
   card.classList.add('instant');
   setFlipped(false);
-  const [type, emoji, question, follow] = PROMPTS[index];
+  const [, type, emoji, question, follow] = PROMPTS[index];
   els.tag.textContent = type;
   els.emoji.textContent = emoji;
   els.question.textContent = question;
   els.follow.textContent = follow;
-  els.counter.innerHTML = '<b>' + (index + 1) + '</b> / ' + PROMPTS.length;
+  els.counter.innerHTML = '<b>' + (deck.indexOf(index) + 1) + '</b> / ' + deck.length;
   resetPick();
   speak();
   history.replaceState(null, '', '#' + (index + 1));
@@ -596,11 +780,15 @@ function show(i){
   card.classList.remove('instant');
   card.classList.add('pop');
 }
-const go = (delta) => show(index + delta);
+const go = (delta) => {
+  const at = deck.indexOf(index);
+  show(deck[(at + delta + deck.length) % deck.length]);
+};
 
 // Shuffle: jump to any other question
 document.getElementById('shuffle').addEventListener('click', () => {
-  show(index + 1 + Math.floor(Math.random() * (PROMPTS.length - 1)));
+  if (deck.length < 2) return;
+  go(1 + Math.floor(Math.random() * (deck.length - 1)));   // any other question in this topic
 });
 
 card.addEventListener('animationend', () => card.classList.remove('pop'));
@@ -614,6 +802,7 @@ document.getElementById('next').addEventListener('click', () => go(1));
 
 // Keyboard: arrows to move, space or enter flips (the card button handles those when focused)
 addEventListener('keydown', e => {
+  if (document.body.classList.contains('picking')) return;
   if (spinDlg.open) return;   // the spinner has its own focus; leave the card alone
   if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
@@ -812,7 +1001,56 @@ function setVoice(on){
 voiceBtn.addEventListener('click', () => setVoice(!voiceOn));
 voiceBtn.setAttribute('aria-pressed', String(voiceOn));
 
-show(index);
+// ---------- start screen: pick a topic ----------
+const TOPIC_EMOJI = { magic: '🪄', animals: '🐾', places: '🗺️', friends: '💛', family: '🏡', me: '🌟' };
+const topicsEl = document.getElementById('topics');
+const topicNow = document.getElementById('topicNow');
+document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
+  const n = PROMPTS.filter(p => p[0] === t.id).length;
+  return '<button class="topic-tile pop-in" type="button" data-topic="' + t.id + '" style="background:' + t.color +
+    '; animation-delay:' + (i * 40) + 'ms"><span class="t-emoji" aria-hidden="true">' + TOPIC_EMOJI[t.id] +
+    '</span><span class="t-name">' + t.name + '</span><span class="t-count">' + n + ' questions</span></button>';
+}).join('') +
+  '<button class="topic-tile random pop-in" type="button" data-topic="random" style="animation-delay:' + (TOPICS.length * 40) + 'ms">' +
+  '<span class="t-emoji" aria-hidden="true">🎲</span><span class="t-text"><span class="t-name">Random</span>' +
+  '<span class="t-count">All ' + PROMPTS.length + ' questions, mixed up</span></span></button>';
+
+function useTopic(id){
+  topic = id;
+  if (id === 'random') {
+    deck = PROMPTS.map((_, i) => i);
+    for (let i = deck.length - 1; i > 0; i--) {   // shuffle, new order every time
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    topicNow.innerHTML = '🎲 Random · <u>change</u>';
+    return;
+  }
+  deck = PROMPTS.map((p, i) => p[0] === id ? i : -1).filter(i => i >= 0);
+  topicNow.innerHTML = TOPIC_EMOJI[id] + ' ' + topicOf(id).name + ' · <u>change</u>';
+}
+function openTopics(){
+  voice.pause();
+  resetPick();
+  document.body.classList.add('picking');
+  topicsEl.hidden = false;
+  history.replaceState(null, '', location.pathname + location.search);
+}
+function chooseTopic(id){
+  useTopic(id);
+  topicsEl.hidden = true;
+  document.body.classList.remove('picking');
+  show(deck[0]);
+}
+document.getElementById('topicGrid').addEventListener('click', e => {
+  const tile = e.target.closest('.topic-tile');
+  if (tile) chooseTopic(tile.dataset.topic);
+});
+topicNow.addEventListener('click', openTopics);
+
+useTopic(topic);
+if (linked >= 1 && linked <= PROMPTS.length) show(index);
+else openTopics();
 </script>
 <script src="../projects-menu.js"></script>
 </body>

@@ -47,7 +47,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
 
     for n in nums or range(1, len(prompts) + 1):
-        _, _, question, follow = prompts[n - 1]
+        *_, question, follow = prompts[n - 1]   # [topic, type, emoji, question, follow-up]
         for part, text in (("question", question), ("follow", follow)):
             path = os.path.join(OUT, f"{n}-{part}.mp3")
             if os.path.exists(path) and not force:
