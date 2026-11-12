@@ -45,14 +45,16 @@
     align-items:center;
   }
 
-  header.top{width:100%; text-align:center; margin-bottom:18px; flex-shrink:0;}
-  header.top h1{
-    font-size:clamp(30px, 6vw, 46px);
-    margin:0 0 6px;
+  .nav-title{
+    grid-column:2;
+    font-size:clamp(23px, 5.4vw, 40px);
+    line-height:1;
+    margin:0;
     font-weight:900;
     letter-spacing:-0.5px;
+    white-space:nowrap;
   }
-  header.top h1 span{
+  .nav-title span{
     background:var(--blue);
     padding:2px 10px;
     border:3px solid var(--ink);
@@ -226,11 +228,27 @@
   .page-nav{
     align-self:stretch;
     flex-shrink:0;
-    display:flex;
+    display:grid;
+    --side:98px;   /* both side columns as wide as the right-hand pair, so the title is truly centered */
+    grid-template-columns:minmax(var(--side), 1fr) auto minmax(var(--side), 1fr);
     align-items:center;
-    gap:14px;
-    margin-bottom:12px;
+    gap:10px;
+    margin-bottom:22px;
   }
+  .page-nav .home-btn{justify-self:start;}
+  @media (max-width:400px){   /* phones: slightly smaller round buttons leave the title room */
+    .page-nav{--side:88px; gap:8px;}
+    .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:40px; height:40px;}
+    .nav-right{gap:8px;}
+  }
+  @media (max-width:350px){   /* the smallest phones */
+    .page-nav{--side:78px; gap:6px;}
+    .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:36px; height:36px;}
+    .nav-right{gap:6px;}
+    .nav-title{font-size:19px;}
+    .nav-title span{padding:2px 7px;}
+  }
+  .nav-right{grid-column:3; justify-self:end; display:flex; align-items:center; gap:10px;}
   @media (max-height:640px){
     .emoji{display:none;}
   }
@@ -245,9 +263,8 @@
       column-gap:20px;
       align-items:center;
     }
-    header.top{grid-column:1 / -1; margin-bottom:8px;}
-    header.top h1{font-size:26px;}
-    header.top h1 span{border-width:2.5px; box-shadow:3px 3px 0 var(--ink);}
+    .nav-title{font-size:24px;}
+    .nav-title span{border-width:2.5px; box-shadow:3px 3px 0 var(--ink);}
     .controls{display:contents;}
     #prev{grid-column:1; grid-row:2;}
     .stage{grid-column:2; grid-row:2; height:100%;}
@@ -255,7 +272,7 @@
     .arrow{width:68px; height:68px; box-shadow:4px 4px 0 var(--ink);}
     .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
     .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
-    .page-nav{margin-bottom:4px;}
+    .page-nav{margin-bottom:8px;}
     .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
     .line{font-size:22px;}
     .back .line{font-size:26px;}
@@ -307,7 +324,6 @@
   .players-btn svg, .voice-btn svg, .home-btn svg{width:58%; height:58%;}
   .home-btn{margin-left:0; background:var(--neutral-btn);}
   body.picking .home-btn{visibility:hidden;}   /* already on the topics */
-  .players-btn{margin-left:10px;}
   .voice-btn{background:var(--neutral-btn);}
   .voice-btn[aria-pressed="true"]{background:var(--yellow);}
   .voice-btn .waves, .voice-btn[aria-pressed="true"] .slash{display:none;}
@@ -391,6 +407,8 @@
   <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></svg>
   </button>
+  <h1 class="nav-title">Ice<span>Breaker</span></h1>
+  <div class="nav-right">
   <button class="voice-btn" id="voiceBtn" type="button" aria-pressed="false" aria-label="Read the questions out loud">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><g class="waves"><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></g><path class="slash" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
   </button>
@@ -398,18 +416,13 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c3 .1 5.5 2.3 5.5 5.7"/></svg>
     <span class="badge" id="playersBadge"></span>
   </button>
+  </div>
 </nav>
 <section class="topics" id="topics" hidden aria-labelledby="topicsTitle">
-  <header class="top">
-    <h1 id="topicsTitle">Ice<span>Breaker</span></h1>
-  </header>
-  <p class="lead">Pick a topic</p>
+  <p class="lead" id="topicsTitle">Pick a topic</p>
   <div class="topic-grid" id="topicGrid"></div>
 </section>
 <div class="wrap">
-  <header class="top">
-    <h1>Ice<span>Breaker</span></h1>
-  </header>
 
   <div class="stage">
     <button class="flip" id="card" type="button" aria-label="Flip the card for a follow-up question">
@@ -453,7 +466,7 @@
   <p class="sub">The card's border splits into a side for each player. Tap a new question to see who answers.</p>
   <div class="stepper">
     <button class="step-btn" type="button" id="fewer" aria-label="One fewer player">&minus;</button>
-    <div class="count" id="count" aria-live="polite">3</div>
+    <div class="count" id="count" aria-live="polite">4</div>
     <button class="step-btn" type="button" id="more" aria-label="One more player">+</button>
   </div>
   <button class="big-btn" type="button" id="playersGo">Let's play</button>
@@ -811,7 +824,7 @@ const sides = document.getElementById('sides');
 const front = card.querySelector('.front');
 const hint = document.getElementById('hintFront');
 const countEl = document.getElementById('count');
-let players = 0, draft = 3, picked = null, lit = 0, raffling = false, raffleTimer = null;
+let players = 0, draft = 4, picked = null, lit = 0, raffling = false, raffleTimer = null;
 try { players = parseInt(localStorage.getItem('icebreaker-players'), 10) || 0; } catch (e) {}
 if (players < MIN_PLAYERS || players > MAX_PLAYERS) players = 0;
 
@@ -939,7 +952,7 @@ function setPlayers(n){
   resetPick();
 }
 document.getElementById('playersBtn').addEventListener('click', () => {
-  draft = players || 3;
+  draft = players || 4;
   updateCount();
   document.getElementById('playersOff').hidden = !players;
   spinDlg.showModal();
