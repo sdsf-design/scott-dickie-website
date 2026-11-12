@@ -307,7 +307,39 @@
     padding-bottom:22px;
   }
   .topic-tile.random .t-text{display:flex; flex-direction:column; gap:4px;}
-  body.picking .topics .pop-in{animation:pop .3s ease both;}
+  body.picking .topics .pop-in{animation:pop .4s cubic-bezier(.3, 1.5, .5, 1) both;}
+  .topic-tile.chosen{transform:scale(1.07) rotate(-1.5deg); box-shadow:8px 8px 0 var(--ink);}
+
+  /* ---------- intro: the logo pops in mid-screen, then shrinks up into the top bar ---------- */
+  .splash{
+    position:fixed; inset:0; z-index:100; display:grid; place-items:center;
+    background:#f4ede1; transition:background-color .6s ease;
+  }
+  .splash.leaving{background-color:rgba(244, 237, 225, 0);}
+  .splash-logo{
+    font-size:clamp(48px, 13vw, 104px);
+    transform-origin:50% 50%;
+    animation:splash-in .8s cubic-bezier(.3, 1.6, .5, 1) backwards;
+  }
+  .splash-logo span{animation:splash-tilt .9s ease .35s backwards;}
+  @keyframes splash-in{
+    from{opacity:0; transform:scale(.3) rotate(-8deg);}
+    to{opacity:1; transform:none;}
+  }
+  @keyframes splash-tilt{
+    0%{transform:rotate(8deg);}
+    60%{transform:rotate(-5deg);}
+    100%{transform:rotate(-2deg);}
+  }
+  /* Until the logo starts moving, everything else waits; tiles hold their pop-in */
+  body.intro .page-nav > :not(.nav-title), body.intro .topics .lead, body.intro .wrap{opacity:0;}
+  body.landing .page-nav > :not(.nav-title), body.landing .topics .lead, body.landing .wrap{transition:opacity .5s ease .15s;}
+  body.intro .topic-tile{animation-play-state:paused;}
+  body.intro .page-nav .nav-title, body.landing .page-nav .nav-title{visibility:hidden;}
+
+  /* ---------- emoji explosion when a topic is picked ---------- */
+  .burst{position:fixed; inset:0; pointer-events:none; z-index:200; overflow:hidden;}
+  .burst span{position:absolute; line-height:1; will-change:transform, opacity;}
   @media (max-height:700px){
     .topic-tile{min-height:96px; padding:12px 14px;}
     .topic-tile .t-emoji{font-size:28px;}
@@ -402,7 +434,10 @@
   }
 </style>
 </head>
-<body>
+<body class="intro">
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="nav-title splash-logo">Ice<span>Breaker</span></div>
+</div>
 <nav class="page-nav">
   <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></svg>
@@ -752,7 +787,7 @@ function setFlipped(next){
   card.setAttribute('aria-label', flipped ? 'Flip the card back to the question' : 'Flip the card for a follow-up question');
 }
 
-function show(i){
+function show(i, quiet){
   index = i;
   // Turn the card back to its front with no animation first, so the next follow-up never shows mid-flip
   card.classList.add('instant');
@@ -764,7 +799,7 @@ function show(i){
   els.follow.textContent = follow;
   els.counter.innerHTML = '<b>' + (deck.indexOf(index) + 1) + '</b> / ' + deck.length;
   resetPick();
-  speak();
+  if (!quiet) speak();
   history.replaceState(null, '', '#' + (index + 1));
   card.classList.remove('pop');
   void card.offsetWidth;
@@ -999,10 +1034,10 @@ const homeBtn = document.getElementById('homeBtn');
 document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
   const n = PROMPTS.filter(p => p[0] === t.id).length;
   return '<button class="topic-tile pop-in" type="button" data-topic="' + t.id + '" style="background:' + t.color +
-    '; animation-delay:' + (i * 40) + 'ms"><span class="t-emoji" aria-hidden="true">' + TOPIC_EMOJI[t.id] +
+    '; animation-delay:' + (80 + i * 70) + 'ms"><span class="t-emoji" aria-hidden="true">' + TOPIC_EMOJI[t.id] +
     '</span><span class="t-name">' + t.name + '</span><span class="t-count">' + n + ' questions</span></button>';
 }).join('') +
-  '<button class="topic-tile random pop-in" type="button" data-topic="random" style="animation-delay:' + (TOPICS.length * 40) + 'ms">' +
+  '<button class="topic-tile random pop-in" type="button" data-topic="random" style="animation-delay:' + (80 + TOPICS.length * 70) + 'ms">' +
   '<span class="t-emoji" aria-hidden="true">🎲</span><span class="t-text"><span class="t-name">Random</span>' +
   '<span class="t-count">All ' + PROMPTS.length + ' questions, mixed up</span></span></button>';
 
@@ -1027,21 +1062,92 @@ function openTopics(){
   topicsEl.hidden = false;
   history.replaceState(null, '', location.pathname + location.search);
 }
-function chooseTopic(id){
+const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const BURST_EMOJI = {
+  magic:   ['🪄', '✨', '🔮', '⭐', '🧞', '🦄', '💫'],
+  animals: ['🐾', '🐶', '🦁', '🐸', '🦋', '🐢', '🌻'],
+  places:  ['🗺️', '🚀', '🏝️', '🏰', '🧭', '🎈', '🌋'],
+  friends: ['💛', '🤝', '😊', '🫶', '💬', '🌈', '🎉'],
+  family:  ['🏡', '❤️', '🍕', '🎂', '🧸', '🍿', '🥞'],
+  me:      ['🌟', '🎨', '🎸', '📚', '🏆', '💡', '🚲']
+};
+BURST_EMOJI.random = Object.values(BURST_EMOJI).flat();
+
+// Emojis fly out from (x, y), arc down a little and fade
+function burst(x, y, set){
+  const layer = document.createElement('div');
+  layer.className = 'burst';
+  document.body.appendChild(layer);
+  for (let n = 0; n < 34; n++) {
+    const e = document.createElement('span');
+    const size = 22 + Math.random() * 26;
+    e.textContent = set[Math.floor(Math.random() * set.length)];
+    e.style.cssText = 'left:' + x + 'px; top:' + y + 'px; font-size:' + size + 'px; margin:' + (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px;';
+    layer.appendChild(e);
+    const a = Math.random() * Math.PI * 2, d = 140 + Math.random() * Math.max(innerWidth, innerHeight) * .45;
+    const tx = Math.cos(a) * d, ty = Math.sin(a) * d - 60, spin = (Math.random() - .5) * 540;
+    e.animate([
+      { transform: 'translate(0, 0) scale(.2) rotate(0deg)', opacity: 1 },
+      { transform: `translate(${tx * .75}px, ${ty * .75}px) scale(1.15) rotate(${spin * .6}deg)`, opacity: 1, offset: .55 },
+      { transform: `translate(${tx}px, ${ty + 160}px) scale(.85) rotate(${spin}deg)`, opacity: 0 }
+    ], { duration: 1100 + Math.random() * 500, easing: 'cubic-bezier(.12, .75, .3, 1)', fill: 'forwards' });
+  }
+  setTimeout(() => layer.remove(), 1800);
+}
+
+let choosing = false;
+function chooseTopic(id, tile){
+  if (choosing) return;
   useTopic(id);
-  topicsEl.hidden = true;
-  document.body.classList.remove('picking');
-  show(deck[0]);
+  // Start the voice now, inside the tap, so iPhone lets it play
+  index = deck[0];
+  setFlipped(false);
+  speak();
+  const finish = () => {
+    topicsEl.hidden = true;
+    document.body.classList.remove('picking');
+    show(deck[0], true);
+    if (tile) tile.classList.remove('chosen');
+    choosing = false;
+  };
+  if (REDUCE_MOTION || !tile) return finish();
+  choosing = true;
+  tile.classList.add('chosen');
+  const r = tile.getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2, BURST_EMOJI[id]);
+  setTimeout(finish, 420);   // the card pops in while the emojis are still flying
 }
 document.getElementById('topicGrid').addEventListener('click', e => {
   const tile = e.target.closest('.topic-tile');
-  if (tile) chooseTopic(tile.dataset.topic);
+  if (tile) chooseTopic(tile.dataset.topic, tile);
 });
 homeBtn.addEventListener('click', openTopics);
 
 useTopic(topic);
 if (linked >= 1 && linked <= PROMPTS.length) show(index);
 else openTopics();
+
+// ---------- intro: logo pops in, then shrinks and flies to its spot in the top bar ----------
+(function intro(){
+  const splash = document.getElementById('splash');
+  const done = () => { splash.remove(); document.body.classList.remove('intro', 'landing'); };
+  if (REDUCE_MOTION) return done();
+  const logo = splash.querySelector('.splash-logo');
+  setTimeout(() => {
+    logo.getAnimations({ subtree: true }).forEach(an => an.finish());   // settle the pop-in before measuring
+    const to = document.querySelector('.page-nav .nav-title').getBoundingClientRect();
+    // Layout size and position, which ignore any transform still on the logo
+    const w = logo.offsetWidth, cx = logo.offsetLeft + w / 2, cy = logo.offsetTop + logo.offsetHeight / 2;
+    const dx = (to.left + to.width / 2) - cx;
+    const dy = (to.top + to.height / 2) - cy;
+    logo.style.transition = 'transform .75s cubic-bezier(.65, 0, .25, 1)';
+    logo.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + (to.width / w) + ')';
+    splash.classList.add('leaving');
+    document.body.classList.add('landing');
+    document.body.classList.remove('intro');   // tiles, buttons and card come in as the logo moves
+    setTimeout(done, 780);
+  }, 1150);
+})();
 </script>
 </body>
 </html>
