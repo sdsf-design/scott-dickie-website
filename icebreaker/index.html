@@ -222,7 +222,7 @@
   .counter{font-size:15px; font-weight:800; color:#777; text-align:center;}
   .counter b{color:var(--ink); font-size:20px;}
 
-  /* Top-left bar: projects menu first, then the way home */
+  /* Top bar: home (back to the topics) on the left, voice and players on the right */
   .page-nav{
     align-self:stretch;
     flex-shrink:0;
@@ -230,21 +230,6 @@
     align-items:center;
     gap:14px;
     margin-bottom:12px;
-  }
-  .site-link{
-    white-space:nowrap;
-    font-size:14px;
-    font-weight:800;
-    color:#777;
-    text-decoration:none;
-  }
-  .site-link:hover{color:var(--ink);}
-
-  /* Phones: the top bar holds the menu, the way home and two round buttons on one line */
-  @media (max-width:400px){
-    .page-nav{gap:10px;}
-    .site-link{font-size:13px;}
-    .players-btn{margin-left:8px;}
   }
   @media (max-height:640px){
     .emoji{display:none;}
@@ -261,7 +246,6 @@
       align-items:center;
     }
     header.top{grid-column:1 / -1; margin-bottom:8px;}
-    .topic-now{margin-top:2px; font-size:13px;}
     header.top h1{font-size:26px;}
     header.top h1 span{border-width:2.5px; box-shadow:3px 3px 0 var(--ink);}
     .controls{display:contents;}
@@ -272,7 +256,6 @@
     .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
     .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
     .page-nav{margin-bottom:4px;}
-    .site-link{font-size:13px;}
     .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
     .line{font-size:22px;}
     .back .line{font-size:26px;}
@@ -308,12 +291,6 @@
   }
   .topic-tile.random .t-text{display:flex; flex-direction:column; gap:4px;}
   body.picking .topics .pop-in{animation:pop .3s ease both;}
-  .topic-now{
-    appearance:none; border:0; background:none; font-family:inherit; cursor:pointer;
-    margin:8px 0 0; padding:2px 6px; font-size:14px; font-weight:800; color:#555;
-  }
-  .topic-now u{color:#888; text-underline-offset:3px;}
-  .topic-now:focus-visible{outline:3px dashed var(--ink); border-radius:6px;}
   @media (max-height:700px){
     .topic-tile{min-height:96px; padding:12px 14px;}
     .topic-tile .t-emoji{font-size:28px;}
@@ -321,13 +298,15 @@
   }
 
   /* ---------- players: the card's border is split into one colored side per player ---------- */
-  .players-btn, .voice-btn{
+  .players-btn, .voice-btn, .home-btn{
     position:relative; appearance:none; margin-left:auto; width:44px; height:44px; padding:0; flex:none;
     border:3px solid var(--ink); border-radius:50%; background:var(--green); color:var(--ink);
     box-shadow:3px 3px 0 var(--ink); cursor:pointer; display:grid; place-items:center;
     transition:transform .12s ease, box-shadow .12s ease;
   }
-  .players-btn svg, .voice-btn svg{width:58%; height:58%;}
+  .players-btn svg, .voice-btn svg, .home-btn svg{width:58%; height:58%;}
+  .home-btn{margin-left:0; background:var(--neutral-btn);}
+  body.picking .home-btn{visibility:hidden;}   /* already on the topics */
   .players-btn{margin-left:10px;}
   .voice-btn{background:var(--neutral-btn);}
   .voice-btn[aria-pressed="true"]{background:var(--yellow);}
@@ -339,9 +318,9 @@
     font-size:12px; font-weight:900; line-height:17px;
   }
   .players-btn .badge:empty{display:none;}
-  @media (hover:hover){ .players-btn:hover, .voice-btn:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--ink);} }
-  .players-btn:active, .voice-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
-  .players-btn:focus-visible, .voice-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
+  @media (hover:hover){ .players-btn:hover, .voice-btn:hover, .home-btn:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--ink);} }
+  .players-btn:active, .voice-btn:active, .home-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
+  .players-btn:focus-visible, .voice-btn:focus-visible, .home-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
 
   .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible;}
   .sides path{fill:none; stroke-width:10; stroke-linecap:butt; transition:opacity .15s, stroke-width .15s;}
@@ -406,12 +385,12 @@
     dialog.spin[open]{animation:none;}
   }
 </style>
-  <link rel="stylesheet" href="../projects-menu.css" />
 </head>
 <body>
 <nav class="page-nav">
-  <button class="pm-trigger" type="button" data-projects-menu aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg></button>
-  <a class="site-link" href="/">&larr; Back to scott-dickie.com</a>
+  <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></svg>
+  </button>
   <button class="voice-btn" id="voiceBtn" type="button" aria-pressed="false" aria-label="Read the questions out loud">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><g class="waves"><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></g><path class="slash" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
   </button>
@@ -430,7 +409,6 @@
 <div class="wrap">
   <header class="top">
     <h1>Ice<span>Breaker</span></h1>
-    <button class="topic-now" type="button" id="topicNow" aria-label="Change topic"></button>
   </header>
 
   <div class="stage">
@@ -1004,7 +982,7 @@ voiceBtn.setAttribute('aria-pressed', String(voiceOn));
 // ---------- start screen: pick a topic ----------
 const TOPIC_EMOJI = { magic: '🪄', animals: '🐾', places: '🗺️', friends: '💛', family: '🏡', me: '🌟' };
 const topicsEl = document.getElementById('topics');
-const topicNow = document.getElementById('topicNow');
+const homeBtn = document.getElementById('homeBtn');
 document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
   const n = PROMPTS.filter(p => p[0] === t.id).length;
   return '<button class="topic-tile pop-in" type="button" data-topic="' + t.id + '" style="background:' + t.color +
@@ -1023,11 +1001,11 @@ function useTopic(id){
       const j = Math.floor(Math.random() * (i + 1));
       [deck[i], deck[j]] = [deck[j], deck[i]];
     }
-    topicNow.innerHTML = '🎲 Random · <u>change</u>';
+    homeBtn.setAttribute('aria-label', 'Change topic (now: Random)');
     return;
   }
   deck = PROMPTS.map((p, i) => p[0] === id ? i : -1).filter(i => i >= 0);
-  topicNow.innerHTML = TOPIC_EMOJI[id] + ' ' + topicOf(id).name + ' · <u>change</u>';
+  homeBtn.setAttribute('aria-label', 'Change topic (now: ' + topicOf(id).name + ')');
 }
 function openTopics(){
   voice.pause();
@@ -1046,12 +1024,11 @@ document.getElementById('topicGrid').addEventListener('click', e => {
   const tile = e.target.closest('.topic-tile');
   if (tile) chooseTopic(tile.dataset.topic);
 });
-topicNow.addEventListener('click', openTopics);
+homeBtn.addEventListener('click', openTopics);
 
 useTopic(topic);
 if (linked >= 1 && linked <= PROMPTS.length) show(index);
 else openTopics();
 </script>
-<script src="../projects-menu.js"></script>
 </body>
 </html>
