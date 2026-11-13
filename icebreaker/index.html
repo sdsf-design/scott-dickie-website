@@ -317,6 +317,7 @@
   }
   .splash.leaving{background-color:rgba(244, 237, 225, 0);}
   .splash-logo{
+    grid-column:auto;   /* it borrows .nav-title's look, not its top-bar column */
     font-size:clamp(48px, 13vw, 104px);
     transform-origin:50% 50%;
     animation:splash-in .8s cubic-bezier(.3, 1.6, .5, 1) backwards;
@@ -339,6 +340,7 @@
 
   /* ---------- emoji explosion when a topic is picked ---------- */
   .burst{position:fixed; inset:0; pointer-events:none; z-index:200; overflow:hidden;}
+  .wipe{position:fixed; inset:0; pointer-events:none; z-index:150;}   /* the tile's color, under the emojis */
   .burst span{position:absolute; line-height:1; will-change:transform, opacity;}
   @media (max-height:700px){
     .topic-tile{min-height:96px; padding:12px 14px;}
@@ -1114,8 +1116,28 @@ function chooseTopic(id, tile){
   choosing = true;
   tile.classList.add('chosen');
   const r = tile.getBoundingClientRect();
-  burst(r.left + r.width / 2, r.top + r.height / 2, BURST_EMOJI[id]);
-  setTimeout(finish, 420);   // the card pops in while the emojis are still flying
+  const x = r.left + r.width / 2, y = r.top + r.height / 2;
+  wipe(x, y, id === 'random'
+    ? 'linear-gradient(135deg, ' + TOPICS.map(t => t.color).join(', ') + ')'
+    : topicOf(id).color);
+  burst(x, y, BURST_EMOJI[id]);
+  setTimeout(finish, 480);   // swap to the card while the screen is fully covered
+}
+
+// The tile's color grows from the tile to fill the whole screen, then fades away to show the card
+function wipe(x, y, paint){
+  const el = document.createElement('div');
+  el.className = 'wipe';
+  el.style.background = paint;
+  document.body.appendChild(el);
+  const reach = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  el.animate([
+    { clipPath: 'circle(0px at ' + x + 'px ' + y + 'px)' },
+    { clipPath: 'circle(' + reach + 'px at ' + x + 'px ' + y + 'px)' }
+  ], { duration: 460, easing: 'cubic-bezier(.55, 0, .35, 1)', fill: 'forwards' });
+  el.animate([{ opacity: 1 }, { opacity: 0 }],
+    { duration: 520, delay: 560, easing: 'ease-out', fill: 'forwards' })
+    .finished.then(() => el.remove(), () => el.remove());
 }
 document.getElementById('topicGrid').addEventListener('click', e => {
   const tile = e.target.closest('.topic-tile');
