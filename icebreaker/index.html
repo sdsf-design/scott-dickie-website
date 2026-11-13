@@ -374,17 +374,17 @@
   .players-btn:focus-visible, .voice-btn:focus-visible, .home-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
 
   .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1;}
-  .stage.ringed .flip{left:28px; top:28px; bottom:36px; width:calc(100% - 64px);}
-  .sides path{fill:none; stroke-width:10; stroke-linecap:butt; transition:opacity .15s, stroke-width .15s;}
+  .stage.ringed .flip{left:22px; top:22px; bottom:22px; width:calc(100% - 44px);}
+  .stage.ringed .face{box-shadow:none !important;}   /* the ring sits right on the black border */
+  .sides path{fill:none; stroke-width:14; stroke-linecap:butt; transition:opacity .15s;}
   .sides .chip circle{stroke:var(--ink); stroke-width:2.5; transition:r .2s;}
   .sides .chip text{font:900 13px/1 "Helvetica Neue", Arial, sans-serif; fill:var(--ink); text-anchor:middle; dominant-baseline:central;}
   .sides .chip{transition:opacity .15s;}
   /* Raffle: only the lit side shows while the light runs; after landing the winner stays lit */
   .sides.running path, .sides.running .chip, .sides.landed path, .sides.landed .chip{opacity:.18;}
   .sides.running .lit, .sides.landed .lit{opacity:1;}
-  .sides path.lit{stroke-width:14;}
   .sides.landed path.lit{animation:glow .5s ease 3;}
-  @keyframes glow{50%{stroke-width:20;}}
+  @keyframes glow{50%{opacity:.45;}}
   .hint.picked{flex-direction:column; gap:10px;}
   .hint.picked::before{display:none;}
   .hint .who{padding:4px 12px; border:2.5px solid var(--ink); border-radius:8px; box-shadow:3px 3px 0 var(--ink); color:var(--ink); font-size:clamp(18px, 3.2cqmin, 24px); font-weight:900;}
@@ -803,7 +803,7 @@ function show(i, quiet){
   els.follow.textContent = follow;
   els.counter.innerHTML = '<b>' + (deck.indexOf(index) + 1) + '</b> / ' + deck.length;
   resetPick();
-  if (!quiet) speak();
+  if (!quiet) present();
   history.replaceState(null, '', '#' + (index + 1));
   card.classList.remove('pop');
   void card.offsetWidth;
@@ -822,11 +822,29 @@ document.getElementById('shuffle').addEventListener('click', () => {
 });
 
 card.addEventListener('animationend', () => card.classList.remove('pop'));
+// A new question: in team play, pick who answers first (the raffle reads the question when it lands);
+// otherwise read it straight away. Called inside a tap, so iPhone allows the sound that follows.
+let startTimer = null;
+function present(){
+  clearTimeout(startTimer);
+  if (!players) return speak();
+  audio();         // unlock the raffle ticks
+  primeVoice();    // and John's voice, for after the pick
+  const at = index;
+  startTimer = setTimeout(() => {   // let the card settle first
+    if (index === at && !flipped && picked === null && !raffling && !document.body.classList.contains('picking')) raffle();
+  }, 450);
+}
 card.addEventListener('click', () => {
   if (raffling) return;
-  if (players && picked === null && !flipped) raffle();   // first tap on a new question picks who answers
-  else { setFlipped(!flipped); speak(); }
+  if (players && picked === null && !flipped) raffle();   // tap to pick, if it hasn't run yet
+  else flipAndRead();
 });
+// The follow-up is read when the card turns over; turning back to the question doesn't repeat it
+function flipAndRead(){
+  setFlipped(!flipped);
+  if (flipped) speak(); else voice.pause();
+}
 document.getElementById('prev').addEventListener('click', () => go(-1));
 document.getElementById('next').addEventListener('click', () => go(1));
 
@@ -836,7 +854,7 @@ addEventListener('keydown', e => {
   if (spinDlg.open) return;   // the spinner has its own focus; leave the card alone
   if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-  else if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) { e.preventDefault(); setFlipped(!flipped); speak(); }
+  else if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) { e.preventDefault(); flipAndRead(); }
 });
 
 // Swipe left or right on a phone to change questions
@@ -878,7 +896,7 @@ function drawSides(){
   if (!players) return;
   const W = stage.clientWidth, H = stage.clientHeight;
   // The card's own box (layout size, unaffected by its flip and pop animations)
-  const out = 15, r = 22 + out;   // ring distance outside the black border; corner follows the card's 22px radius
+  const out = 7, r = 22 + out;   // half the 14px stroke: the ring's inner edge touches the black border
   const x0 = card.offsetLeft - out, y0 = card.offsetTop - out;
   const x1 = card.offsetLeft + card.offsetWidth + out, y1 = card.offsetTop + card.offsetHeight + out;
   if (!W || !H || x1 - x0 < 2 * r) return;
@@ -975,6 +993,8 @@ function raffle(){
       paint();
       setHint();
       ding();
+      const at = index;
+      setTimeout(() => { if (index === at && !flipped && picked !== null) speak(); }, 500);   // then John reads the question
       return;
     }
     const t = n / steps;
@@ -996,6 +1016,7 @@ function setPlayers(n){
   lit = 0;
   drawSides();
   resetPick();
+  if (n && !document.body.classList.contains('picking')) present();   // turning team play on picks right away
 }
 document.getElementById('playersBtn').addEventListener('click', () => {
   draft = players || lastCount;
@@ -1134,8 +1155,9 @@ function chooseTopic(id, tile){
     if (tile) tile.classList.remove('chosen');
     choosing = false;
   };
-  if (REDUCE_MOTION || !tile) { finish(); speak(); return; }
+  if (REDUCE_MOTION || !tile) { finish(); present(); return; }
   primeVoice();   // unlock audio inside this tap; John reads once the card is fully showing
+  if (players) audio();
   choosing = true;
   tile.classList.add('chosen');
   const r = tile.getBoundingClientRect();
@@ -1146,7 +1168,8 @@ function chooseTopic(id, tile){
   burst(x, y, BURST_EMOJI[id]);
   setTimeout(finish, 480);   // swap to the card while the screen is fully covered
   setTimeout(() => {          // the color has faded (560ms delay + 520ms fade): now read the question
-    if (index === first && !flipped && !document.body.classList.contains('picking')) speak();
+    if (index !== first || flipped || document.body.classList.contains('picking')) return;
+    if (players) raffle(); else speak();   // team play: pick who answers first, then read
   }, 1120);
 }
 
