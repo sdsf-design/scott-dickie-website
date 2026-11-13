@@ -45,24 +45,19 @@
     align-items:center;
   }
 
+  /* Logo: a speech-bubble question card over a yellow card, then the name */
   .nav-title{
-    grid-column:2;
-    font-size:clamp(23px, 5.4vw, 40px);
+    font-size:clamp(17px, 3.8vw, 28px);
     line-height:1;
     margin:0;
     font-weight:900;
     letter-spacing:-0.5px;
     white-space:nowrap;
+    display:inline-flex;
+    align-items:center;
+    gap:.3em;
   }
-  .nav-title span{
-    background:var(--blue);
-    padding:2px 10px;
-    border:3px solid var(--ink);
-    border-radius:10px;
-    box-shadow:var(--shadow-off) var(--shadow-off) 0 var(--ink);
-    display:inline-block;
-    transform:rotate(-2deg);
-  }
+  .logo-mark{height:1.55em; width:auto; flex:none; overflow:visible;}
 
   /* ---------- the flip card ---------- */
   .stage{
@@ -86,8 +81,8 @@
     position:absolute;
     left:0;
     top:0;
-    bottom:0;
-    width:100%;
+    bottom:8px;            /* room for the hard shadow */
+    width:calc(100% - 8px);
     margin:auto 0;
     cursor:pointer;
     perspective:1400px;
@@ -124,11 +119,13 @@
     padding:clamp(24px, 5vw, 44px);
     text-align:center;
     border:3px solid var(--ink);
-    border-radius:22px;   /* a thin black border all the way round, no drop shadow */
+    border-radius:22px;
+    box-shadow:8px 8px 0 var(--ink);
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
     overflow:hidden;
   }
+  @media (hover:hover){ .flip:hover .face{box-shadow:10px 10px 0 var(--ink);} }
   .front{background:var(--card); transform:rotateY(0deg);}   /* its own 3D layer, so Safari hides it when turned away */
   .back{background:var(--yellow); transform:rotateY(180deg);}
   .flip:focus-visible{outline:none;}
@@ -166,7 +163,9 @@
 
   /* ---------- big arrows ---------- */
   .controls{
-    width:100%;
+    position:relative; z-index:2;   /* above the team wheel */
+    /* full page width, so the arrows sit in the screen's bottom corners even when the card's column is narrower */
+    width:calc(100vw - 32px);   /* the column centers it, so it spans edge to edge */
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -219,34 +218,30 @@
   @media (hover:hover){ .play:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
   .play:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
   .play:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
-  .counter{font-size:15px; font-weight:800; color:#777; text-align:center;}
-  .counter b{color:var(--ink); font-size:20px;}
 
   /* Top bar: home (back to the topics) on the left, voice and players on the right */
   .page-nav{
+    position:relative; z-index:2;   /* above the team wheel */
     align-self:stretch;
     flex-shrink:0;
-    display:grid;
-    --side:98px;   /* both side columns as wide as the right-hand pair, so the title is truly centered */
-    grid-template-columns:minmax(var(--side), 1fr) auto minmax(var(--side), 1fr);
+    display:flex;   /* home and the logo on the left, voice and players on the right */
     align-items:center;
-    gap:10px;
+    gap:12px;
     margin-bottom:22px;
   }
-  .page-nav .home-btn{justify-self:start;}
   @media (max-width:400px){   /* phones: slightly smaller round buttons leave the title room */
-    .page-nav{--side:88px; gap:8px;}
+    .page-nav{gap:10px;}
     .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:40px; height:40px;}
     .nav-right{gap:8px;}
   }
   @media (max-width:350px){   /* the smallest phones */
-    .page-nav{--side:78px; gap:6px;}
+    .topics .topic-tile .t-name{font-size:15px;}
+    .topics .topic-tile{padding-left:12px; padding-right:12px;}
+    .page-nav{gap:8px;}
     .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:36px; height:36px;}
     .nav-right{gap:6px;}
-    .nav-title{font-size:19px;}
-    .nav-title span{padding:2px 7px;}
   }
-  .nav-right{grid-column:3; justify-self:end; display:flex; align-items:center; gap:10px;}
+  .nav-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
   @media (max-height:640px){
     .emoji{display:none;}
   }
@@ -261,8 +256,7 @@
       column-gap:20px;
       align-items:center;
     }
-    .nav-title{font-size:24px;}
-    .nav-title span{border-width:2.5px; box-shadow:3px 3px 0 var(--ink);}
+    .nav-title{font-size:17px;}
     .controls{display:contents;}
     #prev{grid-column:1; grid-row:2;}
     .stage{grid-column:2; grid-row:2; height:100%;}
@@ -271,7 +265,7 @@
     .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
     .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
     .page-nav{margin-bottom:8px;}
-    .face{gap:10px; padding:14px 22px;}
+    .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
     .line{font-size:22px;}
     .back .line{font-size:26px;}
   }
@@ -321,7 +315,7 @@
     transform-origin:50% 50%;
     animation:splash-in .8s cubic-bezier(.3, 1.6, .5, 1) backwards;
   }
-  .splash-logo span{animation:splash-tilt .9s ease .35s backwards;}
+  .splash-logo .logo-mark{animation:splash-tilt .9s ease .35s backwards; transform-origin:50% 90%;}
   @keyframes splash-in{
     from{opacity:0; transform:scale(.3) rotate(-8deg);}
     to{opacity:1; transform:none;}
@@ -329,13 +323,14 @@
   @keyframes splash-tilt{
     0%{transform:rotate(8deg);}
     60%{transform:rotate(-5deg);}
-    100%{transform:rotate(-2deg);}
+    100%{transform:rotate(0deg);}   /* settles upright, matching the top-bar logo */
   }
   /* Until the logo starts moving, everything else waits; tiles hold their pop-in */
   body.intro .page-nav > :not(.nav-title), body.intro .topics .lead, body.intro .wrap{opacity:0;}
   body.landing .page-nav > :not(.nav-title), body.landing .topics .lead, body.landing .wrap{transition:opacity .5s ease .15s;}
   body.intro .topic-tile{animation-play-state:paused;}
   body.intro .page-nav .nav-title, body.landing .page-nav .nav-title{visibility:hidden;}
+  body:not(.picking) .page-nav .nav-title{display:none;}   /* the logo only shows on the topic screen */
 
   /* ---------- emoji explosion when a topic is picked ---------- */
   .burst{position:fixed; inset:0; pointer-events:none; z-index:200; overflow:hidden;}
@@ -355,8 +350,8 @@
     transition:transform .12s ease, box-shadow .12s ease;
   }
   .players-btn svg, .voice-btn svg, .home-btn svg{width:58%; height:58%;}
-  .home-btn{margin-left:0; background:var(--neutral-btn);}
-  body.picking .home-btn{visibility:hidden;}   /* already on the topics */
+  .home-btn{margin-left:0; background:transparent;}            /* outline only away from home */
+  body.picking .home-btn{background:var(--blue); cursor:default;}   /* filled: you're on the topic screen */
   .voice-btn{background:var(--neutral-btn);}
   .voice-btn[aria-pressed="true"]{background:var(--yellow);}
   .voice-btn .waves, .voice-btn[aria-pressed="true"] .slash{display:none;}
@@ -371,10 +366,22 @@
   .players-btn:active, .voice-btn:active, .home-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
   .players-btn:focus-visible, .voice-btn:focus-visible, .home-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
 
-  .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1;}
-  .stage.ringed .flip{left:36px; top:36px; bottom:36px; width:calc(100% - 72px);}   /* room for the 34px ring */
-  .sides path{fill:none; stroke-width:34; stroke-linecap:butt; transition:opacity .15s;}
-  .sides .chip text{font:900 23px/1 "Helvetica Neue", Arial, sans-serif; fill:var(--ink); text-anchor:middle; dominant-baseline:central;}
+  .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:0;}
+  .stage.ringed .flip{z-index:1;}   /* sized by drawSides() to sit on the wheel */
+  /* A short card (team play on a phone) tightens up so the question, the winner and the hint all fit */
+  @container (max-height:360px){
+    .face{gap:8px; padding:14px 14px;}
+    .emoji{font-size:34px;}
+    .hint.picked{gap:6px;}
+    .hint .who{font-size:16px; padding:3px 10px;}
+    .line{font-size:20px;}
+    .back .line{font-size:22px;}
+  }
+  @container (max-height:240px){ .emoji{display:none;} }
+  .face.tight{gap:6px; padding-top:10px; padding-bottom:10px;}
+  .face.tight .emoji{display:none;}
+  .sides path{stroke:var(--ink); stroke-width:3; stroke-linejoin:round; transition:opacity .15s;}
+  .sides .chip text{font:900 26px/1 "Helvetica Neue", Arial, sans-serif; fill:var(--ink); text-anchor:middle; dominant-baseline:central;}
   .sides .chip{transition:opacity .15s;}
   /* Raffle: only the lit side shows while the light runs; after landing the winner stays lit */
   .sides.running path, .sides.running .chip, .sides.landed path, .sides.landed .chip{opacity:.18;}
@@ -436,13 +443,13 @@
 </head>
 <body class="intro">
 <div class="splash" id="splash" aria-hidden="true">
-  <div class="nav-title splash-logo">Ice<span>Breaker</span></div>
+  <div class="nav-title splash-logo"><svg class="logo-mark" viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg><span class="logo-word">IceBreaker</span></div>
 </div>
 <nav class="page-nav">
   <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></svg>
   </button>
-  <h1 class="nav-title">Ice<span>Breaker</span></h1>
+  <h1 class="nav-title"><svg class="logo-mark" viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg><span class="logo-word">IceBreaker</span></h1>
   <div class="nav-right">
   <button class="voice-btn" id="voiceBtn" type="button" aria-pressed="false" aria-label="Read the questions out loud">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><g class="waves"><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></g><path class="slash" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
@@ -482,12 +489,6 @@
     <button class="arrow prev" id="prev" type="button" aria-label="Previous question">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
     </button>
-    <div class="middle">
-      <button class="play" id="shuffle" type="button" aria-label="Random question">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
-      </button>
-      <div class="counter" id="counter" aria-live="polite"></div>
-    </div>
     <button class="arrow next" id="next" type="button" aria-label="Next question">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </button>
@@ -768,8 +769,7 @@ const els = {
   tag: document.getElementById('tagFront'),
   emoji: document.getElementById('emoji'),
   question: document.getElementById('setup'),
-  follow: document.getElementById('punch'),
-  counter: document.getElementById('counter')
+  follow: document.getElementById('punch')
 };
 
 // A link to a question (#7) opens it in its topic; otherwise the page starts on the topic screen
@@ -797,7 +797,6 @@ function show(i, quiet){
   els.emoji.textContent = emoji;
   els.question.textContent = question;
   els.follow.textContent = follow;
-  els.counter.innerHTML = '<b>' + (deck.indexOf(index) + 1) + '</b> / ' + deck.length;
   resetPick();
   if (!quiet) present();
   history.replaceState(null, '', '#' + (index + 1));
@@ -811,11 +810,6 @@ const go = (delta) => {
   show(deck[(at + delta + deck.length) % deck.length]);
 };
 
-// Shuffle: jump to any other question
-document.getElementById('shuffle').addEventListener('click', () => {
-  if (deck.length < 2) return;
-  go(1 + Math.floor(Math.random() * (deck.length - 1)));   // any other question in this topic
-});
 
 card.addEventListener('animationend', () => card.classList.remove('pop'));
 // A new question: in team play, pick who answers first (the raffle reads the question when it lands);
@@ -889,40 +883,44 @@ const stage = document.querySelector('.stage');
 function drawSides(){
   stage.classList.toggle('ringed', !!players);
   sides.innerHTML = '';
-  if (!players) return;
+  if (!players) { card.style.cssText = ''; return; }
   const W = stage.clientWidth, H = stage.clientHeight;
-  // The card's own box (layout size, unaffected by its flip and pop animations)
-  const out = 17, r = 22 + out;   // half the 34px stroke: the ring's inner edge touches the black border
-  const x0 = card.offsetLeft - out, y0 = card.offsetTop - out;
-  const x1 = card.offsetLeft + card.offsetWidth + out, y1 = card.offsetTop + card.offsetHeight + out;
-  if (!W || !H || x1 - x0 < 2 * r) return;
-  const d = `M${(x0 + x1) / 2} ${y0} H${x1 - r} A${r} ${r} 0 0 1 ${x1} ${y0 + r} V${y1 - r} A${r} ${r} 0 0 1 ${x1 - r} ${y1}` +
-            ` H${x0 + r} A${r} ${r} 0 0 1 ${x0} ${y1 - r} V${y0 + r} A${r} ${r} 0 0 1 ${x0 + r} ${y0} Z`;
+  if (!W || !H) return;
+  // A round wheel as wide as the stage allows (a little past it on phones), centered;
+  // the card sits on it, sized so the wheel's curve shows all around and only its corners poke past
+  // The card keeps the size it had on the wheel; the wheel itself is about a third bigger and on phones
+  // runs past the screen edges. Where height is the limit (desktop), the card steps down a little instead.
+  const base = Math.min(W * 1.1, H);
+  const D = Math.min(W * 1.8, H * 1.2), R = D / 2, cx = W / 2, cy = H / 2;   // may reach behind the top bar and arrows
+  const cardScale = D > base * 1.05 ? 1 : .86;
+  const fw = Math.round(base * .62 * cardScale), fh = Math.round(Math.min(base * .7 * cardScale, H - 16));
+  const css = `left:${Math.round(cx - fw / 2)}px; top:${Math.round(cy - fh / 2)}px; width:${fw}px; height:${fh}px; bottom:auto; margin:0;`;
+  if (card.style.cssText !== css) { card.style.cssText = css; requestAnimationFrame(fitCard); }
   sides.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const seg = 1000 / players;
-  const probe = document.createElementNS(SVGNS, 'path');
-  probe.setAttribute('d', d);
-  sides.appendChild(probe);
-  const len = probe.getTotalLength();
-  // middle of each side, measured before the probe goes away
-  const mids = Array.from({ length: players }, (_, p) => probe.getPointAtLength((p * seg / 1000) * len));
-  probe.remove();
-  for (let p = 0; p < players; p++) {
+  const step = 360 / players;
+  const dir = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];   // 0deg = straight up, clockwise
+  const at = (deg, r) => { const [dx, dy] = dir(deg); return [cx + dx * r, cy + dy * r]; };
+  for (let p = 0; p < players; p++) {   // one wedge per player, player 1 centered at the top
+    const a0 = p * step - step / 2, a1 = a0 + step;
+    const [x0, y0] = at(a0, R), [x1, y1] = at(a1, R);
     const path = document.createElementNS(SVGNS, 'path');
-    path.setAttribute('d', d);
-    path.setAttribute('pathLength', 1000);
-    path.setAttribute('stroke', SEAT_COLORS[p]);
-    path.setAttribute('stroke-dasharray', `${seg - 6} ${1000 - seg + 6}`);   // small gap between sides
-    path.setAttribute('stroke-dashoffset', -(p * seg - seg / 2 + 3));
+    path.setAttribute('d', `M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${step > 180 ? 1 : 0} 1 ${x1} ${y1} Z`);
+    path.setAttribute('fill', SEAT_COLORS[p]);
     path.dataset.p = p;
     sides.appendChild(path);
   }
-  for (let p = 0; p < players; p++) {   // numbered chip in the middle of each side
-    const pos = mids[p];
+  for (let p = 0; p < players; p++) {   // each number sits in the visible band between the card and the rim
+    const [dx, dy] = dir(p * step);
+    const toEdge = (half, d) => Math.abs(d) < 1e-6 ? Infinity : half / Math.abs(d);
+    const tCard = Math.min(toEdge(fw / 2, dx), toEdge(fh / 2, dy));
+    const shadow = (dx > .3 || dy > .3) ? 5 : 0;   // clear the card's drop shadow on the right and bottom
+    const tView = Math.min(dx > 0 ? (W + 8 - cx) / dx : dx < 0 ? (cx + 8) / -dx : Infinity,   // stay on screen
+                           dy > 0 ? (H - cy) / dy : dy < 0 ? cy / -dy : Infinity) - 16;
+    const t = Math.min(Math.max(tCard + 16 + shadow, (tCard + shadow + R) / 2), Math.max(tCard + 16 + shadow, tView));
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'chip');
     g.dataset.p = p;
-    g.innerHTML = `<text x="${pos.x}" y="${pos.y + 1}">${p + 1}</text>`;   // the number sits inside its own color band
+    g.innerHTML = `<text x="${cx + dx * t}" y="${cy + dy * t + 1}">${p + 1}</text>`;
     sides.appendChild(g);
   }
   paint();
@@ -938,6 +936,13 @@ function setHint(){
   else if (picked === null) hint.textContent = 'Tap to see who answers';
   else hint.innerHTML = '<span class="who" style="background:' + SEAT_COLORS[picked] + '">Player ' + (picked + 1) + ' answers!</span><span>👆 Tap for a follow-up</span>';
   hint.classList.toggle('picked', !!players && !raffling && picked !== null);
+  fitCard();
+}
+// On the smaller team-play card a long question can run out of room: drop the emoji when it does
+function fitCard(){
+  const face = card.querySelector('.face.front');
+  face.classList.remove('tight');
+  if (players && face.scrollHeight > face.clientHeight + 1) face.classList.add('tight');
 }
 function resetPick(){
   clearTimeout(raffleTimer);
@@ -1103,6 +1108,7 @@ function openTopics(){
   voice.pause();
   resetPick();
   document.body.classList.add('picking');
+  homeBtn.setAttribute('aria-current', 'page');
   topicsEl.hidden = false;
   history.replaceState(null, '', location.pathname + location.search);
 }
@@ -1149,6 +1155,7 @@ function chooseTopic(id, tile){
   const finish = () => {
     topicsEl.hidden = true;
     document.body.classList.remove('picking');
+    homeBtn.removeAttribute('aria-current');
     show(deck[0], true);
     if (tile) tile.classList.remove('chosen');
     choosing = false;
@@ -1190,7 +1197,7 @@ document.getElementById('topicGrid').addEventListener('click', e => {
   const tile = e.target.closest('.topic-tile');
   if (tile) chooseTopic(tile.dataset.topic, tile);
 });
-homeBtn.addEventListener('click', openTopics);
+homeBtn.addEventListener('click', () => { if (!document.body.classList.contains('picking')) openTopics(); });
 
 useTopic(topic);
 if (linked >= 1 && linked <= PROMPTS.length) show(index);
@@ -1205,12 +1212,18 @@ else openTopics();
   setTimeout(() => {
     logo.getAnimations({ subtree: true }).forEach(an => an.finish());   // settle the pop-in before measuring
     const to = document.querySelector('.page-nav .nav-title').getBoundingClientRect();
-    // Layout size and position, which ignore any transform still on the logo
-    const w = logo.offsetWidth, cx = logo.offsetLeft + w / 2, cy = logo.offsetTop + logo.offsetHeight / 2;
-    const dx = (to.left + to.width / 2) - cx;
-    const dy = (to.top + to.height / 2) - cy;
-    logo.style.transition = 'transform .75s cubic-bezier(.65, 0, .25, 1)';
-    logo.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + (to.width / w) + ')';
+    if (!to.width) {   // a question page has no logo in the top bar: shrink away in place
+      logo.style.transition = 'transform .5s cubic-bezier(.6, 0, .4, 1), opacity .5s ease';
+      logo.style.transform = 'scale(.6)';
+      logo.style.opacity = '0';
+    } else {
+      // Layout size and position, which ignore any transform still on the logo
+      const w = logo.offsetWidth, cx = logo.offsetLeft + w / 2, cy = logo.offsetTop + logo.offsetHeight / 2;
+      const dx = (to.left + to.width / 2) - cx;
+      const dy = (to.top + to.height / 2) - cy;
+      logo.style.transition = 'transform .75s cubic-bezier(.65, 0, .25, 1)';
+      logo.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + (to.width / w) + ')';
+    }
     splash.classList.add('leaving');
     document.body.classList.add('landing');
     document.body.classList.remove('intro');   // tiles, buttons and card come in as the logo moves
