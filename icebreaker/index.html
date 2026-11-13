@@ -86,8 +86,8 @@
     position:absolute;
     left:0;
     top:0;
-    bottom:8px;            /* room for the hard shadow */
-    width:calc(100% - 8px);
+    bottom:0;
+    width:100%;
     margin:auto 0;
     cursor:pointer;
     perspective:1400px;
@@ -124,15 +124,13 @@
     padding:clamp(24px, 5vw, 44px);
     text-align:center;
     border:3px solid var(--ink);
-    border-radius:22px;
-    box-shadow:8px 8px 0 var(--ink);
+    border-radius:22px;   /* a thin black border all the way round, no drop shadow */
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
     overflow:hidden;
   }
   .front{background:var(--card); transform:rotateY(0deg);}   /* its own 3D layer, so Safari hides it when turned away */
   .back{background:var(--yellow); transform:rotateY(180deg);}
-  @media (hover:hover){ .flip:hover .face{box-shadow:10px 10px 0 var(--ink);} }
   .flip:focus-visible{outline:none;}
   .flip:focus-visible .face{outline:3px dashed var(--ink); outline-offset:6px;}
 
@@ -273,7 +271,7 @@
     .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
     .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
     .page-nav{margin-bottom:8px;}
-    .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
+    .face{gap:10px; padding:14px 22px;}
     .line{font-size:22px;}
     .back .line{font-size:26px;}
   }
@@ -374,11 +372,9 @@
   .players-btn:focus-visible, .voice-btn:focus-visible, .home-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
 
   .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1;}
-  .stage.ringed .flip{left:22px; top:22px; bottom:22px; width:calc(100% - 44px);}
-  .stage.ringed .face{box-shadow:none !important;}   /* the ring sits right on the black border */
-  .sides path{fill:none; stroke-width:14; stroke-linecap:butt; transition:opacity .15s;}
-  .sides .chip circle{stroke:var(--ink); stroke-width:2.5; transition:r .2s;}
-  .sides .chip text{font:900 13px/1 "Helvetica Neue", Arial, sans-serif; fill:var(--ink); text-anchor:middle; dominant-baseline:central;}
+  .stage.ringed .flip{left:36px; top:36px; bottom:36px; width:calc(100% - 72px);}   /* room for the 34px ring */
+  .sides path{fill:none; stroke-width:34; stroke-linecap:butt; transition:opacity .15s;}
+  .sides .chip text{font:900 23px/1 "Helvetica Neue", Arial, sans-serif; fill:var(--ink); text-anchor:middle; dominant-baseline:central;}
   .sides .chip{transition:opacity .15s;}
   /* Raffle: only the lit side shows while the light runs; after landing the winner stays lit */
   .sides.running path, .sides.running .chip, .sides.landed path, .sides.landed .chip{opacity:.18;}
@@ -896,7 +892,7 @@ function drawSides(){
   if (!players) return;
   const W = stage.clientWidth, H = stage.clientHeight;
   // The card's own box (layout size, unaffected by its flip and pop animations)
-  const out = 7, r = 22 + out;   // half the 14px stroke: the ring's inner edge touches the black border
+  const out = 17, r = 22 + out;   // half the 34px stroke: the ring's inner edge touches the black border
   const x0 = card.offsetLeft - out, y0 = card.offsetTop - out;
   const x1 = card.offsetLeft + card.offsetWidth + out, y1 = card.offsetTop + card.offsetHeight + out;
   if (!W || !H || x1 - x0 < 2 * r) return;
@@ -926,7 +922,7 @@ function drawSides(){
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'chip');
     g.dataset.p = p;
-    g.innerHTML = `<circle cx="${pos.x}" cy="${pos.y}" r="12" fill="${SEAT_COLORS[p]}"/><text x="${pos.x}" y="${pos.y}">${p + 1}</text>`;
+    g.innerHTML = `<text x="${pos.x}" y="${pos.y + 1}">${p + 1}</text>`;   // the number sits inside its own color band
     sides.appendChild(g);
   }
   paint();
@@ -1016,6 +1012,7 @@ function setPlayers(n){
   lit = 0;
   drawSides();
   resetPick();
+  if (n && !voiceOn) setVoice(true, true);   // team play reads each question after the pick, so voice comes on too
   if (n && !document.body.classList.contains('picking')) present();   // turning team play on picks right away
 }
 document.getElementById('playersBtn').addEventListener('click', () => {
@@ -1063,12 +1060,13 @@ function primeVoice(){
   voice.play().then(() => { if (voice.muted) { voice.pause(); voice.currentTime = 0; voice.muted = false; } },
                     () => { voice.muted = false; });
 }
-function setVoice(on){
+function setVoice(on, quiet){
   voiceOn = on;
   voiceBtn.setAttribute('aria-pressed', String(on));
   voiceBtn.setAttribute('aria-label', on ? 'Stop reading the questions out loud' : 'Read the questions out loud');
   try { localStorage.setItem('icebreaker-voice', on ? '1' : '0'); } catch (e) {}
-  if (on) speak(); else voice.pause();
+  if (!on) voice.pause();
+  else if (!quiet) speak();
 }
 voiceBtn.addEventListener('click', () => setVoice(!voiceOn));
 voiceBtn.setAttribute('aria-pressed', String(voiceOn));
