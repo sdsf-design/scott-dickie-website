@@ -1024,11 +1024,23 @@ const voice = new Audio();
 const voiceBtn = document.getElementById('voiceBtn');
 let voiceOn = false;
 try { voiceOn = localStorage.getItem('icebreaker-voice') === '1'; } catch (e) {}
+function clipSrc(){ return '/icebreaker/audio/' + (index + 1) + '-' + (flipped ? 'follow' : 'question') + '.mp3'; }
 function speak(){
   if (!voiceOn) return;
   voice.pause();
-  voice.src = '/icebreaker/audio/' + (index + 1) + '-' + (flipped ? 'follow' : 'question') + '.mp3';
+  voice.muted = false;
+  voice.src = clipSrc();
   voice.play().catch(() => {});   // a page load can't autoplay; the next tap will
+}
+// iPhone only lets audio start inside a tap. When the reading has to wait (the topic transition),
+// play the clip silently during the tap and stop it at once: that unlocks the player for later.
+function primeVoice(){
+  if (!voiceOn) return;
+  voice.pause();
+  voice.muted = true;
+  voice.src = clipSrc();
+  voice.play().then(() => { if (voice.muted) { voice.pause(); voice.currentTime = 0; voice.muted = false; } },
+                    () => { voice.muted = false; });
 }
 function setVoice(on){
   voiceOn = on;
@@ -1112,10 +1124,9 @@ let choosing = false;
 function chooseTopic(id, tile){
   if (choosing) return;
   useTopic(id);
-  // Start the voice now, inside the tap, so iPhone lets it play
   index = deck[0];
   setFlipped(false);
-  speak();
+  const first = index;
   const finish = () => {
     topicsEl.hidden = true;
     document.body.classList.remove('picking');
@@ -1123,7 +1134,8 @@ function chooseTopic(id, tile){
     if (tile) tile.classList.remove('chosen');
     choosing = false;
   };
-  if (REDUCE_MOTION || !tile) return finish();
+  if (REDUCE_MOTION || !tile) { finish(); speak(); return; }
+  primeVoice();   // unlock audio inside this tap; John reads once the card is fully showing
   choosing = true;
   tile.classList.add('chosen');
   const r = tile.getBoundingClientRect();
@@ -1133,6 +1145,9 @@ function chooseTopic(id, tile){
     : topicOf(id).color);
   burst(x, y, BURST_EMOJI[id]);
   setTimeout(finish, 480);   // swap to the card while the screen is fully covered
+  setTimeout(() => {          // the color has faded (560ms delay + 520ms fade): now read the question
+    if (index === first && !flipped && !document.body.classList.contains('picking')) speak();
+  }, 1120);
 }
 
 // The tile's color grows from the tile to fill the whole screen, then fades away to show the card
