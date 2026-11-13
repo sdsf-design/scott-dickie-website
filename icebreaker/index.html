@@ -383,7 +383,9 @@
   .players-btn:focus-visible, .voice-btn:focus-visible, .home-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
 
   .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:0;}
-  .stage.ringed .flip{z-index:1;}   /* sized by drawSides() to sit on the wheel */
+  .stage.ringed .flip{z-index:1;}
+  .sides.full{position:fixed; inset:0; width:100vw; height:100vh;}   /* ?wheel=full: wedges behind the whole page */
+  .stage.ringed.fullwheel .flip{left:30px; width:calc(100% - 68px);}   /* leave the side wedges room to show */   /* sized by drawSides() to sit on the wheel */
   /* A short card (team play on a phone) tightens up so the question, the winner and the hint all fit */
   @container (max-height:360px){
     .face{gap:8px; padding:14px 14px;}
@@ -896,10 +898,14 @@ if (lastCount < MIN_PLAYERS || lastCount > MAX_PLAYERS) lastCount = 4;
 // One rounded-rectangle path just inside the card's ink border, starting at top-center and running clockwise.
 // Each player gets an equal length of it; player 1 is centered at the top.
 const stage = document.querySelector('.stage');
+// Team play's wedges fill the whole screen behind everything, and the card keeps its full size.
+// ?wheel=round shows the older round wheel behind a smaller card, for comparison.
+const FULL_WHEEL = new URLSearchParams(location.search).get('wheel') !== 'round';
 function drawSides(){
   stage.classList.toggle('ringed', !!players);
   sides.innerHTML = '';
   if (!players) { card.style.cssText = ''; return; }
+  if (FULL_WHEEL) return drawFullWheel();
   const W = stage.clientWidth, H = stage.clientHeight;
   if (!W || !H) return;
   // A round wheel as wide as the stage allows (a little past it on phones), centered;
@@ -933,6 +939,55 @@ function drawSides(){
     const tView = Math.min(dx > 0 ? (W + 8 - cx) / dx : dx < 0 ? (cx + 8) / -dx : Infinity,   // stay on screen
                            dy > 0 ? (H - cy) / dy : dy < 0 ? cy / -dy : Infinity) - 16;
     const t = Math.min(Math.max(tCard + 16 + shadow, (tCard + shadow + R) / 2), Math.max(tCard + 16 + shadow, tView));
+    const g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('class', 'chip');
+    g.dataset.p = p;
+    g.innerHTML = `<text x="${cx + dx * t}" y="${cy + dy * t + 1}">${p + 1}</text>`;
+    sides.appendChild(g);
+  }
+  paint();
+}
+function drawFullWheel(){
+  sides.classList.add('full');
+  stage.classList.add('fullwheel');
+  const W = innerWidth, H = innerHeight;
+  const sr = stage.getBoundingClientRect();
+  // Center the card on the screen, as big as it can be without reaching the top bar or the arrows
+  const navBottom = document.querySelector('.page-nav').getBoundingClientRect().bottom;
+  const ctrlTop = document.querySelector('.controls').getBoundingClientRect().top;
+  const half = Math.max(80, Math.min(H / 2 - navBottom - 14, ctrlTop - H / 2 - 22));   // 22: room for the shadow
+  const fw = Math.round(Math.min(sr.width - 68, 712)), fh = Math.round(half * 2);
+  const css = `left:${Math.round(W / 2 - sr.left - fw / 2)}px; top:${Math.round(H / 2 - sr.top - fh / 2)}px; width:${fw}px; height:${fh}px; bottom:auto; margin:0;`;
+  if (card.style.cssText !== css) { card.style.cssText = css; requestAnimationFrame(fitCard); }
+  // Equal slices of a wheel centered on the screen, big enough to reach every corner
+  const cx = W / 2, cy = H / 2;
+  const R = Math.hypot(cx, cy) + 4;
+  const kx = cx, ky = cy;   // the card is centered on the screen too
+  sides.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const step = 360 / players;
+  const dir = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];   // 0deg = straight up, clockwise
+  const at = (deg, r) => { const [dx, dy] = dir(deg); return [cx + dx * r, cy + dy * r]; };
+  for (let p = 0; p < players; p++) {   // player 1 centered at the top
+    const a0 = p * step - step / 2, a1 = a0 + step;
+    const [x0, y0] = at(a0, R), [x1, y1] = at(a1, R);
+    const path = document.createElementNS(SVGNS, 'path');
+    path.setAttribute('d', `M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${step > 180 ? 1 : 0} 1 ${x1} ${y1} Z`);
+    path.setAttribute('fill', SEAT_COLORS[p]);
+    path.dataset.p = p;
+    sides.appendChild(path);
+  }
+  for (let p = 0; p < players; p++) {   // numbers on each slice's middle line, between the card and the screen edge
+    const [dx, dy] = dir(p * step);
+    const tView = Math.min(dx > 0 ? (W - cx) / dx : dx < 0 ? cx / -dx : Infinity,
+                           dy > 0 ? (H - cy) / dy : dy < 0 ? cy / -dy : Infinity);
+    // where this line leaves the card (the card is centered at kx, ky)
+    const hx = fw / 2, hy = fh / 2;
+    let tCard = 0;
+    for (let t = 0; t < tView; t += 2) {
+      const x = cx + dx * t, y = cy + dy * t;
+      if (Math.abs(x - kx) > hx + ((dx > .3) ? 5 : 0) || Math.abs(y - ky) > hy + ((dy > .3) ? 5 : 0)) { tCard = t; break; }
+    }
+    const t = tCard + Math.max(18, (tView - tCard) / 2);
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'chip');
     g.dataset.p = p;
@@ -1054,6 +1109,7 @@ spinDlg.addEventListener('click', e => {   // a tap on the backdrop, outside the
 const ringWatch = new ResizeObserver(drawSides);
 ringWatch.observe(stage);
 ringWatch.observe(card);
+addEventListener('resize', () => { if (FULL_WHEEL && players) drawSides(); });
 document.getElementById('playersBadge').textContent = players || '';
 
 // ---------- voice mode: John reads the question, and the follow-up when the card flips ----------
