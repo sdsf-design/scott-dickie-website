@@ -159,7 +159,16 @@
     gap:8px;
   }
   .back .hint{color:#5a4a00;}
-  .front .hint::before{content:"👆";}
+  /* The hint sits on the card's bottom edge; the tag, emoji and question stay centered in the space above it */
+  .face{padding-bottom:clamp(14px, 2.8cqmin, 22px);}
+  .face > .tag{margin-top:auto;}
+  .face > .hint{margin-top:auto; flex-shrink:0;}
+  .hint.cue::before{
+    content:""; width:1.25em; height:1.25em; flex-shrink:0; background:currentColor;
+    -webkit-mask:var(--flip-icon) center / contain no-repeat; mask:var(--flip-icon) center / contain no-repeat;
+  }
+  .flip{--flip-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 10.5a7.5 7.5 0 0 1 13.2-3.9'/%3E%3Cpath d='M18.5 2.8v4.4h-4.4'/%3E%3Cpath d='M19.5 13.5a7.5 7.5 0 0 1-13.2 3.9'/%3E%3Cpath d='M5.5 21.2v-4.4h4.4'/%3E%3C/svg%3E");}
+  .who-slot[hidden]{display:none;}
 
   /* ---------- big arrows ---------- */
   .controls{
@@ -390,8 +399,7 @@
   @container (max-height:360px){
     .face{gap:8px; padding:14px 14px;}
     .emoji{font-size:34px;}
-    .hint.picked{gap:6px;}
-    .hint .who{font-size:16px; padding:3px 10px;}
+    .who{font-size:16px; padding:3px 10px;}
     .line{font-size:20px;}
     .back .line{font-size:22px;}
   }
@@ -406,9 +414,7 @@
   .sides.running .lit, .sides.landed .lit{opacity:1;}
   .sides.landed path.lit{animation:glow .5s ease 3;}
   @keyframes glow{50%{opacity:.45;}}
-  .hint.picked{flex-direction:column; gap:10px;}
-  .hint.picked::before{display:none;}
-  .hint .who{padding:4px 12px; border:2.5px solid var(--ink); border-radius:8px; box-shadow:3px 3px 0 var(--ink); color:var(--ink); font-size:clamp(18px, 3.2cqmin, 24px); font-weight:900;}
+  .who{padding:4px 12px; border:2.5px solid var(--ink); border-radius:8px; box-shadow:3px 3px 0 var(--ink); color:var(--ink); font-size:clamp(18px, 3.2cqmin, 24px); font-weight:900;}
 
   dialog.spin{
     width:min(400px, calc(100vw - 32px));
@@ -536,12 +542,13 @@
         <span class="tag" id="tagFront">QUESTION 1</span>
         <div class="emoji" id="emoji" aria-hidden="true"></div>
         <p class="line" id="setup"></p>
-        <span class="hint" id="hintFront">Tap for a follow-up</span>
+        <span class="who-slot" id="whoFront" hidden></span>
+        <span class="hint cue" id="hintFront">Tap for a follow-up</span>
       </div>
       <div class="face back" aria-hidden="true">
         <span class="tag">FOLLOW-UP</span>
         <p class="line" id="punch" aria-live="polite"></p>
-        <span class="hint">Tap to flip back</span>
+        <span class="hint cue">Tap to flip back</span>
       </div>
      </div>
     </button>
@@ -960,6 +967,7 @@ const spinDlg = document.getElementById('spinDlg');
 const sides = document.getElementById('sides');
 const front = card.querySelector('.front');
 const hint = document.getElementById('hintFront');
+const whoFront = document.getElementById('whoFront');
 const countEl = document.getElementById('count');
 let players = 0, draft = 4, picked = null, lit = 0, raffling = false, raffleTimer = null;
 // Players mode starts off on every visit; the last count used only pre-fills the panel
@@ -1074,11 +1082,12 @@ function paint(){
   sides.querySelectorAll('[data-p]').forEach(el => el.classList.toggle('lit', +el.dataset.p === lit));
 }
 function setHint(){
-  if (!players) hint.textContent = 'Tap for a follow-up';
-  else if (raffling) hint.textContent = 'Picking…';
-  else if (picked === null) hint.textContent = 'Tap to see who answers';
-  else hint.innerHTML = '<span class="who" style="background:' + SEAT_COLORS[picked] + '">Player ' + (picked + 1) + ' answers!</span><span>👆 Tap for a follow-up</span>';
-  hint.classList.toggle('picked', !!players && !raffling && picked !== null);
+  // The bottom hint says what a tap does; in team play the winner's badge sits with the question
+  const chosen = !!players && !raffling && picked !== null;
+  hint.textContent = !players || chosen ? 'Tap for a follow-up' : raffling ? 'Picking…' : 'Tap to see who answers';
+  hint.classList.toggle('cue', !players || chosen);
+  whoFront.innerHTML = chosen ? '<span class="who" style="background:' + SEAT_COLORS[picked] + '">Player ' + (picked + 1) + ' answers!</span>' : '';
+  whoFront.hidden = !chosen;
   fitCard();
 }
 // On the smaller team-play card a long question can run out of room: drop the emoji when it does
