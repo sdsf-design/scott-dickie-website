@@ -27,11 +27,13 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: "forbidden" });
   }
 
-  const { message, from = "", website = "", page = "IceBreaker" } = req.body || {};
+  const { message = "", rating = 0, from = "", website = "", page = "IceBreaker" } = req.body || {};
   // "website" is a hidden field people never see; bots that fill every field get a quiet "ok"
   if (website) return res.status(200).json({ ok: true });
-  if (typeof message !== "string" || !message.trim() || message.length > MAX_MESSAGE ||
-      typeof from !== "string" || from.length > MAX_FROM) {
+  // A rating of 1 to 5 stars, a written note, or both
+  const stars = Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : 0;
+  if (typeof message !== "string" || message.length > MAX_MESSAGE || (rating && !stars) ||
+      (!message.trim() && !stars) || typeof from !== "string" || from.length > MAX_FROM) {
     return res.status(400).json({ error: "bad_message" });
   }
   if (!process.env.RESEND_API_KEY) {
@@ -39,11 +41,14 @@ export default async function handler(req, res) {
   }
 
   const sender = from.trim();
-  const text = message.trim() + (sender ? `\n\nFrom: ${sender}` : "") + `\n\nSent from ${String(page).slice(0, 60)}`;
+  const name = String(page).slice(0, 60);
+  const starLine = stars ? `Rating: ${"\u2605".repeat(stars)}${"\u2606".repeat(5 - stars)} (${stars}/5)` : "";
+  const note = message.trim();
+  const text = [starLine, note, sender && `From: ${sender}`, `Sent from ${name}`].filter(Boolean).join("\n\n");
   const body = {
     from: FROM,
     to: [TO],
-    subject: `${String(page).slice(0, 60)} feedback: ${message.trim().replace(/\s+/g, " ").slice(0, 50)}`,
+    subject: `${name} feedback${stars ? ` (${stars}/5)` : ""}${note ? `: ${note.replace(/\s+/g, " ").slice(0, 50)}` : ""}`,
     text,
     html: `<div style="font:16px/1.5 -apple-system, Helvetica, Arial, sans-serif; white-space:pre-wrap">${esc(text)}</div>`,
   };

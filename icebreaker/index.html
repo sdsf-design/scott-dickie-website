@@ -466,6 +466,19 @@
   .fb-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
   .topics{padding-bottom:84px;}   /* room so the button never covers the Random tile */
   .fb-form{display:flex; flex-direction:column; gap:12px; text-align:left;}
+  /* Five-star rating: real radio buttons (keyboard and screen readers work), drawn as big stars */
+  .fb-stars{border:0; margin:0 0 2px; padding:0; text-align:center;}
+  .fb-stars legend{padding:0; margin:0 auto 6px; font-size:14px; font-weight:900;}
+  .fb-star-row{display:flex; justify-content:center; gap:6px;}
+  .fb-star{position:relative; cursor:pointer; display:block; flex:0 1 48px; min-width:0; aspect-ratio:1;}
+  .fb-star input{position:absolute; inset:0; margin:0; opacity:0; cursor:pointer;}
+  .fb-star svg{width:100%; height:100%; display:block; transition:transform .12s ease;}
+  .fb-star path{fill:#fff; stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round; transition:fill .1s;}
+  .fb-star.on path{fill:var(--yellow);}
+  .fb-star.on svg{transform:rotate(-6deg) scale(1.06);}
+  .fb-star input:focus-visible + svg{outline:3px dashed var(--ink); outline-offset:2px; border-radius:8px;}
+  .fb-rate-word{min-height:18px; margin:6px 0 0; font-size:14px; font-weight:800; color:#555;}
+  .fb-star-row.pop .on svg{animation:pop .3s ease;}
   .fb-form label{font-size:14px; font-weight:900;}
   .fb-form input, .fb-form textarea{
     width:100%; margin-top:5px; padding:11px 12px; border:2.5px solid var(--ink); border-radius:12px;
@@ -568,8 +581,13 @@
   <h2 id="fbTitle">Send feedback</h2>
   <p class="sub">Ideas for questions, bugs, anything. It goes straight to Scott.</p>
   <form class="fb-form" id="fbForm">
-    <label>Your feedback<textarea id="fbText" name="message" required placeholder="What should we add or fix?"></textarea></label>
-    <label>Your name or email <span style="font-weight:600;color:#777">(optional)</span><input id="fbFrom" name="from" autocomplete="email" placeholder="So Scott can reply"></label>
+    <fieldset class="fb-stars">
+      <legend>How do you like IceBreaker?</legend>
+      <div class="fb-star-row" id="fbStars"></div>
+      <p class="fb-rate-word" id="fbRateWord" aria-hidden="true"></p>
+    </fieldset>
+    <label>Your feedback <span style="font-weight:600;color:#777">(optional)</span><textarea id="fbText" name="message" placeholder="What should we add or fix?"></textarea></label>
+    <label>Your email <span style="font-weight:600;color:#777">(optional)</span><input id="fbFrom" name="from" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false"></label>
     <input class="fb-trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
     <button class="big-btn" type="submit" id="fbSend">Send</button>
     <p class="fb-note" id="fbNote" role="status"></p>
@@ -1326,7 +1344,25 @@ document.getElementById('topicGrid').addEventListener('click', e => {
 homeBtn.addEventListener('click', () => { if (!document.body.classList.contains('picking')) openTopics(); });
 // Feedback form: builds an email to Scott and opens the visitor's mail app with it filled in
 const fbDlg = document.getElementById('fbDlg');
-document.getElementById('fbBtn').addEventListener('click', () => { fbDlg.showModal(); document.getElementById('fbText').focus(); });
+document.getElementById('fbBtn').addEventListener('click', () => fbDlg.showModal());
+const fbStars = document.getElementById('fbStars'), fbRateWord = document.getElementById('fbRateWord');
+const RATE_WORDS = ['', 'Not for us', 'It\u2019s OK', 'Pretty good', 'Really good', 'We love it!'];
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.75 5.6 6.15.9-4.45 4.33 1.05 6.13L12 16.86l-5.5 2.9 1.05-6.13L3.1 9.3l6.15-.9z"/></svg>';
+for (let n = 1; n <= 5; n++) {
+  fbStars.insertAdjacentHTML('beforeend', `<label class="fb-star"><input type="radio" name="rating" value="${n}" aria-label="${n} star${n > 1 ? 's' : ''}: ${RATE_WORDS[n]}">${STAR}</label>`);
+}
+const fbRating = () => +(fbStars.querySelector('input:checked') || {}).value || 0;
+const showStars = n => {
+  fbStars.querySelectorAll('.fb-star').forEach((el, i) => el.classList.toggle('on', i < n));
+  fbRateWord.textContent = RATE_WORDS[n];
+};
+fbStars.addEventListener('change', () => {
+  showStars(fbRating());
+  fbStars.classList.remove('pop'); void fbStars.offsetWidth; fbStars.classList.add('pop');
+  document.getElementById('fbNote').textContent = '';
+});
+fbStars.addEventListener('pointerover', e => { const i = [...fbStars.children].indexOf(e.target.closest('.fb-star')); if (i >= 0 && e.pointerType === 'mouse') showStars(i + 1); });
+fbStars.addEventListener('pointerleave', () => showStars(fbRating()));
 document.getElementById('fbClose').addEventListener('click', () => fbDlg.close());
 fbDlg.addEventListener('click', e => {   // a tap on the backdrop (the dialog itself, not its contents) closes it
   if (e.target !== fbDlg) return;
@@ -1337,7 +1373,7 @@ const fbForm = document.getElementById('fbForm'), fbDone = document.getElementBy
 const fbSend = document.getElementById('fbSend'), fbNote = document.getElementById('fbNote');
 document.getElementById('fbOk').addEventListener('click', () => fbDlg.close());
 fbDlg.addEventListener('close', () => {   // next time it opens on a fresh, empty form
-  if (!fbDone.hidden) { fbForm.reset(); fbForm.hidden = false; fbDone.hidden = true; }
+  if (!fbDone.hidden) { fbForm.reset(); showStars(0); fbForm.hidden = false; fbDone.hidden = true; }
   fbNote.textContent = '';
 });
 // Sends through the site's /api/feedback (Resend). If that can't be reached, the visitor's
@@ -1345,22 +1381,24 @@ fbDlg.addEventListener('close', () => {   // next time it opens on a fresh, empt
 fbForm.addEventListener('submit', async e => {
   e.preventDefault();
   const text = document.getElementById('fbText').value.trim();
-  if (!text) return;
+  const rating = fbRating();
+  if (!text && !rating) { fbNote.textContent = 'Tap a star or write a note first.'; return; }
   const from = document.getElementById('fbFrom').value.trim();
   fbSend.disabled = true; fbSend.textContent = 'Sending…'; fbNote.textContent = '';
   let ok = false;
   try {
     const r = await fetch('/api/feedback', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, from, website: fbForm.website.value, page: 'IceBreaker' })
+      body: JSON.stringify({ message: text, rating, from, website: fbForm.website.value, page: 'IceBreaker' })
     });
     ok = r.ok;
   } catch {}
   fbSend.disabled = false; fbSend.textContent = 'Send';
   if (ok) { fbForm.hidden = true; fbDone.hidden = false; document.getElementById('fbOk').focus(); return; }
   fbNote.textContent = "Couldn't send it from here, so your email app is opening with it instead.";
-  location.href = 'mailto:scottddickie@gmail.com?subject=' + encodeURIComponent('IceBreaker feedback') +
-    '&body=' + encodeURIComponent(text + (from ? '\n\nFrom: ' + from : ''));
+  const stars = rating ? 'Rating: ' + '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating) + ' (' + rating + '/5)' : '';
+  location.href = 'mailto:scottddickie@gmail.com?subject=' + encodeURIComponent('IceBreaker feedback' + (rating ? ' (' + rating + '/5)' : '')) +
+    '&body=' + encodeURIComponent([stars, text, from && 'From: ' + from].filter(Boolean).join('\n\n'));
 });
 
 
