@@ -450,6 +450,38 @@
     color:#777; text-decoration:underline; cursor:pointer; margin-top:16px; padding:4px;
   }
 
+  /* Feedback: a round button in the bottom-right corner of the topic screen, opening a short form */
+  .fb-btn{
+    position:fixed; right:max(18px, env(safe-area-inset-right)); bottom:max(18px, env(safe-area-inset-bottom)); z-index:5;
+    appearance:none; height:52px; padding:0 18px 0 14px; border:3px solid var(--ink); border-radius:999px;
+    background:var(--pink); color:var(--ink); box-shadow:4px 4px 0 var(--ink); cursor:pointer;
+    display:none; align-items:center; gap:8px; font-family:inherit; font-size:16px; font-weight:900;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .fb-btn svg{width:24px; height:24px;}
+  body.picking:not(.intro) .fb-btn{display:flex;}
+  body.landing .fb-btn{opacity:0;}
+  @media (hover:hover){ .fb-btn:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink);} }
+  .fb-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
+  .fb-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
+  .topics{padding-bottom:84px;}   /* room so the button never covers the Random tile */
+  .fb-form{display:flex; flex-direction:column; gap:12px; text-align:left;}
+  .fb-form label{font-size:14px; font-weight:900;}
+  .fb-form input, .fb-form textarea{
+    width:100%; margin-top:5px; padding:11px 12px; border:2.5px solid var(--ink); border-radius:12px;
+    background:#fff; color:var(--ink); font-family:inherit; font-size:16px; font-weight:600; line-height:1.35;
+  }
+  .fb-form textarea{min-height:120px; resize:vertical;}
+  .fb-form input:focus, .fb-form textarea:focus{outline:3px solid var(--blue); outline-offset:1px;}
+  .fb-form .big-btn{align-self:center; margin-top:6px;}
+  .fb-note{margin:0; font-size:13px; font-weight:600; color:#666; text-align:center;}
+  .fb-note:empty, .fb-form[hidden]{display:none;}
+  .fb-trap{position:absolute; left:-9999px; width:1px; height:1px; opacity:0;}
+  .fb-form .big-btn:disabled{opacity:.6; cursor:default;}
+  .fb-done{padding:6px 0 4px;}
+  .fb-check{font-size:56px; line-height:1; margin:4px 0 10px;}
+  .fb-thanks{margin:0 0 20px; font-size:18px; font-weight:800;}
+
   @media (prefers-reduced-motion: reduce){
     .inner, .face{transition:none;}
     .flip.pop{animation:none;}
@@ -525,6 +557,28 @@
   </div>
   <button class="big-btn" type="button" id="playersGo">Let's play</button>
   <div><button class="link-btn" type="button" id="playersOff" hidden>Turn off players</button></div>
+</dialog>
+
+<button class="fb-btn" id="fbBtn" type="button" aria-haspopup="dialog">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16v11H10l-4 3.5v-3.5H4z"/></svg>
+  Feedback
+</button>
+<dialog class="spin" id="fbDlg" aria-labelledby="fbTitle">
+  <button class="x" type="button" id="fbClose" aria-label="Close">&times;</button>
+  <h2 id="fbTitle">Send feedback</h2>
+  <p class="sub">Ideas for questions, bugs, anything. It goes straight to Scott.</p>
+  <form class="fb-form" id="fbForm">
+    <label>Your feedback<textarea id="fbText" name="message" required placeholder="What should we add or fix?"></textarea></label>
+    <label>Your name or email <span style="font-weight:600;color:#777">(optional)</span><input id="fbFrom" name="from" autocomplete="email" placeholder="So Scott can reply"></label>
+    <input class="fb-trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="big-btn" type="submit" id="fbSend">Send</button>
+    <p class="fb-note" id="fbNote" role="status"></p>
+  </form>
+  <div class="fb-done" id="fbDone" hidden>
+    <div class="fb-check" aria-hidden="true">🎉</div>
+    <p class="fb-thanks">Thanks! Scott got your feedback.</p>
+    <button class="big-btn" type="button" id="fbOk">Done</button>
+  </div>
 </dialog>
 
 <script>
@@ -1270,6 +1324,45 @@ document.getElementById('topicGrid').addEventListener('click', e => {
   if (tile) chooseTopic(tile.dataset.topic, tile);
 });
 homeBtn.addEventListener('click', () => { if (!document.body.classList.contains('picking')) openTopics(); });
+// Feedback form: builds an email to Scott and opens the visitor's mail app with it filled in
+const fbDlg = document.getElementById('fbDlg');
+document.getElementById('fbBtn').addEventListener('click', () => { fbDlg.showModal(); document.getElementById('fbText').focus(); });
+document.getElementById('fbClose').addEventListener('click', () => fbDlg.close());
+fbDlg.addEventListener('click', e => {   // a tap on the backdrop (the dialog itself, not its contents) closes it
+  if (e.target !== fbDlg) return;
+  const r = fbDlg.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) fbDlg.close();
+});
+const fbForm = document.getElementById('fbForm'), fbDone = document.getElementById('fbDone');
+const fbSend = document.getElementById('fbSend'), fbNote = document.getElementById('fbNote');
+document.getElementById('fbOk').addEventListener('click', () => fbDlg.close());
+fbDlg.addEventListener('close', () => {   // next time it opens on a fresh, empty form
+  if (!fbDone.hidden) { fbForm.reset(); fbForm.hidden = false; fbDone.hidden = true; }
+  fbNote.textContent = '';
+});
+// Sends through the site's /api/feedback (Resend). If that can't be reached, the visitor's
+// email app opens with the message filled in instead, so nothing they typed is lost.
+fbForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = document.getElementById('fbText').value.trim();
+  if (!text) return;
+  const from = document.getElementById('fbFrom').value.trim();
+  fbSend.disabled = true; fbSend.textContent = 'Sending…'; fbNote.textContent = '';
+  let ok = false;
+  try {
+    const r = await fetch('/api/feedback', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, from, website: fbForm.website.value, page: 'IceBreaker' })
+    });
+    ok = r.ok;
+  } catch {}
+  fbSend.disabled = false; fbSend.textContent = 'Send';
+  if (ok) { fbForm.hidden = true; fbDone.hidden = false; document.getElementById('fbOk').focus(); return; }
+  fbNote.textContent = "Couldn't send it from here, so your email app is opening with it instead.";
+  location.href = 'mailto:scottddickie@gmail.com?subject=' + encodeURIComponent('IceBreaker feedback') +
+    '&body=' + encodeURIComponent(text + (from ? '\n\nFrom: ' + from : ''));
+});
+
 
 useTopic(topic);
 if (linked >= 1 && linked <= PROMPTS.length) show(index);
