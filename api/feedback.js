@@ -37,7 +37,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "bad_message" });
   }
   if (!process.env.RESEND_API_KEY) {
-    return res.status(503).json({ error: "not_configured" });
+    // TEMPORARY diagnostic: names (never values) of any variables that look like the Resend key,
+    // plus which deploy is answering. Remove once sending works.
+    const seen = Object.keys(process.env).filter((k) => /resend/i.test(k))
+      .map((k) => JSON.stringify(k) + (process.env[k] ? "" : " (empty)"));
+    return res.status(503).json({
+      error: "not_configured", seen,
+      env: process.env.VERCEL_ENV || null, commit: (process.env.VERCEL_GIT_COMMIT_SHA || "").slice(0, 7) || null,
+    });
   }
 
   const sender = from.trim();
