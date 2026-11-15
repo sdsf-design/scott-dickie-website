@@ -249,8 +249,11 @@
     .page-nav{gap:8px;}
     .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:36px; height:36px;}
     .nav-right{gap:6px;}
+    .page-nav .nav-title{font-size:15px;}   /* centered between the buttons, it needs to be a little smaller here */
   }
   .nav-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
+  /* The logo is centered on the bar, so it reads as a title and not as another button beside home */
+  .page-nav .nav-title{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);}
   @media (max-height:640px){
     .emoji{display:none;}
   }
