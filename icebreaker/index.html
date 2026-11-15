@@ -290,11 +290,11 @@
   .topics[hidden], body.picking .wrap{display:none;}
   .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
   /* Tiles stretch to fill the screen's height; on short screens they keep a minimum and the page scrolls */
-  .topic-grid{width:100%; flex:1; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, minmax(118px, 1fr)) auto; gap:16px;}
+  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto; gap:16px;}   /* six tiles a set height; Random sizes to its content */
   .topic-tile{
     appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
     color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
-    padding:16px 16px 14px; min-height:118px;
+    padding:16px 16px 14px; min-height:0;
     display:flex; flex-direction:column; justify-content:space-between; gap:8px;
     transition:transform .12s ease, box-shadow .12s ease;
   }
@@ -352,6 +352,16 @@
     50%{transform:rotate(-8deg) rotateY(-180deg) scale(1.25);}
     100%{transform:rotate(-8deg) rotateY(-360deg) scale(1);}
   }
+  /* The tagline fades up under the logo once the name is in, and fades out as the logo heads for the top bar.
+     It is positioned on its own so the logo stays exactly centered. */
+  .splash-tag{
+    position:absolute; left:16px; right:16px; margin:0;
+    top:calc(50% + clamp(48px, 13vw, 104px) * .8 + clamp(14px, 3vh, 28px));
+    text-align:center; font-size:clamp(18px, 4.8vw, 30px); font-weight:800; color:#444; letter-spacing:-.2px; text-wrap:balance;
+    animation:tag-in .5s ease 1.05s backwards; transition:opacity .3s ease;
+  }
+  .splash.leaving .splash-tag{opacity:0;}
+  @keyframes tag-in{from{opacity:0; transform:translateY(.5em);}to{opacity:1; transform:none;}}
   @keyframes word-in{from{opacity:0; transform:translateX(-.4em);}to{opacity:1; transform:none;}}
   /* Until the logo starts moving, everything else waits; tiles hold their pop-in */
   body.intro .page-nav > :not(.nav-title), body.intro .topics .lead, body.intro .wrap{opacity:0;}
@@ -365,7 +375,7 @@
   .wipe{position:fixed; inset:0; pointer-events:none; z-index:150;}   /* the tile's color, under the emojis */
   .burst span{position:absolute; line-height:1; will-change:transform, opacity;}
   @media (max-height:700px){
-    .topic-tile{min-height:96px; padding:12px 14px;}
+    .topic-tile{padding:12px 14px;}
     .topic-tile .t-emoji{font-size:28px;}
     .topics .lead{margin-bottom:12px;}
   }
@@ -516,6 +526,7 @@
 <body class="intro">
 <div class="splash" id="splash" aria-hidden="true">
   <div class="nav-title splash-logo"><div class="splash-mark" aria-hidden="true"><div class="sc-y"></div><div class="sc-w"><div class="sc-face"><svg viewBox="4 5 34 48"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></svg></div><div class="sc-face sc-back"><svg viewBox="4 5 34 48"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" transform="translate(42 0) scale(-1 1)" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></svg></div></div></div><span class="logo-word">IceBreaker</span></div>
+  <p class="splash-tag">Flip a card. Start a conversation.</p>
 </div>
 <nav class="page-nav">
   <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
@@ -1237,14 +1248,13 @@ const TOPIC_EMOJI = { magic: '🪄', animals: '🐾', places: '🗺️', friends
 const topicsEl = document.getElementById('topics');
 const homeBtn = document.getElementById('homeBtn');
 document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
-  const n = PROMPTS.filter(p => p[0] === t.id).length;
   return '<button class="topic-tile pop-in" type="button" data-topic="' + t.id + '" style="background:' + t.color +
     '; animation-delay:' + (80 + i * 70) + 'ms"><span class="t-emoji" aria-hidden="true">' + TOPIC_EMOJI[t.id] +
-    '</span><span class="t-name">' + t.name + '</span><span class="t-count">' + n + ' questions</span></button>';
+    '</span><span class="t-name">' + t.name + '</span></button>';
 }).join('') +
   '<button class="topic-tile random pop-in" type="button" data-topic="random" style="animation-delay:' + (80 + TOPICS.length * 70) + 'ms">' +
   '<span class="t-emoji" aria-hidden="true">🎲</span><span class="t-text"><span class="t-name">Random</span>' +
-  '<span class="t-count">All ' + PROMPTS.length + ' questions, mixed up</span></span></button>';
+  '<span class="t-count">All topics, mixed up</span></span></button>';
 
 function useTopic(id){
   topic = id;
@@ -1443,7 +1453,7 @@ else openTopics();
     document.body.classList.add('landing');
     document.body.classList.remove('intro');   // tiles, buttons and card come in as the logo moves
     setTimeout(done, 780);
-  }, 1450);   // after the white card's flip has finished
+  }, 2300);   // after the white card's flip, with time to read the tagline
 })();
 </script>
 </body>
