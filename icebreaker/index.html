@@ -282,7 +282,7 @@
     .back .line{font-size:26px;}
   }
 
-  /* ---------- start screen: pick one of the six topics ---------- */
+  /* ---------- start screen: pick one of the seven topics ---------- */
   .topics{
     width:100%; max-width:720px; flex:1; min-height:0; overflow:auto;
     display:flex; flex-direction:column; align-items:center; padding:0 6px 10px;
@@ -290,7 +290,8 @@
   .topics[hidden], body.picking .wrap{display:none;}
   .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
   /* Tiles stretch to fill the screen's height; on short screens they keep a minimum and the page scrolls */
-  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto; gap:16px;}   /* six tiles a set height; Random sizes to its content */
+  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto auto; gap:16px;}   /* six tiles a set height; Holidays and Random size to their content */
+  .topic-tile[data-topic="holidays"]{grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;}
   .topic-tile{
     appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
     color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
@@ -307,7 +308,7 @@
   .topic-tile.random{
     grid-column:1 / -1; min-height:0; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;
     background:#fff;
-    background-image:linear-gradient(90deg, #c9a7ff, #7ed957, #8fd3ff, #ff90e8, #ffb26b, #ffd23f);
+    background-image:linear-gradient(90deg, #c9a7ff, #7ed957, #8fd3ff, #ff90e8, #ffb26b, #ffd23f, #ff8a80);
     background-size:100% 10px; background-repeat:no-repeat; background-position:bottom;
     padding-bottom:22px;
   }
@@ -628,7 +629,8 @@ const TOPICS = [
   { id: 'places',  name: 'Places & Adventures', color: '#8fd3ff' },
   { id: 'friends', name: 'Friends & Feelings',  color: '#ff90e8' },
   { id: 'family',  name: 'Family & Home',       color: '#ffb26b' },
-  { id: 'me',      name: 'Me & My Dreams',      color: '#ffd23f' }
+  { id: 'me',      name: 'Me & My Dreams',      color: '#ffd23f' },
+  { id: 'holidays', name: 'Holidays',           color: '#ff8a80' }
 ];
 // [topic, type, emoji, question, follow-up]
 const PROMPTS = [
@@ -871,7 +873,47 @@ const PROMPTS = [
   ["me", "IMAGINE", "🎯", "If you could learn any skill instantly, what would it be?", "What would you do with it?"],
   ["me", "TELL ME", "📈", "What's something you've gotten better at this year?", "How did you do it?"],
   ["me", "BIG QUESTION", "🪞", "What makes you feel most like yourself?", "When do you feel that way?"],
-  ["me", "WOULD YOU RATHER", "🖊️", "Would you rather write a story or draw a comic?", "What would it be about?"]
+  ["me", "WOULD YOU RATHER", "🖊️", "Would you rather write a story or draw a comic?", "What would it be about?"],
+  ["holidays", "TELL ME", "🎁", "What's the best present you've ever gotten?", "What made it so special?"],
+  ["holidays", "WOULD YOU RATHER", "🏖️", "Would you rather spend the holidays somewhere snowy or on a sunny beach?", "What would you do there all day?"],
+  ["holidays", "TELL ME", "🍪", "What's your favorite holiday treat?", "Could we make it together?"],
+  ["holidays", "IMAGINE", "🎉", "If you could make up a brand new holiday, what would it celebrate?", "How would everyone celebrate it?"],
+  ["holidays", "WHAT IF", "⛄", "What if your snowman came to life?", "What would you do together first?"],
+  ["holidays", "BIG QUESTION", "💝", "What's the best present you could give someone that doesn't cost any money?", "Who would you give it to?"],
+  ["holidays", "TELL ME", "🕯️", "What's your favorite holiday tradition in our family?", "Why do you like it so much?"],
+  ["holidays", "WOULD YOU RATHER", "🎀", "Would you rather wrap all the presents or decorate the whole house?", "What would you need to get it done?"],
+  ["holidays", "IMAGINE", "🧝", "If you were one of Santa's elves, what toy would you build?", "Who would you give it to?"],
+  ["holidays", "TELL ME", "🎶", "What's your favorite holiday song?", "Can you sing a little bit of it?"],
+  ["holidays", "WHAT IF", "❄️", "What if it snowed candy instead of snow?", "What kind of candy would you want?"],
+  ["holidays", "WOULD YOU RATHER", "🛷", "Would you rather go sledding or build a snow fort?", "Who would you bring with you?"],
+  ["holidays", "BIG QUESTION", "🙏", "What's something you're thankful for this year?", "Who helped make it happen?"],
+  ["holidays", "TELL ME", "🎄", "What's your favorite holiday decoration?", "Where would you put it?"],
+  ["holidays", "IMAGINE", "🥧", "If you got to plan the whole holiday dinner, what would we eat?", "What would we have for dessert?"],
+  ["holidays", "WHAT IF", "🦌", "What if a reindeer could give you a ride anywhere for one night?", "Where would you fly first?"],
+  ["holidays", "WOULD YOU RATHER", "🧤", "Would you rather have a snowball fight or drink hot cocoa by the fire?", "Who would be on your team?"],
+  ["holidays", "TELL ME", "📸", "What's your favorite holiday memory?", "What part do you remember best?"],
+  ["holidays", "BIG QUESTION", "🤗", "How can we help make the holidays happy for someone else?", "Could we do that this year?"],
+  ["holidays", "IMAGINE", "🍬", "If you could build a gingerbread house as big as a real house, what would it look like?", "Which part would you eat first?"],
+  ["holidays", "WHAT IF", "🎅", "What if you got to deliver presents to the whole world in one night?", "Where would you go first?"],
+  ["holidays", "TELL ME", "🎬", "What's your favorite holiday movie or story?", "Who's your favorite character in it?"],
+  ["holidays", "WOULD YOU RATHER", "🎊", "Would you rather open one present every day or all your presents at once?", "Why would that be more fun?"],
+  ["holidays", "BIG QUESTION", "✨", "What do you think makes the holidays feel special?", "What's one thing you hope happens this year?"],
+  ["holidays", "IMAGINE", "🌟", "If you could put anything on top of the tree instead of a star, what would it be?", "How would you get it up there?"],
+  ["holidays", "WHAT IF", "🧸", "What if your toys came to life while everyone was asleep?", "What do you think they'd get up to?"],
+  ["holidays", "TELL ME", "👨‍👩‍👧", "Who do you most like to see during the holidays?", "What do you like to do together?"],
+  ["holidays", "WOULD YOU RATHER", "☃️", "Would you rather build the biggest snowman ever or the tiniest one?", "What would you name it?"],
+  ["holidays", "IMAGINE", "🎆", "If you could make a wish at midnight on New Year's Eve, what would you wish for?", "What could you do to help it come true?"],
+  ["holidays", "BIG QUESTION", "🌱", "What's something you want to try in the new year?", "What's the first step?"],
+  ["holidays", "WHAT IF", "🎈", "What if you got to throw a holiday party for all your friends?", "What games would you play?"],
+  ["holidays", "TELL ME", "🍽️", "What's one holiday food you don't like at all?", "What would you swap it for?"],
+  ["holidays", "WOULD YOU RATHER", "🧦", "Would you rather find your stocking full of candy or full of tiny toys?", "Which one would you open first?"],
+  ["holidays", "IMAGINE", "🏔️", "If you could spend the holidays anywhere in the world, where would you go?", "Who would you take with you?"],
+  ["holidays", "WHAT IF", "🐧", "What if a penguin came to stay with us for the holidays?", "What would you show it first?"],
+  ["holidays", "BIG QUESTION", "💌", "If you could send a holiday card to anyone, who would it be?", "What would you write inside?"],
+  ["holidays", "TELL ME", "🎨", "What's something you've made by hand as a gift?", "What would you like to make next?"],
+  ["holidays", "WOULD YOU RATHER", "🌌", "Would you rather stay up late on New Year's Eve or wake up super early on a holiday morning?", "What would you do with the extra time?"],
+  ["holidays", "WHAT IF", "🎟️", "What if you could have one holiday every single week?", "Which holiday would you pick?"],
+  ["holidays", "IMAGINE", "🪄", "If you could add one magic thing to the holidays, what would it be?", "How would it make the holidays better?"]
 ];
 
 const card = document.getElementById('card');
@@ -1244,7 +1286,7 @@ voiceBtn.addEventListener('click', () => setVoice(!voiceOn));
 voiceBtn.setAttribute('aria-pressed', String(voiceOn));
 
 // ---------- start screen: pick a topic ----------
-const TOPIC_EMOJI = { magic: '🪄', animals: '🐾', places: '🗺️', friends: '💛', family: '🏡', me: '🌟' };
+const TOPIC_EMOJI = { magic: '🪄', animals: '🐾', places: '🗺️', friends: '💛', family: '🏡', me: '🌟', holidays: '🎁' };
 const topicsEl = document.getElementById('topics');
 const homeBtn = document.getElementById('homeBtn');
 document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
@@ -1285,7 +1327,8 @@ const BURST_EMOJI = {
   places:  ['🗺️', '🚀', '🏝️', '🏰', '🧭', '🎈', '🌋'],
   friends: ['💛', '🤝', '😊', '🫶', '💬', '🌈', '🎉'],
   family:  ['🏡', '❤️', '🍕', '🎂', '🧸', '🍿', '🥞'],
-  me:      ['🌟', '🎨', '🎸', '📚', '🏆', '💡', '🚲']
+  me:      ['🌟', '🎨', '🎸', '📚', '🏆', '💡', '🚲'],
+  holidays: ['🎁', '❄️', '⛄', '🎄', '🕯️', '🍪', '🎉']
 };
 BURST_EMOJI.random = Object.values(BURST_EMOJI).flat();
 
