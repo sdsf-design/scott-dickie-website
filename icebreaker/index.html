@@ -290,8 +290,8 @@
   .topics[hidden], body.picking .wrap{display:none;}
   .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
   /* Tiles stretch to fill the screen's height; on short screens they keep a minimum and the page scrolls */
-  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto auto; gap:16px;}   /* six tiles a set height; Holidays and Random size to their content */
-  .topic-tile[data-topic="holidays"]{grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;}
+  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto; gap:16px;}   /* six tiles a set height; Holidays and Random share the last row and size to their content */
+  .topic-tile[data-topic="holidays"]{flex-direction:row; align-items:center; justify-content:flex-start; gap:14px; padding-bottom:22px;}
   .topic-tile{
     appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
     color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
@@ -306,13 +306,17 @@
   .topic-tile:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
   .topic-tile:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
   .topic-tile.random{
-    grid-column:1 / -1; min-height:0; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;
+    min-height:0; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;
     background:#fff;
     background-image:linear-gradient(90deg, #c9a7ff, #7ed957, #8fd3ff, #ff90e8, #ffb26b, #ffd23f, #ff8a80);
     background-size:100% 10px; background-repeat:no-repeat; background-position:bottom;
     padding-bottom:22px;
   }
   .topic-tile.random .t-text{display:flex; flex-direction:column; gap:4px;}
+  @media (max-width:600px){   /* half-width tiles: emoji above the name, like the topic tiles */
+    .topic-tile.random, .topic-tile[data-topic="holidays"]{flex-direction:column; align-items:flex-start; justify-content:center; gap:6px; padding-top:12px;}
+    .topic-grid{gap:12px;}
+  }
   body.picking .topics .pop-in{animation:pop .4s cubic-bezier(.3, 1.5, .5, 1) both;}
   .topic-tile.chosen{transform:scale(1.07) rotate(-1.5deg); box-shadow:8px 8px 0 var(--ink);}
 
