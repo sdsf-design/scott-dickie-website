@@ -115,6 +115,58 @@ h1, h2, h3, p { margin: 0; }
 .hero .lede strong { color: var(--ink); font-weight: 500; }
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
 
+/* ---------- built with AI: a reel of tall cards that drifts edge to edge, pausing under the cursor ---------- */
+.reel { position: relative; overflow: hidden; padding: 8px 0 clamp(24px, 4vh, 48px); }
+.reel-track { display: flex; width: max-content; animation: reel 220s linear infinite; }
+.reel:hover .reel-track, .reel:focus-within .reel-track { animation-play-state: paused; }
+@keyframes reel { to { transform: translateX(-50%); } }
+.card {
+  --tint: 255, 158, 27;
+  flex: none; width: clamp(272px, 26vw, 360px); min-height: clamp(380px, 36vw, 480px); margin-right: 18px; border-radius: 24px; overflow: hidden;
+  position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 16px; padding: 22px; color: var(--ink); text-decoration: none;
+  background: radial-gradient(120% 70% at 0% 0%, rgba(var(--tint), .22), transparent 60%), var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line); transition: transform .4s cubic-bezier(.2, .8, .2, 1), box-shadow .4s;
+}
+.card:nth-child(4n+2) { --tint: 255, 226, 74; } .card:nth-child(4n+3) { --tint: 255, 90, 26; } .card:nth-child(4n+4) { --tint: 255, 194, 31; }
+a.card:hover { transform: translateY(-6px); box-shadow: inset 0 0 0 1px rgba(var(--tint), .7); }
+.card-top { display: flex; align-items: center; gap: 12px; }
+.card-top i { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font: 17px/1 var(--sans); font-style: normal; background: rgba(var(--tint), .18); color: rgb(var(--tint)); }
+.card-top h3 { font: 700 clamp(19px, 1.7vw, 23px)/1.1 var(--sans); letter-spacing: -.03em; }
+.card-top small { display: block; margin-top: 4px; font: 11px/1 var(--mono); color: rgb(var(--tint)); text-transform: uppercase; letter-spacing: .06em; }
+.card p.what { font-size: 14.5px; line-height: 1.45; color: var(--quiet); }
+.card a.go, .card .go { color: var(--ink); }
+.cv { position: relative; min-height: 200px; border-radius: 14px; overflow: hidden; background: var(--ground); box-shadow: inset 0 0 0 1px var(--line); display: grid; align-content: center; gap: 10px; padding: 16px; }
+.cv img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cv .b { max-width: 88%; padding: 10px 12px; font-size: 13px; line-height: 1.4; border-radius: 12px 12px 12px 4px; background: var(--raise); }
+.cv .b.me { justify-self: end; border-radius: 12px 12px 4px 12px; background: rgba(var(--tint), .9); color: #160c06; }
+.cv .b small { display: block; font: 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--quiet); margin-bottom: 6px; }
+.cv .term { font: 12px/1.75 var(--mono); color: var(--quiet); white-space: pre; overflow: hidden; }
+.cv .term b { font-weight: 400; color: rgb(var(--tint)); } .cv .term em { font-style: normal; color: var(--ink); }
+.cv .bars { display: grid; gap: 12px; }
+.cv .bar { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; align-items: center; font: 11px/1 var(--mono); color: var(--quiet); }
+.cv .bar span { display: grid; gap: 3px; }
+.cv .bar span i { display: block; height: 7px; background: var(--raise); }
+.cv .bar span i + i { background: rgb(var(--tint)); }
+.cv .bar span i.over { background: #ff4d3a; }
+.cv .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.cv .tiles i { aspect-ratio: 1; border-radius: 6px; }
+.cv .flow { display: grid; gap: 8px; justify-items: center; }
+.cv .flow span { font: 12px/1 var(--mono); padding: 9px 14px; border-radius: 99px; box-shadow: inset 0 0 0 1px var(--line-strong); }
+.cv .flow span:last-child { background: rgb(var(--tint)); color: #160c06; box-shadow: none; }
+.cv .flow i { width: 1px; height: 10px; background: var(--line-strong); }
+.cv .wave { display: flex; align-items: center; gap: 3px; height: 120px; }
+.cv .wave i { flex: 1; border-radius: 2px; background: rgb(var(--tint)); opacity: .85; }
+.cv .finder { position: relative; height: 100%; min-height: 180px; border-radius: 8px; background: linear-gradient(160deg, #2a2a2e, #141416); display: grid; place-items: center; }
+.cv .finder::before, .cv .finder::after { content: ""; position: absolute; inset: 14px; border: 2px solid rgba(var(--tint), .9); clip-path: polygon(0 0, 22% 0, 22% 3px, 3px 3px, 3px 22%, 0 22%, 0 78%, 3px 78%, 3px calc(100% - 3px), 22% calc(100% - 3px), 22% 100%, 78% 100%, 78% calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 78%, 100% 78%, 100% 22%, calc(100% - 3px) 22%, calc(100% - 3px) 3px, 78% 3px, 78% 0, 100% 0, 100% 100%, 0 100%); }
+.cv .finder::after { content: none; }
+.cv .finder span { font: 12px/1 var(--mono); padding: 9px 12px; border-radius: 99px; background: var(--ink); color: var(--ground); }
+.cv .doc { display: grid; gap: 7px; padding: 16px; border-radius: 8px; background: var(--ink); }
+.cv .doc i { display: block; height: 7px; border-radius: 2px; background: #c9c9c9; } .cv .doc i.h { height: 12px; width: 55%; background: #121212; margin-bottom: 4px; }
+.cv .doc i.hl { background: rgb(var(--tint)); }
+@media (prefers-reduced-motion: reduce) {
+  .reel { overflow-x: auto; } .reel-track { animation: none; } .reel-track [aria-hidden="true"] { display: none; }
+}
+
 /* ---------- sections ---------- */
 section { padding: clamp(104px, 17vh, 200px) 0; }
 .head { display: grid; gap: 14px; margin-bottom: clamp(48px, 8vh, 88px); max-width: 820px; }
@@ -395,6 +447,11 @@ html:has(.contact-modal[open]) { overflow: hidden; }
         <a class="btn ghost" href="#contact" data-book="month">Book a month <span>$499</span></a>
       </div>
     </div>
+  </div>
+
+  <!-- Built with AI: a reel of cards -->
+  <div class="reel" aria-label="Things I&rsquo;ve built with AI">
+    <div class="reel-track"></div>
   </div>
 
   <!-- Method -->
@@ -687,6 +744,54 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   if (flow) flow.innerHTML = steps.map(([name, b, a, who]) =>
     `<div class="v-step ${who}"><span>${name}${who === "total" ? "" : `<em>${who === "ai" ? "AI" : "YOU"}</em>`}</span>
      <div class="v-track" style="--b:${b}%;--a:${a}%"><i></i><i style="width:${b}%"></i></div></div>`).join("");
+})();
+
+// Built with AI: each card is a thing I made, with a small picture of it. The list renders twice so the reel loops seamlessly.
+(() => {
+  const track = document.querySelector(".reel-track");
+  if (!track) return;
+  const bars = (rows) => `<div class="bars">${rows.map(([n, b, a, over]) => `<p class="bar">${n}<span><i style="width:${b}%"></i><i class="${over ? "over" : ""}" style="width:${a}%"></i></span></p>`).join("")}</div>`;
+  const chat = (q, a, who = "Agent") => `<p class="b me">${q}</p><p class="b"><small>${who}</small>${a}</p>`;
+  const cards = [
+    { icon: "◎", kind: "Agent", title: "Design feedback agent", what: "Reviews a design the way I would, using my crit patterns and principles.",
+      cv: chat("Can you review this checkout screen?", "Two primary buttons are competing. Pick the one that says why, and tighten spacing to the 8pt grid.", "Feedback agent") },
+    { icon: "✎", kind: "Agent", title: "Writes like me", what: "Drafts updates, launch notes and replies in my voice, so I edit instead of starting cold.",
+      cv: chat("Draft the launch note for the new checkout", "We rebuilt checkout. Two steps instead of five. Try it and tell me what breaks.", "Voice agent") },
+    { icon: "✉", kind: "Agents", title: "Copywriting agents", what: "Headlines, CTAs, UI and error copy on demand, for anyone in the company.", href: "../ai-initiatives.html",
+      cv: chat("3 headlines for the summer sale page", "1. Learn more this summer. 2. Get ahead before fall. 3. Summer is for leveling up.", "Copy agent") },
+    { icon: "⇣", kind: "Agent chain", title: "Page builder", what: "Several agents chained together to produce a landing page layout, copy and image direction.", href: "../ai-initiatives.html",
+      cv: `<div class="flow"><span>Brief</span><i></i><span>Layout agent</span><i></i><span>Copy agent</span><i></i><span>Image agent</span><i></i><span>Landing page</span></div>` },
+    { icon: "▦", kind: "Prompter · Midjourney", title: "Branded image prompter", what: "Turns a brand&rsquo;s guidelines into on-brand photography for every product line.", href: "../ai-initiatives.html",
+      cv: `<div class="tiles">${["#ff9e1b,#ff5a1a", "#ffe24a,#ff9e1b", "#3a3a40,#1d1d20", "#ff5a1a,#a8250e", "#2a2a2e,#ff9e1b", "#ffc21f,#ff7a1a"].map((g) => `<i style="background:linear-gradient(135deg,${g})"></i>`).join("")}</div><div class="term"><b>/imagine</b> <em>student at a desk, warm light…</em></div>` },
+    { icon: "✦", kind: "Claude skill", title: "Budget report skill", what: "Reads my bank and card statement PDFs and builds a spending vs. budget report, by category.",
+      cv: bars([["Rent", 90, 90], ["Groceries", 60, 72, 1], ["Kids", 50, 41], ["Fun", 40, 52, 1], ["Travel", 70, 30]]) },
+    { icon: "⌖", kind: "App · Claude API", title: "LOC-1 Scene Finder", what: "Photograph a scene on your TV and it finds where it was filmed.", href: "../location/index.html",
+      cv: `<div class="finder"><span>📍 Location found</span></div>` },
+    { icon: "?", kind: "App", title: "IceBreaker", what: "Questions that get kids talking, each with a follow-up and a voice clip.", href: "../icebreaker/index.html",
+      cv: `<img src="../assets/play/icebreaker.jpg" alt="" loading="lazy">` },
+    { icon: ">_", kind: "Script · ElevenLabs", title: "Voice clip generator", what: "A Python script that turns every IceBreaker question into a voice clip.",
+      cv: `<div class="term"><b>$</b> <em>python make-audio.py</em>\n<b>✓</b> 1-question.mp3\n<b>✓</b> 1-follow.mp3\n<b>✓</b> 2-question.mp3\n<b>✓</b> 2-follow.mp3\n…\n<em>560 clips written</em></div>` },
+    { icon: "☺", kind: "Site · Claude Code", title: "scott-dickie.com", what: "Designed and built by prompting Claude Code: no framework, and every prompt published.", href: "../howididthis/index.html",
+      cv: `<div class="term"><b>›</b> <em>make the cards fan out on scroll</em>\n<b>✓</b> updated index.html\n<b>›</b> <em>yes, push live</em>\n<b>✓</b> committed and deployed</div>` },
+    { icon: "↺", kind: "App · AI", title: "Get Unstuck", what: "AI-powered help working through tough decisions.", href: "https://www.unstuck.services/",
+      cv: `<img src="../assets/unstuck-home.jpg" alt="" loading="lazy">` },
+    { icon: "♪", kind: "Music · Suno", title: "Songs", what: "Songs I write and produce with Suno, then master with eMastered.", href: "../music/index.html",
+      cv: `<div class="wave">${Array.from({ length: 34 }, (_, i) => `<i style="height:${Math.round(18 + 80 * Math.abs(Math.sin(i * .55) * Math.cos(i * .21)))}%"></i>`).join("")}</div>` },
+    { icon: "≡", kind: "App · AI", title: "AskMentra", what: "An AI assistant that tailors your resume and cover letter to a job.",
+      cv: `<div class="doc"><i class="h"></i><i></i><i class="hl" style="width:80%"></i><i style="width:90%"></i><i></i><i class="hl" style="width:65%"></i><i style="width:75%"></i></div>` },
+    { icon: "☷", kind: "Agents", title: "Synthetic users", what: "A community of synthetic users who react to ideas before real users see them.",
+      cv: chat("Would you pay for this?", "Maybe at $5. I&rsquo;d want to try it free first and see my own data.", "Persona · Maya, 34") },
+    { icon: "✓", kind: "App", title: "Should I buy it?", what: "A 14-question gut check before you buy something, ending in a clear verdict.", href: "../shouldibuyit/index.html",
+      cv: `<img src="../assets/play/shouldibuyit.jpg" alt="" loading="lazy">` },
+  ];
+  const card = (c) => {
+    const tag = c.href ? "a" : "div";
+    const attrs = c.href ? ` href="${c.href}"${/^https?:/.test(c.href) ? ' target="_blank" rel="noopener"' : ""}` : "";
+    return `<${tag} class="card"${attrs}><div class="card-top"><i aria-hidden="true">${c.icon}</i><div><h3>${c.title}</h3><small>${c.kind}</small></div></div>
+      <div class="cv" aria-hidden="true">${c.cv}</div><p class="what">${c.what}</p></${tag}>`;
+  };
+  const set = cards.map(card).join("");
+  track.innerHTML = `<div style="display:flex">${set}</div><div style="display:flex" aria-hidden="true" inert>${set}</div>`;
 })();
 
 // Hero: "Start building." turns into the moving mesh letter by letter over the first ~fifth of a screen of scrolling, while it is still in view.
