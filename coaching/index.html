@@ -8,17 +8,18 @@
 <link rel="icon" href="../assets/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@300;400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="../projects-menu.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Instrument+Sans:wght@400;500&family=Inter:wght@300;400;600;800&display=swap">
 <style>
-/* The Work side's identity (monospaced labels, hairline squares, ginger for anything touched), turned down to night:
-   an almost-black grey ground, white type set heavier and bigger, and fewer things on screen at once. */
+/* Night Field: Section AI's calm, rounded, sentence-case voice after dark, carrying scott-dickie.com's
+   ASCII face, mono labels, prompt box and a single neon accent. */
 :root {
-  --ground: #121212; --paper: #1a1a1b; --raise: #232325; --ink: #f6f6f4; --quiet: #9b9ba0; --pushed: #ff9e1b;
-  --line: rgba(246, 246, 244, .13); --line-strong: rgba(246, 246, 244, .32);
-  --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ground: #121110; --paper: #1a1917; --raise: #24221f; --ink: #eeeae2; --quiet: #96918a; --pushed: #ff9e1b; --indigo: #7a6dff;
+  --line: rgba(238, 234, 226, .1); --line-strong: rgba(238, 234, 226, .24);
+  --sans: "Instrument Sans", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --light: Inter, system-ui, sans-serif;
   --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --gutter: clamp(16px, 4vw, 48px);
+  --r: 24px;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -26,63 +27,46 @@ html { scroll-behavior: smooth; }
 html, body { margin: 0; overflow-x: clip; }
 body { background: var(--ground); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-underline-offset: 4px; text-decoration-color: var(--pushed); }
-h1, h2, h3, p { margin: 0; }
+h1, h2, h3, h4, p { margin: 0; font-weight: 400; }
 :focus-visible { outline: 2px solid var(--pushed); outline-offset: 3px; }
-.label { font: 12px/1.4 var(--mono); color: var(--quiet); letter-spacing: .04em; text-transform: uppercase; }
+.label { font: 12px/1.4 var(--mono); color: var(--quiet); letter-spacing: .02em; }
 .label b { font-weight: 400; color: var(--pushed); }
 .wrap { width: min(1180px, 100%); margin: 0 auto; padding: 0 var(--gutter); }
 
-/* ---------- top bar: projects, the face, contact ---------- */
-.pm-trigger, .pm {
-  --pm-ground: #121212; --pm-paper: #1a1a1b; --pm-ink: #f6f6f4; --pm-quiet: #9b9ba0; --pm-pushed: #ff9e1b; --pm-line: rgba(246, 246, 244, .16);
-}
+/* ---------- top bar: the site's logo (ASCII face + name) on the left; projects and booking on the right ---------- */
 .top {
-  position: sticky; top: 0; z-index: 50; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
-  padding: 8px var(--gutter); background: color-mix(in srgb, var(--ground) 84%, transparent);
+  position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 4px var(--gutter); background: color-mix(in srgb, var(--ground) 86%, transparent);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
-.top .pm-trigger { justify-self: start; }
-.top .face { display: block; width: 84px; height: 90px; }
-.top .face canvas { --mono: "Fragment Mono", ui-monospace, monospace; display: block; width: 100%; height: 100%; cursor: pointer; }
-.top .contact {
-  justify-self: end; display: grid; place-items: center; height: 40px; padding: 0 18px; white-space: nowrap;
-  font: 13px/1 var(--mono); color: var(--ground); background: var(--ink); text-decoration: none; transition: background .3s, color .3s;
-}
-/* Book a session: the homepage Play toggle's mesh gradient, in ember tones: soft blobs drifting over an orange base */
-.top .contact {
-  font-weight: 500; color: #160c06; background-color: #ff9e1b; background-repeat: no-repeat;
-  background-image:
-    radial-gradient(closest-side, #ffe24a, transparent),
-    radial-gradient(closest-side, #ff6b1a, transparent),
-    radial-gradient(closest-side, #ffc21f, transparent),
-    radial-gradient(closest-side, #fff176, transparent);
-  background-size: 110% 260%, 120% 280%, 100% 240%, 115% 270%;
-  animation: mesh 4.67s ease-in-out infinite alternate;
-  transition: filter .3s;
-}
-.top .contact:hover { filter: brightness(1.12) saturate(1.1); animation-duration: 1.8s; }
-@keyframes mesh {
-  0%   { background-position: 0% 0%,    100% 100%, 100% 0%,  0% 100%; }
-  33%  { background-position: 100% 30%, 0% 70%,    20% 100%, 80% 0%; }
-  66%  { background-position: 60% 100%, 30% 0%,    0% 40%,   100% 60%; }
-  100% { background-position: 0% 70%,   100% 20%,  70% 0%,   30% 100%; }
-}
-@media (max-width: 600px) { .top .face { width: 64px; height: 68px; } .top .contact { padding: 0 12px; font-size: 12px; } }
+.logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+/* The portrait needs at least 90px of height to draw; negative margins keep the bar compact */
+.logo canvas { display: block; width: 84px; height: 90px; margin: -6px -14px -6px -18px; }
+.logo span { font: 300 23px/1 var(--light); letter-spacing: -.035em; }
+.top-r { display: flex; align-items: center; gap: 10px; }
+.logo span, .top-r .btn { white-space: nowrap; }
+@media (max-width: 440px) { .logo span { font-size: 19px; } .top-r .btn { padding: 11px 16px; font-size: 14px; } }
 
-/* ---------- buttons ---------- */
+/* ---------- buttons: pills, solid and outlined ---------- */
 .btn {
-  display: inline-flex; align-items: center; gap: 14px; padding: 18px 26px; border: 0; border-radius: 0; cursor: pointer;
-  font: 500 15px/1 var(--mono); text-decoration: none; color: var(--ground); background: var(--ink); transition: background .3s, color .3s, box-shadow .3s;
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 999px; cursor: pointer;
+  font: 500 15px/1 var(--sans); text-decoration: none; color: var(--ground); background: var(--ink); transition: background .3s, color .3s, box-shadow .3s;
 }
 .btn span { color: color-mix(in srgb, currentColor 60%, transparent); }
-.btn:hover { background: var(--pushed); color: var(--ink); }
+.btn:hover { background: var(--pushed); color: var(--ground); }
 .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong); }
-.btn.ghost:hover { box-shadow: inset 0 0 0 1px var(--pushed); background: transparent; color: var(--pushed); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1px var(--ink); background: transparent; color: var(--ink); }
 
-/* ---------- hero ---------- */
-.hero { padding: clamp(56px, 12vh, 140px) 0 clamp(64px, 10vh, 120px); display: grid; gap: 32px; justify-items: center; text-align: center; }
-.hero .ctas { justify-content: center; }
-.hero h1 { font: 800 clamp(48px, 9.4vw, 140px)/.9 var(--sans); letter-spacing: -.055em; max-width: 11ch; }
+/* ---------- hero: one rounded night panel, faint stars and a single glowing horizon ---------- */
+.hero { position: relative; margin: 8px var(--gutter) 0; border-radius: var(--r); overflow: hidden; min-height: min(82svh, 780px);
+  display: grid; place-items: center; text-align: center;
+  background: radial-gradient(70% 45% at 50% 108%, rgba(255, 158, 27, .32), transparent 70%), linear-gradient(#181622, #121110 85%); }
+.hero::before { content: ""; position: absolute; inset: 0; opacity: .55; background-image:
+  radial-gradient(1px 1px at 14% 20%, #fff, transparent), radial-gradient(1px 1px at 31% 11%, #fff9, transparent), radial-gradient(1.5px 1.5px at 68% 16%, #fff, transparent),
+  radial-gradient(1px 1px at 83% 30%, #fffa, transparent), radial-gradient(1px 1px at 47% 7%, #fff8, transparent), radial-gradient(1px 1px at 92% 12%, #fff9, transparent), radial-gradient(1px 1px at 6% 38%, #fff7, transparent); }
+.hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 22%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 158, 27, .5), transparent); }
+.hero-copy { position: relative; display: grid; gap: 28px; justify-items: center; padding: clamp(96px, 15vh, 140px) var(--gutter) clamp(160px, 26vh, 220px); }
+.hero h1 { font: 400 clamp(44px, 6.6vw, 92px)/1.02 var(--sans); letter-spacing: -.04em; max-width: 13ch; }
 /* "Start building.": a mesh gradient sits behind the letters, clipped to their shapes. Each letter starts solid
    orange, covering it; as you scroll, letters go clear one by one and the moving mesh shows through. */
 .hero h1 em {
@@ -111,9 +95,11 @@ h1, h2, h3, p { margin: 0; }
 .hero h1 em .w { white-space: nowrap; }
 .hero h1 em .ch { color: var(--pushed); transition: color .25s; }
 .hero h1 em .ch.on { color: transparent; }
-.hero .lede { font: 400 clamp(19px, 1.9vw, 24px)/1.45 var(--sans); color: var(--quiet); max-width: 34em; letter-spacing: -.01em; }
-.hero .lede strong { color: var(--ink); font-weight: 500; }
-.ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .lede { font-size: clamp(17px, 1.5vw, 20px); color: var(--quiet); max-width: 32em; }
+.hero .lede strong { color: var(--ink); font-weight: 400; }
+.hero .ctas { justify-content: center; }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+.reel { margin-top: clamp(48px, 8vh, 80px); }
 
 /* ---------- built with AI: a reel of tall cards that drifts edge to edge, pausing under the cursor ---------- */
 .reel { position: relative; overflow: hidden; padding: 8px 0 clamp(24px, 4vh, 48px); }
@@ -131,7 +117,7 @@ h1, h2, h3, p { margin: 0; }
 a.card:hover { transform: translateY(-6px); box-shadow: inset 0 0 0 1px rgba(var(--tint), .7); }
 .card-top { display: flex; align-items: center; gap: 12px; }
 .card-top i { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font: 17px/1 var(--sans); font-style: normal; background: rgba(var(--tint), .18); color: rgb(var(--tint)); }
-.card-top h3 { font: 700 clamp(19px, 1.7vw, 23px)/1.1 var(--sans); letter-spacing: -.03em; }
+.card-top h3 { font: 500 clamp(18px, 1.6vw, 21px)/1.15 var(--sans); letter-spacing: -.02em; }
 .card-top small { display: block; margin-top: 4px; font: 11px/1 var(--mono); color: rgb(var(--tint)); text-transform: uppercase; letter-spacing: .06em; }
 .card p.what { font-size: 14.5px; line-height: 1.45; color: var(--quiet); }
 .card a.go, .card .go { color: var(--ink); }
@@ -179,14 +165,14 @@ a.card:hover { transform: translateY(-6px); box-shadow: inset 0 0 0 1px rgba(var
 /* ---------- sections ---------- */
 section { padding: clamp(104px, 17vh, 200px) 0; }
 .head { display: grid; gap: 14px; margin-bottom: clamp(48px, 8vh, 88px); max-width: 820px; }
-.head h2 { font: 800 clamp(38px, 5.6vw, 76px)/.95 var(--sans); letter-spacing: -.05em; }
+.head h2 { font: 400 clamp(32px, 4vw, 54px)/1.08 var(--sans); letter-spacing: -.035em; }
 .head p:not(.label) { color: var(--quiet); font-size: clamp(17px, 1.5vw, 19px); max-width: 36em; }
 
 /* Method: three huge steps */
 .method { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .method li { padding: 0 28px 0 0; display: grid; gap: 14px; align-content: start; }
 .method li + li { padding-left: 28px; border-left: 1px solid var(--line); }
-.method h3 { font: 800 clamp(34px, 4.2vw, 56px)/1 var(--sans); letter-spacing: -.05em; }
+.method h3 { font: 400 clamp(30px, 3.4vw, 44px)/1 var(--sans); letter-spacing: -.035em; }
 .method h3 i { font-style: normal; color: var(--pushed); }
 .method p { color: var(--quiet); font-size: 16px; }
 @media (max-width: 760px) { .method { grid-template-columns: 1fr; } .method li + li { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); } }
@@ -196,7 +182,7 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 .type { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 72px); align-items: center; padding: clamp(56px, 10vh, 112px) 0; }
 .type:nth-child(odd of .type) .viz { order: -1; }
 .type .copy { display: grid; gap: 16px; align-content: center; }
-.type h4 { margin: 0; font: 800 clamp(30px, 3.6vw, 48px)/1 var(--sans); letter-spacing: -.045em; }
+.type h4 { margin: 0; font: 400 clamp(28px, 3vw, 40px)/1.1 var(--sans); letter-spacing: -.03em; }
 .type .copy > p:not(.label) { color: var(--quiet); }
 .copy ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; font: 14px/1.5 var(--mono); }
 .copy li { display: grid; grid-template-columns: 18px minmax(0, 1fr); }
@@ -205,7 +191,7 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 .type .proof a { color: var(--ink); }
 @media (max-width: 860px) { .type { grid-template-columns: 1fr; } .type:nth-child(odd of .type) .viz { order: 0; } }
 
-.viz { position: relative; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); padding: clamp(18px, 2.6vw, 32px); min-height: 340px; overflow: hidden; display: grid; align-content: center; gap: 18px; }
+.viz { position: relative; border-radius: var(--r); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); padding: clamp(18px, 2.6vw, 32px); min-height: 340px; overflow: hidden; display: grid; align-content: center; gap: 18px; }
 .viz .cap { position: absolute; left: clamp(18px, 2.6vw, 32px); bottom: 14px; font: 11px/1 var(--mono); color: var(--quiet); letter-spacing: .05em; text-transform: uppercase; }
 .viz .cap b { color: var(--pushed); font-weight: 400; }
 .viz { padding-bottom: 48px; }
@@ -320,20 +306,20 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 
 /* ---------- pricing ---------- */
 .plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.plan { background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); padding: clamp(24px, 3vw, 40px); display: grid; gap: 22px; align-content: start; }
+.plan { border-radius: var(--r); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); padding: clamp(24px, 3vw, 40px); display: grid; gap: 22px; align-content: start; }
 .plan.best { box-shadow: inset 0 0 0 1px var(--pushed); }
 .plan-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.plan h3 { font: 800 clamp(26px, 2.6vw, 34px)/1 var(--sans); letter-spacing: -.04em; }
+.plan h3 { font: 400 clamp(24px, 2.2vw, 30px)/1.1 var(--sans); letter-spacing: -.03em; }
 .tag { font: 11px/1 var(--mono); padding: 7px 9px; background: var(--pushed); color: var(--ground); text-transform: uppercase; letter-spacing: .05em; }
 .price { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.price b { font: 800 clamp(64px, 7vw, 96px)/.9 var(--sans); letter-spacing: -.06em; }
+.price b { font: 300 clamp(60px, 6.4vw, 88px)/.9 var(--light); letter-spacing: -.05em; }
 .price span { font: 13px/1.4 var(--mono); color: var(--quiet); }
 .price span em { font-style: normal; color: var(--pushed); }
 .plan ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 20px; }
 .plan li { display: grid; grid-template-columns: 22px minmax(0, 1fr); color: var(--quiet); font-size: 15.5px; }
 .plan li::before { content: "+"; font-family: var(--mono); color: var(--pushed); }
 .plan .btn { justify-content: space-between; width: 100%; }
-.plan .viz-mini { height: 120px; display: grid; place-items: center; background: var(--ground); box-shadow: inset 0 0 0 1px var(--line); }
+.plan .viz-mini { height: 120px; display: grid; place-items: center; border-radius: 16px; background: var(--ground); box-shadow: inset 0 0 0 1px var(--line); }
 @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } }
 
 /* Session: one hour, drawn as a dial that fills */
@@ -342,7 +328,7 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 .dial .track { stroke: var(--raise); }
 .dial .fill { stroke: var(--pushed); stroke-dasharray: 251.3; stroke-dashoffset: 251.3; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 1.6s cubic-bezier(.2, .8, .2, 1); }
 .viz-mini.in .dial .fill { stroke-dashoffset: 0; }
-.dial text { fill: var(--ink); font: 600 17px var(--sans); text-anchor: middle; dominant-baseline: central; letter-spacing: -.03em; }
+.dial text { fill: var(--ink); font: 500 17px var(--sans); text-anchor: middle; dominant-baseline: central; letter-spacing: -.03em; }
 /* Month: four weeks on a track, filling week by week */
 .weeks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(100% - 32px, 440px); position: relative; }
 .weeks::before, .weeks::after { content: ""; position: absolute; top: 9px; left: 12.5%; right: 12.5%; height: 2px; background: var(--raise); }
@@ -358,7 +344,7 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 .stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .stats li { padding: 0 20px 24px 0; display: grid; gap: 10px; align-content: start; }
 .stats li + li { padding-left: 20px; border-left: 1px solid var(--line); }
-.stats b { font: 800 clamp(44px, 5vw, 72px)/.9 var(--sans); letter-spacing: -.06em; }
+.stats b { font: 300 clamp(44px, 4.6vw, 64px)/.95 var(--light); letter-spacing: -.05em; }
 .stats span { color: var(--quiet); font-size: 15px; }
 .stats a { font: 13px/1.4 var(--mono); color: var(--ink); }
 @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats li:nth-child(3) { padding-left: 0; border-left: 0; } .stats li:nth-child(n+3) { border-top: 1px solid var(--line); } }
@@ -369,10 +355,17 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 .fill-title .ch { transition: color .18s; }
 .fill-title .ch.on { color: var(--pushed); }
 
+/* ---------- how a session starts: the prompt box from How I built this ---------- */
+.prompt { position: relative; margin: 0; padding: 44px 68px 24px 24px; border-radius: 18px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); font: clamp(14px, 1.3vw, 16px)/1.7 var(--mono); max-width: 880px; }
+.prompt::before { content: "Prompt"; position: absolute; top: 16px; left: 24px; font: 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--quiet); }
+.prompt::after { content: "↑"; position: absolute; right: 14px; bottom: 14px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--pushed); color: var(--ground); font: 16px/1 var(--sans); }
+.why { margin-top: 20px; padding-left: 14px; border-left: 2px solid var(--pushed); color: var(--quiet); max-width: 38em; }
+.why strong { color: var(--ink); font-weight: 400; }
+
 /* ---------- FAQ ---------- */
 .faq { max-width: 880px; }
 .faq details { border-bottom: 1px solid var(--line); }
-.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 20px; padding: 24px 0; font: 700 clamp(19px, 1.9vw, 24px)/1.25 var(--sans); letter-spacing: -.025em; }
+.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 20px; padding: 24px 0; font: 400 clamp(19px, 1.9vw, 24px)/1.3 var(--sans); letter-spacing: -.015em; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after { content: "+"; font: 400 24px/1 var(--mono); color: var(--pushed); transition: transform .3s; }
 .faq details[open] summary::after { transform: rotate(45deg); }
@@ -380,7 +373,7 @@ section { padding: clamp(104px, 17vh, 200px) 0; }
 
 /* ---------- closer ---------- */
 .closer { text-align: left; display: grid; gap: 28px; }
-.closer h2 { font: 800 clamp(44px, 7.4vw, 112px)/.92 var(--sans); letter-spacing: -.055em; max-width: 12ch; }
+.closer h2 { font: 400 clamp(40px, 6vw, 88px)/1 var(--sans); letter-spacing: -.04em; max-width: 12ch; }
 .closer h2 em { font-style: normal; color: var(--pushed); }
 .closer .teams { color: var(--quiet); }
 .closer .teams a { color: var(--ink); }
@@ -409,7 +402,7 @@ html:has(.contact-modal[open]) { overflow: hidden; }
 @keyframes sheet-fade { from { opacity: 0; } }
 .sheet { display: grid; gap: 32px; padding: calc(var(--feather) + 8px) calc(var(--feather) + clamp(8px, 2vw, 32px)); }
 .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.sheet-top h2 { font: 800 clamp(38px, 4.8vw, 60px)/1 var(--sans); letter-spacing: -.05em; }
+.sheet-top h2 { font: 400 clamp(34px, 4vw, 52px)/1 var(--sans); letter-spacing: -.035em; }
 .sheet-close { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; cursor: pointer; color: var(--ink); background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); transition: background .3s, color .3s; }
 .sheet-close:hover { background: var(--ink); color: var(--ground); }
 .sheet-close svg { width: 20px; height: 20px; }
@@ -430,7 +423,7 @@ html:has(.contact-modal[open]) { overflow: hidden; }
 }
 .contact-form textarea { min-height: 160px; resize: vertical; }
 .contact-form input:focus, .contact-form textarea:focus { outline: none; box-shadow: inset 0 0 0 1px var(--ink); }
-.contact-done { font: 700 clamp(22px, 2.4vw, 30px)/1.25 var(--sans); letter-spacing: -.025em; padding: 28px 0 8px; border-top: 1px solid var(--line); }
+.contact-done { font: 400 clamp(22px, 2.4vw, 30px)/1.25 var(--sans); letter-spacing: -.02em; padding: 28px 0 8px; border-top: 1px solid var(--line); }
 .contact-done p + p { font: 400 16px/1.65 var(--sans); letter-spacing: 0; color: var(--quiet); margin-top: 10px; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -440,17 +433,19 @@ html:has(.contact-modal[open]) { overflow: hidden; }
 </head>
 <body>
 <header class="top">
-  <button class="pm-trigger" type="button" data-projects-menu aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg></button>
-  <a class="face" href="../index.html" aria-label="Scott Dickie, back to the homepage"><canvas id="case-face" aria-hidden="true"></canvas></a>
-  <a class="contact" href="#contact" data-book>Book a session</a>
+  <a class="logo" href="https://scott-dickie.com" aria-label="Scott Dickie, go to scott-dickie.com"><canvas id="case-face" aria-hidden="true"></canvas><span>Scott Dickie</span></a>
+  <div class="top-r">
+    <a class="btn" href="#contact" data-book>Book a session</a>
+  </div>
 </header>
 
 <main>
-  <div class="wrap">
-    <!-- Hero -->
-    <div class="hero">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-copy">
+      <p class="label"><b>&gt;</b> 1:1 ai coaching</p>
       <h1>Stop talking about AI. <em>Start building.</em></h1>
-      <p class="lede">Coaching for <strong>designers, product managers and anyone in tech</strong> who wants to work differently with AI. From a former Head of Design who builds with it every day, including <a href="../howididthis/index.html">this whole site</a>.</p>
+      <p class="lede">Coaching for <strong>designers, product managers and anyone in tech</strong> who wants to work differently with AI. From a former Head of Design who builds with it every day.</p>
       <div class="ctas">
         <a class="btn" href="#contact" data-book="session">Book a session <span>$149</span></a>
         <a class="btn ghost" href="#contact" data-book="month">Book a month <span>$499</span></a>
@@ -459,7 +454,7 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   </div>
 
   <!-- Built with AI: a reel of cards -->
-  <div class="reel" aria-label="Things I&rsquo;ve built with AI">
+  <div class="reel" aria-label="AI skills you can learn">
     <div class="reel-track"></div>
   </div>
 
@@ -467,6 +462,7 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   <section aria-labelledby="method-title">
     <div class="wrap">
       <div class="head">
+        <p class="label"><b>[01]</b> the method</p>
         <h2 id="method-title">Every session ends with something that works.</h2>
         <p>Not a list of tools. We take how you work today, decide what AI should do, and build it together, live.</p>
       </div>
@@ -478,10 +474,23 @@ html:has(.contact-modal[open]) { overflow: hidden; }
     </div>
   </section>
 
+  <!-- How a session starts -->
+  <section aria-labelledby="start-title">
+    <div class="wrap">
+      <div class="head">
+        <p class="label"><b>[02]</b> how a session starts</p>
+        <h2 id="start-title">One sentence in plain words.</h2>
+      </div>
+      <p class="prompt">help me map my design review process and build an agent that gives first-pass feedback the way I would</p>
+      <p class="why">Every session starts with <strong>something you want built</strong>, typed the way you&rsquo;d say it. No jargon, no setup.</p>
+    </div>
+  </section>
+
   <!-- Session types -->
   <section aria-labelledby="types-title">
     <div class="wrap">
       <div class="head">
+        <p class="label"><b>[03]</b> what we can work on</p>
         <h2 id="types-title">Bring one thing. Leave with it built.</h2>
       </div>
 
@@ -490,9 +499,8 @@ html:has(.contact-modal[open]) { overflow: hidden; }
         <article class="type">
           <div class="copy">
             <h4>Build your portfolio by prompting.</h4>
-            <p>Your portfolio should prove you can build with AI, not just say it. We design and ship your site together, one prompt at a time, the way I built scott-dickie.com.</p>
+            <p>Your portfolio should prove you can build with AI, not just say it. We design and ship your site together, one plain-English prompt at a time.</p>
             <ul><li>A live site you made and can explain</li><li>Case studies that show how you think</li><li>Deployed on your own domain</li></ul>
-            <p class="proof">See it: <a href="../howididthis/index.html">How I built this →</a></p>
           </div>
           <div class="viz" data-viz="portfolio">
             <div class="v-prompt"><span class="typed" data-text="make my case studies a stack of cards that fan out on scroll"></span><span class="caret"></span></div>
@@ -509,7 +517,6 @@ html:has(.contact-modal[open]) { overflow: hidden; }
             <h4>Ship something small, in public.</h4>
             <p>Pick an idea, build it in a week or two, and share the process as you go. A working link beats a slide every time, and posting the journey brings people to you.</p>
             <ul><li>An idea scoped to something you can ship</li><li>A real app with a public link</li><li>Posts that show your process</li></ul>
-            <p class="proof">See it: <a href="../icebreaker/index.html">IceBreaker →</a></p>
           </div>
           <div class="viz" data-viz="public">
             <div class="v-grid" aria-hidden="true"></div>
@@ -540,9 +547,8 @@ html:has(.contact-modal[open]) { overflow: hidden; }
         <article class="type">
           <div class="copy">
             <h4>Redesign how your team works.</h4>
-            <p>Map your current workflow, find the steps AI should own, and build them. I did this at Study.com, turning a team of AI skeptics into early adopters with agents the whole company used.</p>
+            <p>Map your current workflow, find the steps AI should own, and build them. Start with the work everyone dreads, and even the skeptics on your team become early adopters.</p>
             <ul><li>Your workflow mapped, step by step</li><li>Clear lines between AI and human work</li><li>The first agents built and in use</li></ul>
-            <p class="proof">See it: <a href="../ai-initiatives.html">AI initiatives at Study.com →</a></p>
           </div>
           <div class="viz" data-viz="workflow">
             <div class="v-flow" aria-hidden="true"></div>
@@ -602,6 +608,7 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   <section id="pricing" aria-labelledby="pricing-title">
     <div class="wrap">
       <div class="head">
+        <p class="label"><b>[04]</b> pricing</p>
         <h2 id="pricing-title">One hour, or one month.</h2>
         <p>Simple, and less than a typical coaching rate. Every session is 1:1 over video.</p>
       </div>
@@ -640,14 +647,15 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   <section aria-labelledby="proof-title">
     <div class="wrap">
       <div class="head">
+        <p class="label"><b>[05]</b> why me</p>
         <h2 id="proof-title">I lead design. I also build.</h2>
-        <p>Head of Design &amp; Research at Udacity, design leader at Study.com, Upwork and Comfy (Siemens). Today I build most things myself, by prompting.</p>
+        <p>I&rsquo;ve led design and research teams at four tech companies. Today I build most things myself, by prompting.</p>
       </div>
       <ul class="stats">
-        <li><b>114</b><span>commits to this site, built by talking to Claude Code</span><a href="../howididthis/index.html">How I built this →</a></li>
-        <li><b>+19%</b><span>weekly active users after an AI classroom assistant at Udacity</span><a href="../udacity.html">Udacity →</a></li>
-        <li><b>0→1</b><span>AI skeptics to early adopters, with agents used company-wide at Study.com</span><a href="../ai-initiatives.html">AI initiatives →</a></li>
-        <li><b>$10M</b><span>secured from Siemens on a product vision I led at Comfy</span><a href="../comfy.html">Comfy →</a></li>
+        <li><b>100+</b><span>changes shipped to a live website, each one a plain-English prompt</span><a href="../howididthis/index.html">See the prompts →</a></li>
+        <li><b>+19%</b><span>weekly active users after launching an AI learning assistant</span><a href="../udacity.html">Case study →</a></li>
+        <li><b>0→1</b><span>a team of AI skeptics turned early adopters, with agents everyone used</span><a href="../ai-initiatives.html">Case study →</a></li>
+        <li><b>$10M</b><span>in funding won on a product vision I led</span><a href="../comfy.html">Case study →</a></li>
       </ul>
     </div>
   </section>
@@ -656,11 +664,12 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   <section aria-labelledby="faq-title">
     <div class="wrap">
       <div class="head">
+        <p class="label"><b>[06]</b> questions</p>
         <h2 id="faq-title">Good to know.</h2>
       </div>
       <div class="faq">
         <details><summary>Do I need to know how to code?</summary><p>No. Most of what we build is done by describing what you want in plain words. If you can explain a design decision, you can do this.</p></details>
-        <details><summary>Which tools do we use?</summary><p>Whatever fits the job, usually Claude, Claude Code, ChatGPT and Figma, plus GitHub and Vercel to put things online. You&rsquo;ll leave knowing which tool to reach for and why.</p></details>
+        <details><summary>Which tools do we use?</summary><p>Whatever fits the job. The focus is the skill underneath, like writing a clear prompt, building an agent, chaining steps and putting something online, so it carries over when the tools change.</p></details>
         <details><summary>Can I change topics during a month?</summary><p>Yes. We set one goal in week one so there&rsquo;s something to finish, but if something more important comes up, we follow it.</p></details>
         <details><summary>I booked one session. Can I upgrade to a month?</summary><p>Yes. Upgrade within a week and your first session counts toward the month.</p></details>
         <details><summary>Can my company pay?</summary><p>Yes. Many companies have a learning budget for this. Tell me who to bill and I&rsquo;ll send an invoice.</p></details>
@@ -725,7 +734,7 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   if (!canvas || !window.createAsciiPortrait) return;
   createAsciiPortrait(canvas, document.createElement("video"), {
     photo: "flannel", effect: "wind", minCols: 30, autoplay: true,
-    look: { ground: "#121212", ink: "#f6f6f4", pushed: "#ff9e1b", colorful: false },
+    look: { ground: "#121110", ink: "#eeeae2", pushed: "#ff9e1b", colorful: false },
   });
 })();
 
@@ -762,44 +771,54 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   const bars = (rows) => `<div class="bars">${rows.map(([n, b, a, over]) => `<p class="bar">${n}<span><i style="width:${b}%"></i><i class="${over ? "over" : ""}" style="width:${a}%"></i></span></p>`).join("")}</div>`;
   const chat = (q, a, who = "Agent") => `<p class="b me">${q}</p><p class="b"><small>${who}</small>${a}</p>`;
   const cards = [
-    { icon: "◎", kind: "Agent", title: "Design feedback agent", what: "Reviews a design the way I would, using my crit patterns and principles.",
-      cv: chat("Can you review this checkout screen?", "Two primary buttons are competing. Pick the one that says why, and tighten spacing to the 8pt grid.", "Feedback agent") },
-    { icon: "✎", kind: "Agent", title: "Writes like me", what: "Drafts updates, launch notes and replies in my voice, so I edit instead of starting cold.",
+    { icon: "◎", kind: "Agent", title: "Design critique agent", what: "An agent that reviews designs against your own principles and the feedback you usually give.",
+      cv: chat("Can you review this checkout screen?", "Two primary buttons are competing. Pick the one that says why, and tighten spacing to the 8pt grid.", "Critique agent") },
+    { icon: "✎", kind: "Agent", title: "Write in your voice", what: "Teach AI how you write, then get drafts you only need to edit, not rewrite.",
       cv: chat("Draft the launch note for the new checkout", "We rebuilt checkout. Two steps instead of five. Try it and tell me what breaks.", "Voice agent") },
-    { icon: "✉", kind: "Agents", title: "Copywriting agents", what: "Headlines, CTAs, UI and error copy on demand, for anyone in the company.", href: "../ai-initiatives.html",
+    { icon: "✉", kind: "Agent", title: "Copy on demand", what: "A shared agent anyone on the team can ask for headlines, CTAs, UI and error messages.",
       cv: chat("3 headlines for the summer sale page", "1. Learn more this summer. 2. Get ahead before fall. 3. Summer is for leveling up.", "Copy agent") },
-    { icon: "⇣", kind: "Agent chain", title: "Page builder", what: "Several agents chained together to produce a landing page layout, copy and image direction.", href: "../ai-initiatives.html",
+    { icon: "⇣", kind: "Workflow", title: "Agent chains", what: "Several agents passing work down a line, so one brief turns into a finished first draft.",
       cv: `<div class="flow"><span>Brief</span><i></i><span>Layout agent</span><i></i><span>Copy agent</span><i></i><span>Image agent</span><i></i><span>Landing page</span></div>` },
-    { icon: "▦", kind: "Prompter · Midjourney", title: "Branded image prompter", what: "Turns a brand&rsquo;s guidelines into on-brand photography for every product line.", href: "../ai-initiatives.html",
+    { icon: "▦", kind: "Image generation", title: "On-brand image prompts", what: "Turn brand guidelines into a reusable prompt that makes consistent photography every time.",
       cv: `<div class="tiles">${["#ff9e1b,#ff5a1a", "#ffe24a,#ff9e1b", "#3a3a40,#1d1d20", "#ff5a1a,#a8250e", "#2a2a2e,#ff9e1b", "#ffc21f,#ff7a1a"].map((g) => `<i style="background:linear-gradient(135deg,${g})"></i>`).join("")}</div><div class="term"><b>/imagine</b> <em>student at a desk, warm light…</em></div>` },
-    { icon: "✦", kind: "Claude skill", title: "Budget report skill", what: "Reads my bank and card statement PDFs and builds a spending vs. budget report, by category.",
+    { icon: "✦", kind: "Claude skill", title: "PDFs to a report", what: "A reusable skill that reads a stack of PDFs and builds the same clear report every time.",
       cv: bars([["Rent", 90, 90], ["Groceries", 60, 72, 1], ["Kids", 50, 41], ["Fun", 40, 52, 1], ["Travel", 70, 30]]) },
-    { icon: "⌖", kind: "App · Claude API", title: "LOC-1 Scene Finder", what: "Photograph a scene on your TV and it finds where it was filmed.", href: "../location/index.html",
-      cv: `<div class="finder"><span>📍 Location found</span></div>` },
-    { icon: "?", kind: "App", title: "IceBreaker", what: "Questions that get kids talking, each with a follow-up and a voice clip.", href: "../icebreaker/index.html",
-      cv: `<img src="../assets/play/icebreaker.jpg" alt="" loading="lazy">` },
-    { icon: ">_", kind: "Script · ElevenLabs", title: "Voice clip generator", what: "A Python script that turns every IceBreaker question into a voice clip.",
-      cv: `<div class="term"><b>$</b> <em>python make-audio.py</em>\n<b>✓</b> 1-question.mp3\n<b>✓</b> 1-follow.mp3\n<b>✓</b> 2-question.mp3\n<b>✓</b> 2-follow.mp3\n…\n<em>560 clips written</em></div>` },
-    { icon: "@", kind: "Canvas · MediaPipe", title: "ASCII portrait", what: "My face redrawn in characters, with 11 effects. Turn on the camera and it copies your expressions.", href: "../index.html",
-      cv: `<div class="term ascii">     .-=#@@@#=-.\n   +@@@@@@@@@@@+\n  *@@ <b>o</b>     <b>o</b> @@*\n  #@@    ^    @@#\n   *@@ <b>\\___/</b> @@*\n    '=@@@@@@@='</div>` },
-    { icon: "◉", kind: "Web Audio", title: "Record player", what: "A spinning record that plays my songs, with a live wave of the music drawn on its label.", href: "../music/index.html",
-      cv: `<div class="disc"><i></i></div>` },
-    { icon: "◐", kind: "Site · Claude Code", title: "Work / Play modes", what: "One portfolio, two moods: a calm daytime version for work and a colorful night one for side projects.", href: "../index.html",
-      cv: `<div class="modes"><span>Work<small>day · navy · calm</small></span><span class="play">Play<small>night · color · bounce</small></span></div>` },
-    { icon: "›", kind: "Claude Code", title: "How I built this", what: "Every prompt, idea and update behind my site, published as I go.", href: "../howididthis/index.html",
-      cv: `<div class="term"><b>›</b> <em>fan the cards out</em>\n<b>✓</b> updated index.html\n<b>›</b> <em>yes, push live</em>\n<b>✓</b> committed and deployed</div>` },
-    { icon: "✉", kind: "Vercel function · Resend", title: "Feedback inbox", what: "A serverless function that emails me whatever visitors type into IceBreaker&rsquo;s feedback form.",
-      cv: `<div class="term"><b>POST</b> <em>/api/feedback</em>\n<b>✓</b> origin allowed\n<b>✓</b> message checked\n<b>✓</b> email sent to Scott</div>` },
-    { icon: "↺", kind: "App · AI", title: "Get Unstuck", what: "AI-powered help working through tough decisions.", href: "https://www.unstuck.services/",
-      cv: `<img src="../assets/unstuck-home.jpg" alt="" loading="lazy">` },
-    { icon: "♪", kind: "Music · Suno", title: "Songs", what: "Songs I write and produce with Suno, then master with eMastered.", href: "../music/index.html",
-      cv: `<div class="wave">${Array.from({ length: 34 }, (_, i) => `<i style="height:${Math.round(18 + 80 * Math.abs(Math.sin(i * .55) * Math.cos(i * .21)))}%"></i>`).join("")}</div>` },
-    { icon: "≡", kind: "App · AI", title: "AskMentra", what: "An AI assistant that tailors your resume and cover letter to a job.",
+    { icon: "?", kind: "Agent", title: "One question at a time", what: "An agent that asks a single good question at a time until the real problem is clear.",
+      cv: chat("I can&rsquo;t decide whether to go independent.", "What does your current work feel like most days, in a sentence or two?", "Facilitator") },
+    { icon: "▤", kind: "Prompting", title: "Pick the right framework", what: "Ask AI which thinking framework fits your problem, then have it walk you through it.",
+      cv: `<div class="flow"><span>Your problem</span><i></i><span>Fear inventory</span><i></i><span>Future self</span><i></i><span>Clear next step</span></div>` },
+    { icon: "⚖", kind: "Analysis", title: "Score your options", what: "List your options and what matters, and AI weighs every tradeoff into a score.",
+      cv: bars([["Option A", 100, 82], ["Option B", 100, 44], ["Option C", 100, 67], ["Wait", 100, 30]]) },
+    { icon: "→", kind: "Planning", title: "Decision to action plan", what: "Turn a decision into dated next steps you can start this week.",
+      cv: `<div class="term"><b>Decision</b> <em>launch in March</em>\n<b>✓</b> tell the team by Feb 1\n<b>✓</b> line up two pilots\n<b>✓</b> set the budget\n<b>✓</b> check in April 15</div>` },
+    { icon: "◇", kind: "Analysis", title: "Gap analysis", what: "Compare any document to a target, like a job post or rubric, and get exactly what&rsquo;s missing.",
+      cv: bars([["Skills", 100, 72], ["Keywords", 100, 48], ["Impact", 100, 85], ["Seniority", 100, 64]]) },
+    { icon: "≡", kind: "Writing", title: "Tailor for each audience", what: "Rewrite one document for different readers while keeping every claim true.",
       cv: `<div class="doc"><i class="h"></i><i></i><i class="hl" style="width:80%"></i><i style="width:90%"></i><i></i><i class="hl" style="width:65%"></i><i style="width:75%"></i></div>` },
-    { icon: "☷", kind: "Agents", title: "Synthetic users", what: "A community of synthetic users who react to ideas before real users see them.",
+    { icon: "↗", kind: "Writing", title: "Cold outreach that gets replies", what: "Short, specific messages to the right person, written from what you&rsquo;ve actually done.",
+      cv: chat("Message the hiring manager", "Hi Sam, I saw you&rsquo;re hiring a design lead. I&rsquo;ve built two design teams from scratch and would love 15 minutes.", "Outreach") },
+    { icon: "☷", kind: "Research", title: "Synthetic user research", what: "AI personas that react to an idea before you put it in front of real users.",
       cv: chat("Would you pay for this?", "Maybe at $5. I&rsquo;d want to try it free first and see my own data.", "Persona · Maya, 34") },
-    { icon: "✓", kind: "App", title: "Should I buy it?", what: "A 14-question gut check before you buy something, ending in a clear verdict.", href: "../shouldibuyit/index.html",
-      cv: `<img src="../assets/play/shouldibuyit.jpg" alt="" loading="lazy">` },
+    { icon: "⌖", kind: "Vision", title: "Ask questions about a photo", what: "Send a photo to an AI model and get a specific answer back, like where a scene was filmed.", href: "../location/index.html",
+      cv: `<div class="finder"><span>📍 Location found</span></div>` },
+    { icon: "@", kind: "Vision", title: "Face tracking in the browser", what: "Use the camera to read expressions in real time and drive an animation, all on-device.", href: "../index.html",
+      cv: `<div class="term ascii">     .-=#@@@#=-.\n   +@@@@@@@@@@@+\n  *@@ <b>o</b>     <b>o</b> @@*\n  #@@    ^    @@#\n   *@@ <b>\\___/</b> @@*\n    '=@@@@@@@='</div>` },
+    { icon: "☺", kind: "Prompting", title: "Build by prompting", what: "Ship a real website one plain-English request at a time, checking each change as you go.", href: "../howididthis/index.html",
+      cv: `<div class="term"><b>›</b> <em>fan the cards out</em>\n<b>✓</b> updated index.html\n<b>›</b> <em>yes, push live</em>\n<b>✓</b> committed and deployed</div>` },
+    { icon: "◉", kind: "Prototyping", title: "Prototype real interactions", what: "Describe an interaction in words and get a working prototype, like a record that animates to music.", href: "../music/index.html",
+      cv: `<div class="disc"><i></i></div>` },
+    { icon: "◐", kind: "Design systems", title: "Two themes from one system", what: "Ask for a second visual mode of the same design and get both from one set of tokens.", href: "../index.html",
+      cv: `<div class="modes"><span>Light<small>calm · navy</small></span><span class="play">Dark<small>color · bounce</small></span></div>` },
+    { icon: "⚙", kind: "Backend", title: "AI-written backend", what: "Have AI write the small server pieces, like a form that emails you what people send.",
+      cv: `<div class="term"><b>POST</b> <em>/api/feedback</em>\n<b>✓</b> origin allowed\n<b>✓</b> message checked\n<b>✓</b> email sent</div>` },
+    { icon: ">_", kind: "Voice", title: "Text to speech, in bulk", what: "A short script that turns hundreds of lines of text into natural voice clips.",
+      cv: `<div class="term"><b>$</b> <em>python make-audio.py</em>\n<b>✓</b> 1-question.mp3\n<b>✓</b> 1-follow.mp3\n<b>✓</b> 2-question.mp3\n…\n<em>560 clips written</em></div>` },
+    { icon: "✳", kind: "Generation", title: "Generate content sets", what: "Turn one prompt into a full set of questions, follow-ups and variations, all in one style.",
+      cv: `<div class="term"><b>01</b> <em>What makes a really good friend?</em>\n   ↳ who&rsquo;s someone like that for you?\n<b>02</b> <em>What&rsquo;s a rule you&rsquo;d change?</em>\n   ↳ why that one?\n<b>…</b> <em>40 more</em></div>` },
+    { icon: "✓", kind: "Interactive", title: "Questions into a verdict", what: "Turn a gut decision into a short scored quiz that ends with a clear answer.",
+      cv: `<div class="term"><b>01</b> need or want? <em>want</em>\n<b>02</b> in budget? <em>yes</em>\n<b>03</b> used it this month? <em>no</em>\n…\n<b>Verdict</b> <em>wait 30 days</em></div>` },
+    { icon: "♪", kind: "Audio", title: "Make a song", what: "Go from lyrics and a style to a finished, mastered track.", href: "../music/index.html",
+      cv: `<div class="wave">${Array.from({ length: 34 }, (_, i) => `<i style="height:${Math.round(18 + 80 * Math.abs(Math.sin(i * .55) * Math.cos(i * .21)))}%"></i>`).join("")}</div>` },
   ];
   const card = (c) => {
     const tag = c.href ? "a" : "div";
@@ -906,6 +925,5 @@ html:has(.contact-modal[open]) { overflow: hidden; }
   if (location.hash === "#contact") open();
 })();
 </script>
-<script src="../projects-menu.js"></script>
 </body>
 </html>
