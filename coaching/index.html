@@ -163,6 +163,15 @@ a.card:hover { transform: translateY(-6px); box-shadow: inset 0 0 0 1px rgba(var
 .cv .doc { display: grid; gap: 7px; padding: 16px; border-radius: 8px; background: var(--ink); }
 .cv .doc i { display: block; height: 7px; border-radius: 2px; background: #c9c9c9; } .cv .doc i.h { height: 12px; width: 55%; background: #121212; margin-bottom: 4px; }
 .cv .doc i.hl { background: rgb(var(--tint)); }
+.cv .term.ascii { font-size: clamp(14px, 1.3vw, 18px); line-height: 1.15; color: var(--ink); justify-self: center; }
+.cv .disc { justify-self: center; width: min(190px, 70%); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+  background: repeating-radial-gradient(circle, #0c0c0d 0 2px, #1d1d20 2px 4px); box-shadow: 0 0 0 1px var(--line-strong); animation: spin 6s linear infinite; }
+.cv .disc i { width: 38%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #121212 0 7%, transparent 8%), conic-gradient(from 0deg, rgb(var(--tint)), #ff5a1a, #ffe24a, rgb(var(--tint))); }
+@keyframes spin { to { transform: rotate(1turn); } }
+.cv .modes { display: grid; grid-template-columns: 1fr 1fr; height: 100%; min-height: 170px; border-radius: 8px; overflow: hidden; }
+.cv .modes span { display: grid; align-content: end; gap: 6px; padding: 14px; font: 800 22px/1 var(--sans); letter-spacing: -.03em; background: #e8ebf0; color: #16233b; }
+.cv .modes span.play { background: radial-gradient(60% 50% at 30% 30%, #ff6fb5, transparent), radial-gradient(60% 50% at 80% 70%, #ffd166, transparent), #11132a; color: #f3eefc; }
+.cv .modes small { font: 10px/1.3 var(--mono); letter-spacing: .02em; opacity: .75; }
 @media (prefers-reduced-motion: reduce) {
   .reel { overflow-x: auto; } .reel-track { animation: none; } .reel-track [aria-hidden="true"] { display: none; }
 }
@@ -771,8 +780,16 @@ html:has(.contact-modal[open]) { overflow: hidden; }
       cv: `<img src="../assets/play/icebreaker.jpg" alt="" loading="lazy">` },
     { icon: ">_", kind: "Script · ElevenLabs", title: "Voice clip generator", what: "A Python script that turns every IceBreaker question into a voice clip.",
       cv: `<div class="term"><b>$</b> <em>python make-audio.py</em>\n<b>✓</b> 1-question.mp3\n<b>✓</b> 1-follow.mp3\n<b>✓</b> 2-question.mp3\n<b>✓</b> 2-follow.mp3\n…\n<em>560 clips written</em></div>` },
-    { icon: "☺", kind: "Site · Claude Code", title: "scott-dickie.com", what: "Designed and built by prompting Claude Code: no framework, and every prompt published.", href: "../howididthis/index.html",
-      cv: `<div class="term"><b>›</b> <em>make the cards fan out on scroll</em>\n<b>✓</b> updated index.html\n<b>›</b> <em>yes, push live</em>\n<b>✓</b> committed and deployed</div>` },
+    { icon: "@", kind: "Canvas · MediaPipe", title: "ASCII portrait", what: "My face redrawn in characters, with 11 effects. Turn on the camera and it copies your expressions.", href: "../index.html",
+      cv: `<div class="term ascii">     .-=#@@@#=-.\n   +@@@@@@@@@@@+\n  *@@ <b>o</b>     <b>o</b> @@*\n  #@@    ^    @@#\n   *@@ <b>\\___/</b> @@*\n    '=@@@@@@@='</div>` },
+    { icon: "◉", kind: "Web Audio", title: "Record player", what: "A spinning record that plays my songs, with a live wave of the music drawn on its label.", href: "../music/index.html",
+      cv: `<div class="disc"><i></i></div>` },
+    { icon: "◐", kind: "Site · Claude Code", title: "Work / Play modes", what: "One portfolio, two moods: a calm daytime version for work and a colorful night one for side projects.", href: "../index.html",
+      cv: `<div class="modes"><span>Work<small>day · navy · calm</small></span><span class="play">Play<small>night · color · bounce</small></span></div>` },
+    { icon: "›", kind: "Claude Code", title: "How I built this", what: "Every prompt, idea and update behind my site, published as I go.", href: "../howididthis/index.html",
+      cv: `<div class="term"><b>›</b> <em>fan the cards out</em>\n<b>✓</b> updated index.html\n<b>›</b> <em>yes, push live</em>\n<b>✓</b> committed and deployed</div>` },
+    { icon: "✉", kind: "Vercel function · Resend", title: "Feedback inbox", what: "A serverless function that emails me whatever visitors type into IceBreaker&rsquo;s feedback form.",
+      cv: `<div class="term"><b>POST</b> <em>/api/feedback</em>\n<b>✓</b> origin allowed\n<b>✓</b> message checked\n<b>✓</b> email sent to Scott</div>` },
     { icon: "↺", kind: "App · AI", title: "Get Unstuck", what: "AI-powered help working through tough decisions.", href: "https://www.unstuck.services/",
       cv: `<img src="../assets/unstuck-home.jpg" alt="" loading="lazy">` },
     { icon: "♪", kind: "Music · Suno", title: "Songs", what: "Songs I write and produce with Suno, then master with eMastered.", href: "../music/index.html",
