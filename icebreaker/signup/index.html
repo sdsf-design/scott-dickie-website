@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign up | IceBreaker</title>
+<style>
+  :root{
+    --pink:#ff90e8;
+    --yellow:#ffd23f;
+    --green:#7ed957;
+    --blue:#8fd3ff;
+    --ink:#0a0a0a;
+    --paper:#f4ede1;
+  }
+  *{box-sizing:border-box;}
+  html,body{min-height:100%;}
+  body{
+    margin:0; min-height:100vh; min-height:100dvh;
+    font-family:"Helvetica Neue", Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+    background:var(--paper); color:var(--ink);
+    display:flex; flex-direction:column; align-items:center;
+    padding:16px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  a{color:inherit;}
+
+  .bar{width:100%; max-width:1040px; display:flex; align-items:center;}
+  .logo{
+    display:inline-flex; align-items:center; gap:.3em;
+    font-size:clamp(20px, 3.8vw, 28px); font-weight:900; letter-spacing:-.5px; line-height:1;
+    text-decoration:none; white-space:nowrap;
+  }
+  .logo svg{height:1.55em; width:auto; overflow:visible;}
+
+  main{flex:1; width:100%; display:grid; place-items:center; padding:32px 0 48px;}
+  .card{
+    width:100%; max-width:440px; background:#fff;
+    border:3px solid var(--ink); border-radius:22px; box-shadow:10px 10px 0 var(--ink);
+    padding:36px 28px 28px; text-align:center;
+  }
+  .card .mark{width:64px; height:auto; overflow:visible; margin-bottom:8px;}
+  h1{margin:0; font-size:32px; font-weight:900; letter-spacing:-.5px;}
+  .sub{margin:8px 0 28px; font-size:16px; font-weight:700; color:#555;}
+
+  .providers{display:flex; flex-direction:column; gap:16px;}
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:12px; width:100%;
+    border:3px solid var(--ink); border-radius:14px; background:#fff;
+    color:var(--ink); box-shadow:5px 5px 0 var(--ink);
+    font:inherit; font-size:18px; font-weight:900; line-height:1;
+    padding:16px 18px; cursor:pointer;
+    transition:transform .08s, box-shadow .08s;
+  }
+  .btn:hover{transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink);}
+  .btn:active{transform:translate(3px,3px); box-shadow:2px 2px 0 var(--ink);}
+  .btn:focus-visible{outline:3px solid var(--blue); outline-offset:3px;}
+  .btn svg{width:24px; height:24px; flex:none;}
+  .btn-facebook{background:#1877f2; color:#fff;}
+
+  .note{min-height:20px; margin:18px 0 0; font-size:14px; font-weight:700; color:#555;}
+  .switch{margin:22px 0 0; font-size:15px; font-weight:700; color:#555;}
+  .switch a{font-weight:900;}
+  .legal{margin:18px 0 0; font-size:12px; font-weight:600; color:#888; line-height:1.4;}
+
+  @media (max-width:480px){
+    .card{padding:28px 20px 22px; box-shadow:6px 6px 0 var(--ink);}
+    h1{font-size:28px;}
+  }
+  @media (prefers-reduced-motion:reduce){.btn{transition:none;}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="logo" href="/icebreaker/" aria-label="Back to IceBreaker">
+    <svg viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg>
+    <span>IceBreaker</span>
+  </a>
+</header>
+
+<main>
+  <section class="card">
+    <svg class="mark" viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg>
+    <h1 id="title">Create your account</h1>
+    <p class="sub" id="sub">Save your favorite cards and pick up where you left off.</p>
+
+    <div class="providers">
+      <button class="btn" type="button" data-provider="google">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+        <span><span class="verb">Sign up</span> with Google</span>
+      </button>
+      <button class="btn btn-facebook" type="button" data-provider="facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+        <span><span class="verb">Sign up</span> with Facebook</span>
+      </button>
+    </div>
+
+    <p class="note" id="note" role="status" aria-live="polite"></p>
+
+    <p class="switch" id="switch">Already have an account? <a href="/icebreaker/signup/?mode=login">Log in</a></p>
+    <p class="legal">By continuing you agree to IceBreaker's Terms and Privacy Policy.</p>
+  </section>
+</main>
+
+<script>
+  // One page for both sign up and log in: ?mode=login swaps the wording.
+  const isLogin = new URLSearchParams(location.search).get('mode') === 'login';
+  if (isLogin) {
+    document.title = 'Log in | IceBreaker';
+    document.getElementById('title').textContent = 'Welcome back';
+    document.getElementById('sub').textContent = 'Log in to get back to your cards.';
+    document.querySelectorAll('.verb').forEach(v => v.textContent = 'Continue');
+    document.getElementById('switch').innerHTML = 'New to IceBreaker? <a href="/icebreaker/signup/">Sign up</a>';
+  }
+
+  // Where each provider's sign-in starts. Point these at the real OAuth endpoints
+  // (e.g. /api/auth/google, /api/auth/facebook) once they exist.
+  const AUTH_URLS = { google: '', facebook: '' };
+
+  document.querySelectorAll('[data-provider]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = AUTH_URLS[btn.dataset.provider];
+      if (url) { location.href = url; return; }
+      const name = btn.dataset.provider === 'google' ? 'Google' : 'Facebook';
+      document.getElementById('note').textContent = name + ' sign-in is coming soon.';
+    });
+  });
+</script>
+</body>
+</html>

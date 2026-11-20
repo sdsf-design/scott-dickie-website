@@ -1,4 +1,4 @@
-// IceBreaker feedback (scott-dickie.com/icebreaker): emails what a visitor types in the
+// IceBreaker feedback (scott-dickie.com/icebreaker/play): emails what a visitor types in the
 // Feedback form to Scott through Resend. Needs RESEND_API_KEY in the Vercel project.
 // Until a domain is verified in Resend, mail can only come from onboarding@resend.dev
 // and only go to the Resend account's own address, which is Scott's.

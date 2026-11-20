@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the IceBreaker voice clips with ElevenLabs (voice: John - Conversational).
 
-Reads the PROMPTS list out of icebreaker/index.html and writes, for each question N:
+Reads the PROMPTS list out of icebreaker/play/index.html and writes, for each question N:
   icebreaker/audio/N-question.mp3   and   icebreaker/audio/N-follow.mp3
 
 The key is ELEVENLABS_API_KEY, loaded from .env.local at the repo root
@@ -29,7 +29,7 @@ MODEL_ID = "eleven_v4"
 
 
 def load_prompts():
-    html = open(os.path.join(HERE, "index.html"), encoding="utf-8").read()
+    html = open(os.path.join(HERE, "play", "index.html"), encoding="utf-8").read()
     block = re.search(r"const PROMPTS = \[(.*?)\n\];", html, re.S).group(1)
     return [json.loads(line.strip().rstrip(",")) for line in block.strip().splitlines()]
 

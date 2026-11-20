@@ -1,1522 +1,279 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IceBreaker | Scott Dickie</title>
-<meta name="description" content="240 conversation starters for kids: read the question, tap the card for a follow-up.">
-<link rel="icon" href="/assets/favicon.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IceBreaker | Flip a card. Start a conversation.</title>
+<meta name="description" content="IceBreaker: question cards that get everyone talking. For ages 5+.">
 <style>
-  /* Same look as Joke Flip: cream ground, ink outlines, hard offset shadows */
   :root{
     --pink:#ff90e8;
     --yellow:#ffd23f;
     --green:#7ed957;
     --blue:#8fd3ff;
     --ink:#0a0a0a;
-    --card:#ffffff;
-    --neutral-btn:#eee8dc;
-    --shadow-off:5px;
+    --paper:#f4ede1;
   }
   *{box-sizing:border-box;}
-  html,body{height:100%;}
   body{
     margin:0;
     font-family:"Helvetica Neue", Arial, -apple-system, BlinkMacSystemFont, sans-serif;
-    background:#f4ede1;
+    background:var(--paper);
     color:var(--ink);
-    height:100vh;
-    height:100dvh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:16px;
-    overflow:hidden;
     -webkit-tap-highlight-color:transparent;
-    touch-action:manipulation;   /* no double-tap zoom when tapping the arrows quickly */
   }
-  .wrap{
-    width:100%;
-    max-width:720px;   /* same width as the topic screen */
-    flex:1;
-    min-height:0;   /* fills what the top bar leaves */
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+  a{color:inherit;}
+
+  /* ---------- top bar: logo left, log in right ---------- */
+  .bar{
+    max-width:1040px; margin:0 auto; padding:16px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .logo{
+    display:inline-flex; align-items:center; gap:.3em;
+    font-size:clamp(20px, 3.8vw, 28px); font-weight:900; letter-spacing:-.5px; line-height:1;
+    text-decoration:none; white-space:nowrap;
+  }
+  .logo svg{height:1.55em; width:auto; overflow:visible;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    border:3px solid var(--ink); border-radius:14px; background:#fff;
+    color:var(--ink); box-shadow:5px 5px 0 var(--ink);
+    font:inherit; font-weight:900; line-height:1; text-decoration:none;
+    padding:12px 20px; font-size:17px; cursor:pointer;
+    transition:transform .08s, box-shadow .08s;
+  }
+  .btn:hover{transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink);}
+  .btn:active{transform:translate(3px,3px); box-shadow:2px 2px 0 var(--ink);}
+  .btn:focus-visible{outline:3px solid var(--blue); outline-offset:3px;}
+  .btn-big{background:var(--yellow); font-size:clamp(20px, 3vw, 24px); padding:18px 34px;}
+
+  /* ---------- hero ---------- */
+  main{max-width:1040px; margin:0 auto; padding:8px 16px 56px; text-align:center; overflow-x:clip;}
+  .hero-logo{
+    display:inline-flex; align-items:center; gap:.3em; margin:12px 0 0;
+    font-size:clamp(34px, 9vw, 96px); font-weight:900; letter-spacing:-.02em; line-height:1;
+  }
+  .hero-logo svg{height:1.4em; width:auto; overflow:visible;}
+  .tag{margin:16px auto 0; font-size:clamp(19px, 3.6vw, 28px); font-weight:800; color:#444; text-wrap:balance;}
+  .ages{
+    display:inline-block; margin-top:12px; padding:4px 12px;
+    border:2.5px solid var(--ink); border-radius:999px; background:var(--green);
+    font-size:14px; font-weight:900; box-shadow:3px 3px 0 var(--ink);
   }
 
-  /* Logo: a speech-bubble question card over a yellow card, then the name */
-  .nav-title{
-    font-size:clamp(17px, 3.8vw, 28px);
-    line-height:1;
-    margin:0;
-    font-weight:900;
-    letter-spacing:-0.5px;
-    white-space:nowrap;
-    display:inline-flex;
-    align-items:center;
-    gap:.3em;
+  .video{
+    position:relative; margin:36px auto 0; max-width:900px;
+    border:3px solid var(--ink); border-radius:20px; overflow:hidden;
+    background:var(--ink); box-shadow:10px 10px 0 var(--ink);
   }
-  .logo-mark{height:1.55em; width:auto; flex:none; overflow:visible;}
+  .video video{display:block; width:100%; height:auto; aspect-ratio:16/9; background:var(--ink);}
+  /* little cards peeking out behind the video */
+  .video-wrap{position:relative; max-width:900px; margin:0 auto;}
+  .peek{
+    position:absolute; width:clamp(60px, 11vw, 110px); aspect-ratio:3/4;
+    border:3px solid var(--ink); border-radius:12px; z-index:-1;
+  }
+  .peek.p1{background:var(--pink); top:6px; left:-34px; transform:rotate(-14deg);}
+  .peek.p2{background:var(--blue); bottom:-26px; right:-28px; transform:rotate(12deg);}
+  .video-wrap{isolation:isolate;}
 
-  /* ---------- the flip card ---------- */
-  .stage{
-    width:100%;
-    flex:1;
-    min-height:0;
-    position:relative;
-  }
-  /* The button is absolutely positioned and only holds the perspective; the inner div
-     does the 3D turn, which Safari won't do on a button. Sizing comes from fixed insets
-     plus max-height - no height percentages anywhere: mobile engines that mis-resolve
-     a % height in min()/calc() were collapsing the card to a strip. */
-  .flip{
-    -webkit-appearance:none;
-    appearance:none;
-    border:0;
-    padding:0;
-    background:none;
-    font:inherit;
-    color:inherit;
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:8px;            /* room for the hard shadow */
-    width:calc(100% - 8px);
-    margin:auto 0;
-    cursor:pointer;
-    perspective:1400px;
-    -webkit-perspective:1400px;
-    container-type:size;   /* text inside sizes itself to the card (cqmin = 1% of its shorter side) */
-  }
-  .inner{
-    position:absolute;
-    inset:0;
-    transform-style:preserve-3d;
-    -webkit-transform-style:preserve-3d;
-    transition:transform .6s cubic-bezier(.3, 1.4, .5, 1);
-  }
-  .flip.flipped .inner{transform:rotateY(180deg);}
-  .flip.instant .inner, .flip.instant .face{transition:none;}
-  /* Backup for browsers that ignore backface-visibility: swap faces as the card passes edge-on
-     (the easing reaches 90° at 75ms of the 600ms turn, in both directions) */
-  .face{transition:visibility 0s linear 75ms;}
-  .back, .flip.flipped .front{visibility:hidden;}
-  .flip.flipped .back{visibility:visible;}
-  .flip.pop{animation:pop .3s ease;}
-  @keyframes pop{
-    from{opacity:0; transform:translateY(10px) scale(.97);}
-    to{opacity:1; transform:none;}
-  }
-  .face{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:18px;
-    padding:clamp(24px, 5vw, 44px);
-    text-align:center;
-    border:3px solid var(--ink);
-    border-radius:22px;
-    box-shadow:8px 8px 0 var(--ink);
-    backface-visibility:hidden;
-    -webkit-backface-visibility:hidden;
-    overflow:hidden;
-  }
-  @media (hover:hover){ .flip:hover .face{box-shadow:10px 10px 0 var(--ink);} }
-  .front{background:var(--card); transform:rotateY(0deg);}   /* its own 3D layer, so Safari hides it when turned away */
-  .back{background:var(--yellow); transform:rotateY(180deg);}
-  .flip:focus-visible{outline:none;}
-  .flip:focus-visible .face{outline:3px dashed var(--ink); outline-offset:6px;}
+  .cta{margin:56px 0 0; display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .cta p{margin:0; font-size:16px; font-weight:700; color:#555;}
+  .cta p a{font-weight:900;}
+  .play-link{font-size:15px; font-weight:800; color:#555;}
 
-  .tag{
-    background:var(--yellow);
-    border:2.5px solid var(--ink);
-    border-radius:8px;
-    padding:4px 12px;
-    font-weight:800;
-    font-size:clamp(13px, 2.4cqmin, 18px);
-    box-shadow:3px 3px 0 var(--ink);
-  }
-  .back .tag{background:var(--pink);}
-  .emoji{font-size:clamp(44px, 13cqmin, 104px); line-height:1;}
-  .line{
-    margin:0;
-    font-size:clamp(22px, 6.4cqmin, 48px);
-    font-weight:800;
-    line-height:1.25;
-    text-wrap:balance;
-  }
-  .back .line{font-size:clamp(24px, 7.2cqmin, 54px); font-weight:900;}
-  .hint{
-    font-size:clamp(14px, 2.5cqmin, 19px);
-    font-weight:800;
-    color:#777;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-  }
-  .back .hint{color:#5a4a00;}
-  /* The hint sits on the card's bottom edge; the tag, emoji and question stay centered in the space above it */
-  .face{padding-bottom:clamp(14px, 2.8cqmin, 22px);}
-  .face > .tag{margin-top:auto;}
-  .face > .hint{margin-top:auto; flex-shrink:0;}
-  .hint.cue::before{
-    content:""; width:1.25em; height:1.25em; flex-shrink:0; background:currentColor;
-    -webkit-mask:var(--flip-icon) center / contain no-repeat; mask:var(--flip-icon) center / contain no-repeat;
-  }
-  .flip{--flip-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 10.5a7.5 7.5 0 0 1 13.2-3.9'/%3E%3Cpath d='M18.5 2.8v4.4h-4.4'/%3E%3Cpath d='M19.5 13.5a7.5 7.5 0 0 1-13.2 3.9'/%3E%3Cpath d='M5.5 21.2v-4.4h4.4'/%3E%3C/svg%3E");}
-  .who-slot[hidden]{display:none;}
+  footer{padding:24px 16px 32px; text-align:center; font-size:13px; font-weight:700; color:#777;}
 
-  /* ---------- big arrows ---------- */
-  .controls{
-    position:relative; z-index:2;   /* above the team wheel */
-    /* full page width, so the arrows sit in the screen's bottom corners even when the card's column is narrower */
-    width:calc(100vw - 32px);   /* the column centers it, so it spans edge to edge */
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    margin-top:22px;
-    flex-shrink:0;
-  }
-  .arrow{
-    appearance:none;
-    width:clamp(76px, 18vw, 104px);
-    height:clamp(76px, 18vw, 104px);
-    border:3px solid var(--ink);
-    border-radius:50%;
-    background:var(--neutral-btn);
-    color:var(--ink);
-    box-shadow:6px 6px 0 var(--ink);
-    cursor:pointer;
-    display:grid;
-    place-items:center;
-    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
-  }
-  .arrow svg{width:46%; height:46%;}
-  @media (hover:hover){
-    .arrow:hover{transform:translate(-3px,-3px); box-shadow:9px 9px 0 var(--ink); background:var(--pink);}
-    .arrow.next:hover{background:var(--green);}
-  }
-  .arrow:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
-  .arrow:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
-  .middle{display:flex; flex-direction:column; align-items:center; gap:10px;}
-  .play{
-    appearance:none;
-    width:clamp(60px, 14vw, 78px);
-    height:clamp(60px, 14vw, 78px);
-    border:3px solid var(--ink);
-    border-radius:50%;
-    background:var(--yellow);
-    color:var(--ink);
-    box-shadow:5px 5px 0 var(--ink);
-    cursor:pointer;
-    display:grid;
-    place-items:center;
-    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
-  }
-  .play svg{width:44%; height:44%;}
-  .play .stop-icon, .play.playing .play-icon{display:none;}
-  .play.playing .stop-icon{display:block;}
-  .play.playing{background:var(--pink);}
-  .play.waiting{animation:wait 1s ease-in-out infinite;}
-  @keyframes wait{50%{transform:scale(1.08);}}
-  @media (hover:hover){ .play:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
-  .play:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
-  .play:focus-visible{outline:3px dashed var(--ink); outline-offset:5px;}
+  .btn-try{background:var(--pink);}
+  .hero-actions{margin-top:28px; display:flex; justify-content:center; flex-wrap:wrap; gap:16px;}
+  .cta-row{display:flex; justify-content:center; flex-wrap:wrap; gap:16px;}
 
-  /* Top bar: home (back to the topics) on the left, voice and players on the right */
-  .page-nav{
-    position:relative; z-index:2;   /* above the team wheel */
-    align-self:stretch;
-    flex-shrink:0;
-    display:flex;   /* home and the logo on the left, voice and players on the right */
-    align-items:center;
-    gap:12px;
-    margin-bottom:22px;
+  /* ---------- Try it free: a sample card in a dialog, the same flip card as the game ---------- */
+  .demo{
+    width:min(480px, calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto;
+    margin:auto; padding:20px 20px 24px;
+    border:3px solid var(--ink); border-radius:22px; background:var(--paper); color:var(--ink);
+    box-shadow:10px 10px 0 var(--ink);
   }
-  @media (max-width:400px){   /* phones: slightly smaller round buttons leave the title room */
-    .page-nav{gap:10px;}
-    .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:40px; height:40px;}
-    .nav-right{gap:8px;}
+  .demo::backdrop{background:rgba(10,10,10,.55);}
+  .demo-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;}
+  .demo-head h2{margin:0; font-size:20px; font-weight:900; letter-spacing:-.3px;}
+  .demo-x{
+    width:40px; height:40px; flex:none; display:grid; place-items:center;
+    border:3px solid var(--ink); border-radius:50%; background:#fff; box-shadow:3px 3px 0 var(--ink);
+    font-family:inherit; font-size:26px; font-weight:900; line-height:1; color:var(--ink); cursor:pointer; padding:0 0 3px;
   }
-  @media (max-width:350px){   /* the smallest phones */
-    .topics .topic-tile .t-name{font-size:15px;}
-    .topics .topic-tile{padding-left:12px; padding-right:12px;}
-    .page-nav{gap:8px;}
-    .page-nav .players-btn, .page-nav .voice-btn, .page-nav .home-btn{width:36px; height:36px;}
-    .nav-right{gap:6px;}
-    .page-nav .nav-title{font-size:15px;}   /* centered between the buttons, it needs to be a little smaller here */
-  }
-  .nav-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
-  /* The logo is centered on the bar, so it reads as a title and not as another button beside home */
-  .page-nav .nav-title{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);}
-  @media (max-height:640px){
-    .emoji{display:none;}
-  }
-  /* Phones on their side: arrows flank the card instead of taking a row under it */
-  @media (max-height:520px) and (orientation:landscape){
-    body{padding:10px max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));}
-    .wrap{
-      max-width:960px;
-      display:grid;
-      grid-template-columns:auto minmax(0,1fr) auto;
-      grid-template-rows:auto minmax(0,1fr) auto auto;
-      column-gap:20px;
-      align-items:center;
-    }
-    .nav-title{font-size:17px;}
-    .controls{display:contents;}
-    #prev{grid-column:1; grid-row:2;}
-    .stage{grid-column:2; grid-row:2; height:100%;}
-    #next{grid-column:3; grid-row:2;}
-    .arrow{width:68px; height:68px; box-shadow:4px 4px 0 var(--ink);}
-    .middle{grid-column:1 / -1; grid-row:3; flex-direction:row; justify-content:center; gap:16px; margin-top:6px;}
-    .play{width:48px; height:48px; box-shadow:3px 3px 0 var(--ink);}
-    .page-nav{margin-bottom:8px;}
-    .face{gap:10px; padding:14px 22px; box-shadow:6px 6px 0 var(--ink);}
-    .line{font-size:22px;}
-    .back .line{font-size:26px;}
-  }
+  .demo-x:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
 
-  /* ---------- start screen: pick one of the seven topics ---------- */
-  .topics{
-    width:100%; max-width:720px; flex:1; min-height:0; overflow:auto;
-    display:flex; flex-direction:column; align-items:center; padding:0 6px 10px;
+  .d-flip{
+    appearance:none; -webkit-appearance:none; border:0; padding:0; background:none; font:inherit; color:inherit;
+    display:block; position:relative; width:calc(100% - 8px); height:min(360px, 52dvh);
+    margin:0 0 8px; cursor:pointer; perspective:1400px; -webkit-perspective:1400px;
   }
-  .topics[hidden], body.picking .wrap{display:none;}
-  .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
-  /* Tiles stretch to fill the screen's height; on short screens they keep a minimum and the page scrolls */
-  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto; gap:16px;}   /* six tiles a set height; Holidays and Random share the last row and size to their content */
-  .topic-tile[data-topic="holidays"]{flex-direction:row; align-items:center; justify-content:flex-start; gap:14px; padding-bottom:22px;}
-  .topic-tile{
-    appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
-    color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
-    padding:16px 16px 14px; min-height:0;
-    display:flex; flex-direction:column; justify-content:center; gap:8px;   /* emoji and name centered top to bottom */
-    transition:transform .12s ease, box-shadow .12s ease;
+  .d-inner{position:absolute; inset:0; transform-style:preserve-3d; -webkit-transform-style:preserve-3d; transition:transform .6s cubic-bezier(.3, 1.4, .5, 1);}
+  .d-flip.flipped .d-inner{transform:rotateY(180deg);}
+  .d-face{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding:24px 22px 16px; text-align:center;
+    border:3px solid var(--ink); border-radius:22px; box-shadow:8px 8px 0 var(--ink);
+    backface-visibility:hidden; -webkit-backface-visibility:hidden; overflow:hidden;
+    transition:visibility 0s linear 75ms;
   }
-  .topic-tile .t-emoji{font-size:clamp(34px, 5.5vw, 52px); line-height:1;}
-  .topic-tile .t-name{font-size:clamp(18px, 3vw, 26px); font-weight:900; line-height:1.15;}
-  .topic-tile .t-count{font-size:clamp(13px, 1.8vw, 16px); font-weight:800; opacity:.7;}
-  @media (hover:hover){ .topic-tile:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
-  .topic-tile:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
-  .topic-tile:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
-  .topic-tile.random{
-    min-height:0; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;
-    background:#fff;
-    background-image:linear-gradient(90deg, #c9a7ff, #7ed957, #8fd3ff, #ff90e8, #ffb26b, #ffd23f, #ff8a80);
-    background-size:100% 10px; background-repeat:no-repeat; background-position:bottom;
-    padding-bottom:22px;
+  .d-front{background:#fff;}
+  .d-back{background:var(--yellow); transform:rotateY(180deg); visibility:hidden;}
+  .d-flip.flipped .d-front{visibility:hidden;}
+  .d-flip.flipped .d-back{visibility:visible;}
+  .d-flip:focus-visible{outline:none;}
+  .d-flip:focus-visible .d-face{outline:3px dashed var(--ink); outline-offset:6px;}
+  .d-tag{
+    margin-top:auto; background:var(--yellow); border:2.5px solid var(--ink); border-radius:8px;
+    padding:4px 12px; font-size:14px; font-weight:800; box-shadow:3px 3px 0 var(--ink);
   }
-  .topic-tile.random .t-text{display:flex; flex-direction:column; gap:4px;}
-  @media (max-width:600px){   /* half-width tiles: emoji above the name, like the topic tiles */
-    .topic-tile.random, .topic-tile[data-topic="holidays"]{flex-direction:column; align-items:flex-start; justify-content:center; gap:6px; padding-top:12px;}
-    .topic-grid{gap:12px;}
-  }
-  body.picking .topics .pop-in{animation:pop .4s cubic-bezier(.3, 1.5, .5, 1) both;}
-  .topic-tile.chosen{transform:scale(1.07) rotate(-1.5deg); box-shadow:8px 8px 0 var(--ink);}
+  .d-back .d-tag{background:var(--pink);}
+  .d-emoji{font-size:clamp(44px, 12vw, 64px); line-height:1;}
+  .d-line{margin:0; font-size:clamp(21px, 5.6vw, 28px); font-weight:800; line-height:1.25; text-wrap:balance;}
+  .d-back .d-line{font-size:clamp(23px, 6.2vw, 31px); font-weight:900;}
+  .d-hint{margin-top:auto; flex-shrink:0; font-size:14px; font-weight:800; color:#777;}
+  .d-back .d-hint{color:#5a4a00;}
+  .d-pop{animation:d-pop .3s ease;}
+  @keyframes d-pop{from{opacity:0; transform:translateY(10px) scale(.97);} to{opacity:1; transform:none;}}
 
-  /* ---------- intro: the logo pops in mid-screen, then shrinks up into the top bar ---------- */
-  .splash{
-    position:fixed; inset:0; z-index:100; display:grid; place-items:center;
-    background:#f4ede1; transition:background-color .6s ease;
-  }
-  .splash.leaving{background-color:rgba(244, 237, 225, 0);}
-  .splash-logo{
-    grid-column:auto;   /* it borrows .nav-title's look, not its top-bar column */
-    font-size:clamp(48px, 13vw, 104px);
-    transform-origin:50% 50%;
-  }
-  /* The logo mark in the intro, as two cards laid out exactly like the logo's 52x58 drawing */
-  .splash-mark{position:relative; height:1.55em; width:calc(1.55em * 52 / 58); flex:none; perspective:6em;}
-  .sc-y, .sc-w{position:absolute; transform-style:preserve-3d;}
-  .sc-y{
-    left:calc(16 / 52 * 100%); top:calc(6 / 58 * 100%); width:calc(30 / 52 * 100%); height:calc(40 / 58 * 100%);
-    box-sizing:border-box; border:calc(1.55em * 3 / 58) solid var(--ink); border-radius:calc(1.55em * 6 / 58);
-    background:var(--yellow); transform:rotate(12deg);
-  }
-  .sc-w{
-    left:calc(4 / 52 * 100%); top:calc(5 / 58 * 100%); width:calc(34 / 52 * 100%); height:calc(48 / 58 * 100%);
-    transform-origin:47% 44%; transform:rotate(-8deg);
-  }
-  .sc-face{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;}
-  .sc-face svg{display:block; width:100%; height:100%; overflow:visible;}
-  .sc-back{transform:rotateY(180deg);}   /* its other side also shows a ? */
-  /* Intro: both cards fly in from opposite sides, flipping a full turn, then the name slides in */
-  .splash-logo .sc-y{animation:fly-y .7s cubic-bezier(.2, .85, .3, 1.15) both;}
-  .splash-logo .sc-w{animation:fly-w .6s cubic-bezier(.2, .85, .3, 1.1) .1s both, flip-w .7s cubic-bezier(.45, 0, .25, 1) .65s both;}
-  .splash-logo .logo-word{animation:word-in .4s ease .75s both;}
-  @keyframes fly-y{from{transform:translateX(-60vw) rotate(-25deg) rotateY(0);}to{transform:rotate(12deg) rotateY(360deg);}}
-  @keyframes fly-w{from{transform:translateX(60vw) rotate(20deg);}to{transform:rotate(-8deg);}}
-  @keyframes flip-w{   /* once it has landed, the white card flips a full turn so you can see both ? sides */
-    0%{transform:rotate(-8deg) rotateY(0) scale(1);}
-    50%{transform:rotate(-8deg) rotateY(-180deg) scale(1.25);}
-    100%{transform:rotate(-8deg) rotateY(-360deg) scale(1);}
-  }
-  /* The tagline fades up under the logo once the name is in, and fades out as the logo heads for the top bar.
-     It is positioned on its own so the logo stays exactly centered. */
-  .splash-tag{
-    position:absolute; left:16px; right:16px; margin:0;
-    top:calc(50% + clamp(48px, 13vw, 104px) * .8 + clamp(14px, 3vh, 28px));
-    text-align:center; font-size:clamp(18px, 4.8vw, 30px); font-weight:800; color:#444; letter-spacing:-.2px; text-wrap:balance;
-    animation:tag-in .5s ease 1.05s backwards; transition:opacity .3s ease;
-  }
-  .splash.leaving .splash-tag{opacity:0;}
-  .splash-ages{display:block; margin-top:6px; font-size:.6em; font-weight:800; color:#777;}
-  @keyframes tag-in{from{opacity:0; transform:translateY(.5em);}to{opacity:1; transform:none;}}
-  @keyframes word-in{from{opacity:0; transform:translateX(-.4em);}to{opacity:1; transform:none;}}
-  /* Until the logo starts moving, everything else waits; tiles hold their pop-in */
-  body.intro .page-nav > :not(.nav-title), body.intro .topics .lead, body.intro .wrap{opacity:0;}
-  body.landing .page-nav > :not(.nav-title), body.landing .topics .lead, body.landing .wrap{transition:opacity .5s ease .15s;}
-  body.intro .topic-tile{animation-play-state:paused;}
-  body.intro .page-nav .nav-title, body.landing .page-nav .nav-title{visibility:hidden;}
-  body:not(.picking) .page-nav .nav-title{display:none;}   /* the logo only shows on the topic screen */
+  .d-controls{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:18px;}
+  .d-count{font-size:14px; font-weight:800; color:#555;}
+  .d-actions{margin-top:22px; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center;}
+  .d-actions p{margin:0; font-size:15px; font-weight:700; color:#555;}
+  .d-actions .btn{width:100%;}
+  @media (prefers-reduced-motion:reduce){.d-inner, .d-face{transition:none;} .d-pop{animation:none;}}
 
-  /* ---------- emoji explosion when a topic is picked ---------- */
-  .burst{position:fixed; inset:0; pointer-events:none; z-index:200; overflow:hidden;}
-  .wipe{position:fixed; inset:0; pointer-events:none; z-index:150;}   /* the tile's color, under the emojis */
-  .burst span{position:absolute; line-height:1; will-change:transform, opacity;}
-  @media (max-height:700px){
-    .topic-tile{padding:12px 14px;}
-    .topic-tile .t-emoji{font-size:28px;}
-    .topics .lead{margin-bottom:12px;}
+  @media (max-width:600px){
+    .btn{padding:10px 16px; font-size:16px;}
+    .btn-big{padding:16px 28px; font-size:20px;}
+    .video{box-shadow:6px 6px 0 var(--ink); border-radius:14px;}
+    .peek.p1{left:-12px;}
+    .peek.p2{right:-10px;}
   }
-
-  /* ---------- players: the card's border is split into one colored side per player ---------- */
-  .players-btn, .voice-btn, .home-btn{
-    position:relative; appearance:none; margin-left:auto; width:44px; height:44px; padding:0; flex:none;
-    border:3px solid var(--ink); border-radius:50%; background:var(--green); color:var(--ink);
-    box-shadow:3px 3px 0 var(--ink); cursor:pointer; display:grid; place-items:center;
-    transition:transform .12s ease, box-shadow .12s ease;
-  }
-  .players-btn svg, .voice-btn svg, .home-btn svg{width:58%; height:58%;}
-  .home-btn{margin-left:0; background:transparent;}            /* outline only away from home */
-  body.picking .home-btn{background:var(--blue); cursor:default;}   /* filled: you're on the topic screen */
-  .voice-btn{background:var(--neutral-btn);}
-  .voice-btn[aria-pressed="true"]{background:var(--yellow);}
-  .voice-btn .waves, .voice-btn[aria-pressed="true"] .slash{display:none;}
-  .voice-btn[aria-pressed="true"] .waves{display:inline;}
-  .players-btn .badge{
-    position:absolute; top:-8px; right:-8px; min-width:22px; height:22px; padding:0 5px;
-    border:2.5px solid var(--ink); border-radius:11px; background:var(--yellow);
-    font-size:12px; font-weight:900; line-height:17px;
-  }
-  .players-btn .badge:empty{display:none;}
-  @media (hover:hover){ .players-btn:hover, .voice-btn:hover, .home-btn:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--ink);} }
-  .players-btn:active, .voice-btn:active, .home-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
-  .players-btn:focus-visible, .voice-btn:focus-visible, .home-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
-
-  .sides{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:0;}
-  .stage.ringed .flip{z-index:1;}
-  .sides.full{position:fixed; inset:0; width:100vw; height:100vh;}   /* ?wheel=full: wedges behind the whole page */
-  .stage.ringed.fullwheel .flip{left:30px; width:calc(100% - 68px);}   /* leave the side wedges room to show */   /* sized by drawSides() to sit on the wheel */
-  /* A short card (team play on a phone) tightens up so the question, the winner and the hint all fit */
-  @container (max-height:360px){
-    .face{gap:8px; padding:14px 14px;}
-    .emoji{font-size:34px;}
-    .who{font-size:16px; padding:3px 10px;}
-    .line{font-size:20px;}
-    .back .line{font-size:22px;}
-  }
-  @container (max-height:240px){ .emoji{display:none;} }
-  .face.tight{gap:6px; padding-top:10px; padding-bottom:10px;}
-  .face.tight .emoji{display:none;}
-  .sides path{stroke:var(--ink); stroke-width:3; stroke-linejoin:round; transition:opacity .15s;}
-  .sides .chip text{font:900 26px/1 "Helvetica Neue", Arial, sans-serif; fill:var(--ink); text-anchor:middle; dominant-baseline:central;}
-  .sides .chip{transition:opacity .15s;}
-  /* Raffle: only the lit side shows while the light runs; after landing the winner stays lit */
-  .sides.running path, .sides.running .chip, .sides.landed path, .sides.landed .chip{opacity:.18;}
-  .sides.running .lit, .sides.landed .lit{opacity:1;}
-  .sides.landed path.lit{animation:glow .5s ease 3;}
-  @keyframes glow{50%{opacity:.45;}}
-  .who{padding:4px 12px; border:2.5px solid var(--ink); border-radius:8px; box-shadow:3px 3px 0 var(--ink); color:var(--ink); font-size:clamp(18px, 3.2cqmin, 24px); font-weight:900;}
-
-  dialog.spin{
-    width:min(400px, calc(100vw - 32px));
-    padding:26px 22px 22px;
-    border:3px solid var(--ink);
-    border-radius:22px;
-    background:#fffaf0;
-    color:var(--ink);
-    box-shadow:8px 8px 0 var(--ink);
-    text-align:center;
-    font-family:inherit;
-  }
-  dialog.spin::backdrop{background:rgba(10,10,10,.35);}
-  dialog.spin[open]{animation:pop .25s ease;}
-  .spin h2{margin:0; padding:0 26px; font-size:28px; font-weight:900; letter-spacing:-.3px;}
-  .spin .sub{margin:6px 0 18px; font-size:15px; font-weight:600; color:#555;}
-  .spin .x{
-    position:absolute; top:10px; right:10px; width:40px; height:40px;
-    appearance:none; border:0; background:none; color:var(--ink); cursor:pointer;
-    font-family:inherit; font-size:30px; font-weight:900; line-height:1; border-radius:50%;
-  }
-  .spin .x:focus-visible{outline:3px dashed var(--ink);}
-  .stepper{display:flex; align-items:center; justify-content:center; gap:22px; margin:8px 0 24px;}
-  .step-btn{
-    appearance:none; width:60px; height:60px; border:3px solid var(--ink); border-radius:50%;
-    background:var(--neutral-btn); color:var(--ink); box-shadow:4px 4px 0 var(--ink);
-    font-family:inherit; font-size:34px; font-weight:900; line-height:1; cursor:pointer; display:grid; place-items:center; padding:0 0 3px;
-  }
-  .step-btn:disabled{opacity:.35; cursor:default;}
-  .step-btn:not(:disabled):active, .big-btn:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
-  .count{font-size:64px; font-weight:900; min-width:1.4em; line-height:1;}
-  .big-btn{
-    appearance:none; border:3px solid var(--ink); border-radius:14px; background:var(--yellow);
-    color:var(--ink); box-shadow:5px 5px 0 var(--ink); font-family:inherit; font-size:20px; font-weight:900; line-height:1;
-    padding:15px 30px; cursor:pointer;
-  }
-  .link-btn{
-    appearance:none; border:0; background:none; font:inherit; font-size:14px; font-weight:800;
-    color:#777; text-decoration:underline; cursor:pointer; margin-top:16px; padding:4px;
-  }
-
-  /* Feedback: a round button in the bottom-right corner of the topic screen, opening a short form */
-  .fb-btn{
-    position:fixed; right:max(18px, env(safe-area-inset-right)); bottom:max(18px, env(safe-area-inset-bottom)); z-index:5;
-    appearance:none; height:52px; padding:0 18px 0 14px; border:3px solid var(--ink); border-radius:999px;
-    background:var(--pink); color:var(--ink); box-shadow:4px 4px 0 var(--ink); cursor:pointer;
-    display:none; align-items:center; gap:8px; font-family:inherit; font-size:16px; font-weight:900;
-    transition:transform .12s ease, box-shadow .12s ease;
-  }
-  .fb-btn svg{width:24px; height:24px;}
-  body.picking:not(.intro) .fb-btn{display:flex;}
-  body.landing .fb-btn{opacity:0;}
-  @media (hover:hover){ .fb-btn:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink);} }
-  .fb-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
-  .fb-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
-  .topics{padding-bottom:84px;}   /* room so the button never covers the Random tile */
-  .fb-form{display:flex; flex-direction:column; gap:12px; text-align:left;}
-  /* Five-star rating: real radio buttons (keyboard and screen readers work), drawn as big stars */
-  .fb-stars{border:0; margin:0 0 2px; padding:0; text-align:center;}
-  .fb-stars legend{padding:0; margin:0 auto 6px; font-size:14px; font-weight:900;}
-  .fb-star-row{display:flex; justify-content:center; gap:6px;}
-  .fb-star{position:relative; cursor:pointer; display:block; flex:0 1 48px; min-width:0; aspect-ratio:1;}
-  .fb-star input{position:absolute; inset:0; margin:0; opacity:0; cursor:pointer;}
-  .fb-star svg{width:100%; height:100%; display:block; transition:transform .12s ease;}
-  .fb-star path{fill:#fff; stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round; transition:fill .1s;}
-  .fb-star.on path{fill:var(--yellow);}
-  .fb-star.on svg{transform:rotate(-6deg) scale(1.06);}
-  .fb-star input:focus-visible + svg{outline:3px dashed var(--ink); outline-offset:2px; border-radius:8px;}
-  .fb-rate-word{min-height:18px; margin:6px 0 0; font-size:14px; font-weight:800; color:#555;}
-  .fb-star-row.pop .on svg{animation:pop .3s ease;}
-  .fb-form label{font-size:14px; font-weight:900;}
-  .fb-form label select{   /* after the shared field rule below in weight, so its arrow survives */
-    appearance:none; padding-right:40px; cursor:pointer;
-    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 18px;
-  }
-  .fb-form select:focus{outline:3px solid var(--blue); outline-offset:1px;}
-  .fb-form input, .fb-form textarea, .fb-form select{
-    width:100%; margin-top:5px; padding:11px 12px; border:2.5px solid var(--ink); border-radius:12px;
-    background:#fff; color:var(--ink); font-family:inherit; font-size:16px; font-weight:600; line-height:1.35;
-  }
-  .fb-form textarea{min-height:120px; resize:vertical;}
-  .fb-form input:focus, .fb-form textarea:focus{outline:3px solid var(--blue); outline-offset:1px;}
-  .fb-form .big-btn{align-self:center; margin-top:6px;}
-  .fb-note{margin:0; font-size:13px; font-weight:600; color:#666; text-align:center;}
-  .fb-note:empty, .fb-form[hidden]{display:none;}
-  .fb-trap{position:absolute; left:-9999px; width:1px; height:1px; opacity:0;}
-  .fb-form .big-btn:disabled{opacity:.6; cursor:default;}
-  .fb-done{padding:6px 0 4px;}
-  .fb-check{font-size:56px; line-height:1; margin:4px 0 10px;}
-  .fb-thanks{margin:0 0 20px; font-size:18px; font-weight:800;}
-
-  @media (prefers-reduced-motion: reduce){
-    .inner, .face{transition:none;}
-    .flip.pop{animation:none;}
-    .play.waiting{animation:none;}
-    .sides.landed path.lit{animation:none;}
-    dialog.spin[open]{animation:none;}
-  }
+  @media (prefers-reduced-motion:reduce){.btn{transition:none;}}
 </style>
 </head>
-<body class="intro">
-<div class="splash" id="splash" aria-hidden="true">
-  <div class="nav-title splash-logo"><div class="splash-mark" aria-hidden="true"><div class="sc-y"></div><div class="sc-w"><div class="sc-face"><svg viewBox="4 5 34 48"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></svg></div><div class="sc-face sc-back"><svg viewBox="4 5 34 48"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" transform="translate(42 0) scale(-1 1)" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></svg></div></div></div><span class="logo-word">IceBreaker</span></div>
-  <p class="splash-tag">Flip a card. Start a conversation.<span class="splash-ages">For ages 5+</span></p>
-</div>
-<nav class="page-nav">
-  <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></svg>
-  </button>
-  <h1 class="nav-title"><svg class="logo-mark" viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg><span class="logo-word">IceBreaker</span></h1>
-  <div class="nav-right">
-  <button class="voice-btn" id="voiceBtn" type="button" aria-pressed="false" aria-label="Read the questions out loud">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><g class="waves"><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></g><path class="slash" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
-  </button>
-  <button class="players-btn" id="playersBtn" type="button" aria-label="Players: pick who answers each question">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c3 .1 5.5 2.3 5.5 5.7"/></svg>
-    <span class="badge" id="playersBadge"></span>
-  </button>
-  </div>
-</nav>
-<section class="topics" id="topics" hidden aria-labelledby="topicsTitle">
-  <p class="lead" id="topicsTitle">Pick a topic</p>
-  <div class="topic-grid" id="topicGrid"></div>
-</section>
-<div class="wrap">
+<body>
 
-  <div class="stage">
-    <button class="flip" id="card" type="button" aria-label="Flip the card for a follow-up question">
-     <div class="inner">
-      <div class="face front">
-        <span class="tag" id="tagFront">QUESTION 1</span>
-        <div class="emoji" id="emoji" aria-hidden="true"></div>
-        <p class="line" id="setup"></p>
-        <span class="who-slot" id="whoFront" hidden></span>
-        <span class="hint cue" id="hintFront">Tap for a follow-up</span>
+<header class="bar">
+  <a class="logo" href="/icebreaker/" aria-label="IceBreaker home">
+    <svg viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg>
+    <span>IceBreaker</span>
+  </a>
+  <a class="btn" href="/icebreaker/signup/?mode=login">Log in</a>
+</header>
+
+<main>
+  <h1 class="hero-logo">
+    <svg viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg>
+    <span>IceBreaker</span>
+  </h1>
+  <p class="tag">Flip a card. Start a conversation.</p>
+  <span class="ages">For ages 5+</span>
+
+  <div class="hero-actions">
+    <button class="btn btn-big btn-try" type="button" data-try>Try it free</button>
+  </div>
+
+  <div class="video-wrap">
+    <div class="peek p1" aria-hidden="true"></div>
+    <div class="peek p2" aria-hidden="true"></div>
+    <div class="video">
+      <video src="/icebreaker/promo.mp4" controls playsinline preload="metadata" aria-label="IceBreaker product video"></video>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-row">
+      <a class="btn btn-big" href="/icebreaker/signup/">Sign up free</a>
+      <button class="btn btn-big btn-try" type="button" data-try>Try it free</button>
+    </div>
+    <p>Already have an account? <a href="/icebreaker/signup/?mode=login">Log in</a></p>
+    <a class="play-link" href="/icebreaker/play/">Or just start playing →</a>
+  </div>
+</main>
+
+<footer>IceBreaker by Scott Dickie</footer>
+
+<dialog class="demo" id="demo" aria-labelledby="demoTitle">
+  <div class="demo-head">
+    <h2 id="demoTitle">Try a card</h2>
+    <button class="demo-x" type="button" id="demoClose" aria-label="Close">&times;</button>
+  </div>
+
+  <button class="d-flip" id="dCard" type="button" aria-label="Flip the card for a follow-up question">
+    <div class="d-inner">
+      <div class="d-face d-front">
+        <span class="d-tag" id="dTag"></span>
+        <div class="d-emoji" id="dEmoji" aria-hidden="true"></div>
+        <p class="d-line" id="dQuestion"></p>
+        <span class="d-hint">Tap for a follow-up</span>
       </div>
-      <div class="face back" aria-hidden="true">
-        <span class="tag">FOLLOW-UP</span>
-        <p class="line" id="punch" aria-live="polite"></p>
-        <span class="hint cue">Tap to flip back</span>
+      <div class="d-face d-back" aria-hidden="true">
+        <span class="d-tag">FOLLOW-UP</span>
+        <p class="d-line" id="dFollow" aria-live="polite"></p>
+        <span class="d-hint">Tap to flip back</span>
       </div>
-     </div>
-    </button>
-    <svg class="sides" id="sides" aria-hidden="true"></svg>
+    </div>
+  </button>
+
+  <div class="d-controls">
+    <span class="d-count" id="dCount"></span>
+    <button class="btn" type="button" id="dNext">Next question →</button>
   </div>
 
-  <div class="controls">
-    <button class="arrow prev" id="prev" type="button" aria-label="Previous question">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
-    </button>
-    <button class="arrow next" id="next" type="button" aria-label="Next question">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </button>
-  </div>
-
-</div>
-
-<dialog class="spin" id="spinDlg" aria-labelledby="spinTitle">
-  <button class="x" type="button" id="spinClose" aria-label="Close">&times;</button>
-  <h2 id="spinTitle">How many players?</h2>
-  <p class="sub">The card's border splits into a side for each player. Tap a new question to see who answers.</p>
-  <div class="stepper">
-    <button class="step-btn" type="button" id="fewer" aria-label="One fewer player">&minus;</button>
-    <div class="count" id="count" aria-live="polite">4</div>
-    <button class="step-btn" type="button" id="more" aria-label="One more player">+</button>
-  </div>
-  <button class="big-btn" type="button" id="playersGo">Let's play</button>
-  <div><button class="link-btn" type="button" id="playersOff" hidden>Turn off players</button></div>
-</dialog>
-
-<button class="fb-btn" id="fbBtn" type="button" aria-haspopup="dialog">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16v11H10l-4 3.5v-3.5H4z"/></svg>
-  Feedback
-</button>
-<dialog class="spin" id="fbDlg" aria-labelledby="fbTitle">
-  <button class="x" type="button" id="fbClose" aria-label="Close">&times;</button>
-  <h2 id="fbTitle">Send feedback</h2>
-  <p class="sub">Ideas for questions, bugs, anything. It goes straight to Scott.</p>
-  <form class="fb-form" id="fbForm">
-    <fieldset class="fb-stars">
-      <legend>How do you like IceBreaker?</legend>
-      <div class="fb-star-row" id="fbStars"></div>
-      <p class="fb-rate-word" id="fbRateWord" aria-hidden="true"></p>
-    </fieldset>
-    <label>Your feedback <span style="font-weight:600;color:#777">(optional)</span><textarea id="fbText" name="message" placeholder="What should we add or fix?"></textarea></label>
-    <label>Who played? <span style="font-weight:600;color:#777">(optional)</span><select id="fbAges" name="ages">
-      <option value="">Choose an age group</option>
-      <option>Kids 5–9</option>
-      <option>Kids 10–13</option>
-      <option>Teens 14–17</option>
-      <option>Adults</option>
-      <option>A mix of ages</option>
-    </select></label>
-    <label>Your email <span style="font-weight:600;color:#777">(optional)</span><input id="fbFrom" name="from" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false"></label>
-    <input class="fb-trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <button class="big-btn" type="submit" id="fbSend">Send</button>
-    <p class="fb-note" id="fbNote" role="status"></p>
-  </form>
-  <div class="fb-done" id="fbDone" hidden>
-    <div class="fb-check" aria-hidden="true">🎉</div>
-    <p class="fb-thanks">Thanks! Scott got your feedback.</p>
-    <button class="big-btn" type="button" id="fbOk">Done</button>
+  <div class="d-actions">
+    <p>Like it? There are hundreds more questions across every topic.</p>
+    <a class="btn btn-big" href="/icebreaker/signup/">Sign up free</a>
+    <a class="play-link" href="/icebreaker/play/">Play the full game →</a>
   </div>
 </dialog>
 
 <script>
-// Topics, in the order "All" shows them. Each question keeps its number (and its audio clips) whatever its topic.
-const TOPICS = [
-  { id: 'magic',   name: 'Superpowers & Magic', color: '#c9a7ff' },
-  { id: 'animals', name: 'Animals & Nature',    color: '#7ed957' },
-  { id: 'places',  name: 'Places & Adventures', color: '#8fd3ff' },
-  { id: 'friends', name: 'Friends & Feelings',  color: '#ff90e8' },
-  { id: 'family',  name: 'Family & Home',       color: '#ffb26b' },
-  { id: 'me',      name: 'Me & My Dreams',      color: '#ffd23f' },
-  { id: 'holidays', name: 'Holidays',           color: '#ff8a80' }
-];
-// [topic, type, emoji, question, follow-up]
-const PROMPTS = [
-  ["magic", "WOULD YOU RATHER", "🦅", "Would you rather be able to fly or be invisible?", "Where's the first place you'd go?"],
-  ["animals", "WHAT IF", "🐶", "What if your pet could talk for one day?", "What do you think it would complain about?"],
-  ["friends", "TELL ME", "😄", "What made you laugh the hardest this week?", "Can you act it out for me?"],
-  ["places", "IMAGINE", "🚀", "If you could visit any planet, which one would you pick?", "What would you pack for the trip?"],
-  ["friends", "BIG QUESTION", "🤝", "What makes someone a really good friend?", "When were you a good friend to someone?"],
-  ["animals", "WOULD YOU RATHER", "🐉", "Would you rather have a pet dragon or a pet unicorn?", "What would you name it, and what would it eat?"],
-  ["me", "WHAT IF", "🏫", "What if you were the teacher for a day?", "What would you teach, and what new rule would you make?"],
-  ["me", "TELL ME", "💪", "What's something you're really good at?", "How did you get so good at it?"],
-  ["me", "IMAGINE", "🍦", "If you invented a new ice cream flavor, what would it be?", "What would you call it?"],
-  ["places", "WOULD YOU RATHER", "🌊", "Would you rather live under the sea or on the moon?", "What would you miss most about home?"],
-  ["magic", "WHAT IF", "📏", "What if you woke up three inches tall?", "How would you get your breakfast?"],
-  ["me", "TELL ME", "🏔️", "What's something hard you did that made you proud?", "What helped you keep going?"],
-  ["me", "IMAGINE", "🎨", "If you could have any job when you grow up, what would it be?", "What would a normal day at work look like?"],
-  ["friends", "BIG QUESTION", "😊", "What's one thing that always makes you happy?", "Could we do it together this week?"],
-  ["animals", "WOULD YOU RATHER", "🗣️", "Would you rather talk to animals or speak every language?", "Who would you talk to first, and what would you say?"],
-  ["me", "WHAT IF", "💰", "What if you found a million dollars?", "Who would you share it with?"],
-  ["friends", "TELL ME", "💛", "Who was kind to you lately?", "How could you be kind to someone tomorrow?"],
-  ["me", "IMAGINE", "🎬", "If your life were a movie, what would it be called?", "Who would play you?"],
-  ["magic", "WOULD YOU RATHER", "⏳", "Would you rather go back in time or into the future?", "What year would you pick, and why?"],
-  ["me", "WHAT IF", "🎉", "What if you could invent a brand-new holiday?", "How would everyone celebrate it?"],
-  ["family", "TELL ME", "🌟", "What's your favorite memory from this year?", "What made it so special?"],
-  ["magic", "IMAGINE", "🦸", "If you had a superpower just for helping people, what would it be?", "Who would you help first?"],
-  ["magic", "WOULD YOU RATHER", "🧸", "Would you rather your toys come alive or your drawings come alive?", "Which one would cause more trouble?"],
-  ["family", "WHAT IF", "🛏️", "What if you could design your dream bedroom?", "What's the one wild thing it would have?"],
-  ["friends", "TELL ME", "🌧️", "What's something that worries you sometimes?", "What helps you feel better when it does?"],
-  ["me", "BIG QUESTION", "🌍", "If you could change one thing about the world, what would it be?", "What's one small step we could take?"],
-  ["family", "WOULD YOU RATHER", "🍕", "Would you rather eat only pizza forever or never have dessert again?", "What food would you rescue if all the others disappeared?"],
-  ["animals", "WHAT IF", "🦖", "What if dinosaurs still lived today?", "Which one would you want as a neighbor?"],
-  ["magic", "IMAGINE", "🧙", "If you were a wizard for a day, what spell would you cast first?", "What would go wrong?"],
-  ["family", "BIG QUESTION", "❤️", "What's something you love about our family?", "What's something new we should try together?"],
-  ["animals", "WOULD YOU RATHER", "🐙", "Would you rather have eight arms like an octopus or a tail like a monkey?", "What's the first thing you'd do with them?"],
-  ["family", "WHAT IF", "🌙", "What if you could stay up as late as you wanted for a whole week?", "What would you do at midnight?"],
-  ["me", "TELL ME", "🎒", "What's the best part of your school day?", "And what's the hardest part?"],
-  ["places", "IMAGINE", "🏝️", "If you were stuck on an island, what three things would you bring?", "Who would you want there with you?"],
-  ["friends", "BIG QUESTION", "🦁", "What does it mean to be brave?", "When have you been brave?"],
-  ["animals", "WOULD YOU RATHER", "🌋", "Would you rather explore a volcano or a deep, dark cave?", "What do you think you'd find?"],
-  ["magic", "WHAT IF", "👽", "What if an alien landed in our backyard?", "What would you show it first?"],
-  ["me", "TELL ME", "🎮", "What's your favorite game to play right now?", "Can you teach me how to play?"],
-  ["places", "IMAGINE", "🎢", "If you built your own theme park, what would the best ride be?", "What would you name the park?"],
-  ["family", "BIG QUESTION", "🙏", "What are three things you're thankful for today?", "Which one would you never trade?"],
-  ["animals", "WOULD YOU RATHER", "❄️", "Would you rather it snowed every day or was summer all year?", "What would you do on the very first day?"],
-  ["family", "WHAT IF", "🔁", "What if you and I switched places for a day?", "What would you make me do?"],
-  ["me", "TELL ME", "📚", "What's the best story you've ever read or heard?", "Which character would you want to be?"],
-  ["me", "IMAGINE", "🤖", "If you had a robot helper, what job would you give it?", "What would you name it?"],
-  ["friends", "BIG QUESTION", "🫂", "What do you do when a friend is sad?", "What helps you when you're sad?"],
-  ["animals", "WOULD YOU RATHER", "🐘", "Would you rather be as big as an elephant or as tiny as an ant?", "What would be the best part?"],
-  ["magic", "WHAT IF", "⏸️", "What if you could pause time?", "What would you do while everyone was frozen?"],
-  ["me", "TELL ME", "🤪", "What's the silliest thing that's ever happened to you?", "Who was there to see it?"],
-  ["me", "IMAGINE", "🍳", "If you ran a restaurant, what would be on the menu?", "What would the special of the day be?"],
-  ["me", "BIG QUESTION", "🌱", "What's something you want to get better at?", "What's one small way you could practice?"],
-  ["animals", "WOULD YOU RATHER", "🐬", "Would you rather swim with dolphins or ride a camel in the desert?", "What would you bring along?"],
-  ["magic", "WHAT IF", "🏎️", "What if you could run as fast as a car?", "Where would you race to first?"],
-  ["friends", "TELL ME", "👫", "Who is your best friend, and what makes them great?", "What's your favorite thing to do together?"],
-  ["me", "IMAGINE", "🎸", "If you started a band, what would it be called?", "What instrument would you play?"],
-  ["family", "BIG QUESTION", "🏡", "What makes our home a happy place?", "What could make it even happier?"],
-  ["places", "WOULD YOU RATHER", "🧭", "Would you rather be a famous explorer or a famous inventor?", "What would you discover or invent?"],
-  ["magic", "WHAT IF", "🧠", "What if you could read minds for a day?", "Whose mind would you read first?"],
-  ["family", "TELL ME", "🍽️", "What's your favorite meal that we make at home?", "What should we cook together next?"],
-  ["places", "IMAGINE", "🗺️", "If you could travel anywhere in the world, where would you go?", "What would you want to see there?"],
-  ["friends", "BIG QUESTION", "🤗", "What's the nicest thing someone has ever said to you?", "How did it make you feel?"],
-  ["family", "WOULD YOU RATHER", "🧁", "Would you rather bake a giant cake or build a giant fort?", "Who would you invite?"],
-  ["magic", "WHAT IF", "🍬", "What if candy grew on trees?", "What would you plant in our yard?"],
-  ["me", "TELL ME", "💭", "What do you like to dream about?", "What's the weirdest dream you've ever had?"],
-  ["magic", "IMAGINE", "🧞", "If you had three wishes, what would they be?", "Which one would you use first?"],
-  ["me", "BIG QUESTION", "⭐", "What makes you special?", "What do you think makes me special?"],
-  ["places", "WOULD YOU RATHER", "🎈", "Would you rather travel by hot air balloon or by submarine?", "Where would you go?"],
-  ["animals", "WHAT IF", "🌳", "What if trees could talk?", "What would the oldest tree tell us?"],
-  ["family", "TELL ME", "👶", "What do you remember about being really little?", "What do you think you were like?"],
-  ["me", "IMAGINE", "🏅", "If you could win a gold medal for anything, what would it be for?", "What would your victory dance look like?"],
-  ["friends", "BIG QUESTION", "💌", "If you could say thank you to anyone, who would it be?", "Should we tell them this week?"],
-  ["animals", "WOULD YOU RATHER", "🦒", "Would you rather have a neck as long as a giraffe's or ears as big as an elephant's?", "How would it change your day?"],
-  ["magic", "WHAT IF", "🔮", "What if you could see one day into the future?", "What would you want to know?"],
-  ["friends", "TELL ME", "🎁", "What's the best gift you've ever given someone?", "How did they react?"],
-  ["me", "IMAGINE", "✍️", "If you wrote a book, what would it be about?", "Who would be the main character?"],
-  ["friends", "BIG QUESTION", "👂", "What does it mean to be a good listener?", "Who's a really good listener in your life?"],
-  ["places", "WOULD YOU RATHER", "🏕️", "Would you rather camp in a tent in the woods or sleep in a castle tower?", "What would the best part be?"],
-  ["magic", "WHAT IF", "🪐", "What if gravity turned off for an hour?", "What would float away first?"],
-  ["me", "TELL ME", "🪀", "What's your favorite thing you own?", "Why is it so special to you?"],
-  ["places", "IMAGINE", "🏙️", "If you were the mayor of our town, what would you change?", "What new place would you build?"],
-  ["me", "BIG QUESTION", "🧗", "What's something that's hard for you but easy for other people?", "What's something easy for you that's hard for others?"],
-  ["animals", "WOULD YOU RATHER", "🐸", "Would you rather jump like a frog or climb walls like a gecko?", "Where would you go first?"],
-  ["family", "WHAT IF", "📱", "What if there were no screens for a whole month?", "What would you do instead?"],
-  ["me", "TELL ME", "💡", "What's something new you learned this week?", "Can you teach it to me?"],
-  ["animals", "IMAGINE", "🐣", "If you could be any animal for a day, which would you be?", "What would you do first?"],
-  ["friends", "BIG QUESTION", "🤝", "What should you do if you see someone being left out?", "Have you ever done that?"],
-  ["me", "WOULD YOU RATHER", "🎤", "Would you rather sing in front of a huge crowd or dance in front of your whole school?", "What song would you pick?"],
-  ["magic", "WHAT IF", "💧", "What if it rained something other than water?", "What would you want it to rain?"],
-  ["family", "TELL ME", "🎂", "What was your favorite birthday ever?", "What made it so good?"],
-  ["places", "IMAGINE", "🕰️", "If you could meet anyone from history, who would it be?", "What would you ask them?"],
-  ["friends", "BIG QUESTION", "⚽", "What does it mean to be a good sport?", "When is it hard to be one?"],
-  ["places", "WOULD YOU RATHER", "🕹️", "Would you rather live inside a cartoon or inside a video game?", "Which character would you hang out with?"],
-  ["places", "WHAT IF", "🚐", "What if our house could drive anywhere?", "Where would we park it first?"],
-  ["me", "TELL ME", "🏆", "Who is your hero?", "What do you admire most about them?"],
-  ["places", "IMAGINE", "🛝", "If you designed a brand-new playground, what would it have?", "What would the best part be?"],
-  ["friends", "BIG QUESTION", "🎀", "Which is better: giving a present or getting one?", "Why do you think so?"],
-  ["animals", "WOULD YOU RATHER", "🦉", "Would you rather stay awake all night like an owl or sleep all winter like a bear?", "What would you do while everyone else was asleep?"],
-  ["magic", "WHAT IF", "👻", "What if you met a friendly ghost?", "What would you ask it?"],
-  ["friends", "TELL ME", "😠", "What's something that makes you really mad?", "What helps you calm down?"],
-  ["magic", "IMAGINE", "🌌", "If you could name a star, what would you call it?", "Why that name?"],
-  ["friends", "BIG QUESTION", "🧩", "Why do you think people are so different from each other?", "What's something that makes you different?"],
-  ["family", "WOULD YOU RATHER", "🥦", "Would you rather eat a bowl of broccoli or a spoonful of hot sauce?", "What's the strangest food you've ever tried?"],
-  ["magic", "WHAT IF", "🎶", "What if you could only talk by singing for a whole day?", "What would you sing first?"],
-  ["family", "TELL ME", "✈️", "What's your favorite trip we've taken together?", "Where should we go next?"],
-  ["magic", "IMAGINE", "🎭", "If you designed your own superhero costume, what would it look like?", "What would your superhero name be?"],
-  ["friends", "BIG QUESTION", "💛", "How do you know when someone loves you?", "How do you show people you love them?"],
-  ["places", "WOULD YOU RATHER", "🚁", "Would you rather drive a race car or fly a helicopter?", "Who would you take for a ride?"],
-  ["animals", "WHAT IF", "🗳️", "What if animals could vote?", "Which animal would be president?"],
-  ["me", "TELL ME", "🧱", "What's your favorite thing to make or build?", "What would you build if you had all the supplies in the world?"],
-  ["me", "IMAGINE", "📺", "If you had your own TV show, what would it be about?", "Who would be your first guest?"],
-  ["friends", "BIG QUESTION", "🤫", "Is it ever okay to keep a secret?", "What would you do if a secret made you feel worried?"],
-  ["animals", "WOULD YOU RATHER", "🐟", "Would you rather have a dog that can fly or a fish that can walk?", "What would you name it?"],
-  ["magic", "WHAT IF", "🖍️", "What if you could invent a brand-new color?", "What would you call it?"],
-  ["animals", "TELL ME", "🐛", "What's the coolest animal or bug you've ever seen up close?", "Where did you see it?"],
-  ["places", "IMAGINE", "🌲", "If you lived in a treehouse, what would it have inside?", "Who would be allowed in?"],
-  ["me", "BIG QUESTION", "🧑", "What do you want to be like when you're a grown-up?", "What do you want to stay the same about you?"],
-  ["family", "WOULD YOU RATHER", "☔", "Would you rather spend a rainy day inside playing games or a sunny day at the beach?", "What would we do first?"],
-  ["magic", "WHAT IF", "🕷️", "What if you could walk on walls and ceilings?", "Where would you go first?"],
-  ["family", "TELL ME", "😴", "What's the best part of your bedtime?", "What would make bedtime even better?"],
-  ["me", "IMAGINE", "📜", "If you could make one rule that everyone in the world had to follow, what would it be?", "Why that rule?"],
-  ["friends", "BIG QUESTION", "🕊️", "What does it mean to forgive someone?", "Is it easy or hard for you?"],
-  ["magic", "WOULD YOU RATHER", "🫧", "Would you rather breathe underwater or see in the dark?", "What would you explore first?"],
-  ["magic", "WHAT IF", "🪞", "What if your reflection could talk back?", "What would it say about you?"],
-  ["magic", "IMAGINE", "🧹", "If you had a flying broom, where would you fly at night?", "Who would you bring along?"],
-  ["magic", "WOULD YOU RATHER", "🔥", "Would you rather control fire or control water?", "What would you use it for?"],
-  ["magic", "WHAT IF", "🏢", "What if you could grow as tall as a building whenever you wanted?", "What would you look at from up there?"],
-  ["magic", "IMAGINE", "🗝️", "If you found a key that opened any door, which door would you open?", "What do you hope is behind it?"],
-  ["magic", "WOULD YOU RATHER", "🦘", "Would you rather jump over houses or run across water?", "Where would you go first?"],
-  ["magic", "WHAT IF", "🌀", "What if you could teleport anywhere, but only for five minutes?", "Where would you pop in?"],
-  ["magic", "IMAGINE", "🎩", "If you were a magician, what would your best trick be?", "Who would you trick first?"],
-  ["magic", "WHAT IF", "🍃", "What if you could understand every sound, even the wind?", "What do you think the wind would say?"],
-  ["magic", "WOULD YOU RATHER", "⏰", "Would you rather never have to sleep or never have to eat?", "What would you do with all that extra time?"],
-  ["magic", "IMAGINE", "🧪", "If you could make a magic potion, what would it do?", "What would you put in it?"],
-  ["magic", "WHAT IF", "👯", "What if you could make a copy of yourself?", "What job would you give your copy?"],
-  ["magic", "WOULD YOU RATHER", "💪", "Would you rather be super strong or super fast?", "How would you help someone with it?"],
-  ["magic", "IMAGINE", "🏰", "If you had a magic castle that could appear anywhere, where would you put it?", "What secret room would it have?"],
-  ["magic", "WHAT IF", "🐝", "What if you could shrink small enough to ride on a bee?", "Where would you ask it to take you?"],
-  ["magic", "WOULD YOU RATHER", "🦎", "Would you rather change your size or change your color like a chameleon?", "When would you use it?"],
-  ["magic", "IMAGINE", "☁️", "If you could ride a cloud, where would it take you?", "What do you think a cloud would feel like?"],
-  ["magic", "WHAT IF", "🍫", "What if everything you touched turned to chocolate?", "What's the first thing you'd touch on purpose?"],
-  ["animals", "WOULD YOU RATHER", "🐧", "Would you rather be a penguin in the snow or a parrot in the jungle?", "What would your day be like?"],
-  ["animals", "WHAT IF", "🐢", "What if you could ride a giant turtle across the ocean?", "Where would you go?"],
-  ["animals", "TELL ME", "🐕", "What's your favorite animal, and why?", "What's one cool fact you know about it?"],
-  ["animals", "IMAGINE", "🦁", "If you ran a zoo, what animals would you have?", "How would you keep them happy?"],
-  ["animals", "BIG QUESTION", "🌍", "Why do you think we should take care of nature?", "What's one thing we can do to help?"],
-  ["animals", "WOULD YOU RATHER", "🐈", "Would you rather be a busy bee or a lazy cat?", "What would you do all day?"],
-  ["animals", "WHAT IF", "🐦", "What if birds could talk to us?", "What do you think they'd tell us?"],
-  ["animals", "TELL ME", "🌸", "What's your favorite thing to do outside?", "What should we do outside this weekend?"],
-  ["animals", "IMAGINE", "🔍", "If you discovered a new animal, what would it look like?", "What would you name it?"],
-  ["animals", "BIG QUESTION", "🐾", "Do you think animals have feelings?", "How can you tell when an animal is happy?"],
-  ["animals", "WOULD YOU RATHER", "🦈", "Would you rather swim with sharks in a cage or hold a big snake?", "How brave would you feel?"],
-  ["animals", "WHAT IF", "🐜", "What if ants were as big as dogs?", "Would you want one as a pet?"],
-  ["animals", "TELL ME", "🌦️", "What's your favorite kind of weather?", "What do you love to do in it?"],
-  ["animals", "IMAGINE", "🌻", "If you had a giant garden, what would you grow?", "What would you do with it all?"],
-  ["animals", "BIG QUESTION", "🌊", "Why do you think the ocean is so important?", "What would you like to learn about it?"],
-  ["animals", "WOULD YOU RATHER", "🦓", "Would you rather have stripes like a zebra or spots like a leopard?", "What color would you pick?"],
-  ["animals", "WHAT IF", "🐋", "What if you could talk with a whale?", "What would you ask it?"],
-  ["animals", "TELL ME", "🍂", "What's your favorite season?", "What's the best thing about it?"],
-  ["animals", "IMAGINE", "🧬", "If you could mix two animals together, which would you pick?", "What could your new animal do?"],
-  ["animals", "WOULD YOU RATHER", "🐿️", "Would you rather live in a tree like a squirrel or underground like a rabbit?", "What would your home look like?"],
-  ["animals", "WHAT IF", "⛈️", "What if you could choose the weather for a day?", "What weather would you make?"],
-  ["animals", "TELL ME", "🪴", "Have you ever taken care of a plant or an animal?", "What did you learn from it?"],
-  ["animals", "BIG QUESTION", "🦋", "What's the most amazing thing about nature?", "Where have you seen it?"],
-  ["places", "WOULD YOU RATHER", "🏔️", "Would you rather climb the tallest mountain or explore the biggest jungle?", "What would you pack?"],
-  ["places", "WHAT IF", "🛰️", "What if you lived on a space station?", "What would you miss most about Earth?"],
-  ["places", "TELL ME", "📍", "What's the coolest place you've ever been?", "What made it so cool?"],
-  ["places", "IMAGINE", "🏗️", "If you could build a city anywhere, where would it be?", "What would you call it?"],
-  ["places", "WOULD YOU RATHER", "🚂", "Would you rather take a train across the country or a boat across the ocean?", "Who would you bring?"],
-  ["places", "WHAT IF", "👑", "What if you lived in a real castle?", "Which room would be yours?"],
-  ["places", "TELL ME", "🏞️", "What's your favorite place in our town?", "Why do you like it so much?"],
-  ["places", "IMAGINE", "🛸", "If you visited a planet with aliens, what would they be like?", "What would you bring them as a gift?"],
-  ["places", "WOULD YOU RATHER", "🗼", "Would you rather visit Paris or Tokyo?", "What would you want to see there?"],
-  ["places", "WHAT IF", "🕳️", "What if you found a secret tunnel under our house?", "Where do you think it would lead?"],
-  ["places", "TELL ME", "🧭", "Have you ever gotten lost?", "How did you find your way?"],
-  ["places", "IMAGINE", "🏴‍☠️", "If you were a pirate captain, what would your ship be called?", "What treasure would you look for?"],
-  ["places", "WOULD YOU RATHER", "🌴", "Would you rather live on a tropical island or in a snowy cabin?", "What would you do all day?"],
-  ["places", "WHAT IF", "🛶", "What if we took a canoe trip down a long river?", "What do you think we'd see?"],
-  ["places", "IMAGINE", "🚢", "If you designed your own cruise ship, what would it have?", "What would the best part be?"],
-  ["places", "WOULD YOU RATHER", "🎡", "Would you rather spend a day at a carnival or a day at a water park?", "What's the first ride you'd go on?"],
-  ["places", "WHAT IF", "🔴", "What if you were the first kid on Mars?", "What would you do first?"],
-  ["places", "TELL ME", "🥾", "What's the best adventure you've ever had?", "What made it an adventure?"],
-  ["places", "IMAGINE", "🔭", "If you were an explorer, what would you want to discover?", "What would you name it?"],
-  ["places", "WOULD YOU RATHER", "🌆", "Would you rather explore a big city or a quiet forest?", "What would you look for?"],
-  ["places", "WHAT IF", "💎", "What if you found a real treasure map?", "Who would you take with you to find it?"],
-  ["places", "TELL ME", "🚗", "What's the best part of a long car ride?", "What's the hardest part?"],
-  ["places", "IMAGINE", "🛻", "If you could drive any vehicle on a road trip, what would it be?", "Where would we go?"],
-  ["places", "WOULD YOU RATHER", "🏛️", "Would you rather visit a dinosaur museum or a space museum?", "What would you look for first?"],
-  ["places", "WHAT IF", "🧊", "What if you visited the North Pole?", "What would you do there?"],
-  ["friends", "TELL ME", "🥰", "What's something a friend did that made you feel good?", "How did you thank them?"],
-  ["friends", "BIG QUESTION", "🤔", "What should you do if you and a friend disagree?", "What's a good way to make up?"],
-  ["friends", "WOULD YOU RATHER", "🎉", "Would you rather have one best friend or lots of good friends?", "Why?"],
-  ["friends", "TELL ME", "😳", "What's something that makes you feel shy?", "What helps you feel braver?"],
-  ["friends", "BIG QUESTION", "🙌", "What does it mean to be a good teammate?", "When have you been one?"],
-  ["friends", "IMAGINE", "📕", "If you could be friends with a character from any book or movie, who would it be?", "What would you do together?"],
-  ["friends", "TELL ME", "😢", "What's something that made you sad this week?", "What helped you feel better?"],
-  ["friends", "BIG QUESTION", "🗣️", "Why is it important to say sorry?", "Is it hard for you to say?"],
-  ["friends", "WHAT IF", "💬", "What if everyone said exactly what they were feeling?", "Would that be good or bad?"],
-  ["friends", "TELL ME", "🎭", "What's a feeling you had today?", "What made you feel that way?"],
-  ["friends", "BIG QUESTION", "🧡", "What's the kindest thing you've ever seen someone do?", "How did it make you feel?"],
-  ["friends", "WOULD YOU RATHER", "📓", "Would you rather help a friend with homework or cheer them up when they're sad?", "Which do you think matters more?"],
-  ["friends", "TELL ME", "👋", "How do you make a new friend?", "What's the first thing you'd say?"],
-  ["friends", "BIG QUESTION", "😤", "What do you do when you feel frustrated?", "What helps the most?"],
-  ["friends", "IMAGINE", "✉️", "If you wrote a note to a friend, what would it say?", "Who would you give it to?"],
-  ["friends", "TELL ME", "😆", "Who makes you laugh the most?", "What do they do that's so funny?"],
-  ["friends", "BIG QUESTION", "⚖️", "What does it mean to be fair?", "When is it hard to be fair?"],
-  ["friends", "WHAT IF", "🎈", "What if you gave everyone in your class a compliment?", "What would you say to the person next to you?"],
-  ["friends", "TELL ME", "🫶", "Who do you feel safe talking to?", "What makes them easy to talk to?"],
-  ["friends", "BIG QUESTION", "🌟", "What's one way you can be a good friend tomorrow?", "Who will you try it with?"],
-  ["family", "TELL ME", "👵", "What's your favorite thing to do with your grandparents?", "What would you like to ask them?"],
-  ["family", "WOULD YOU RATHER", "🍿", "Would you rather have a family movie night or a family game night?", "What would we watch or play?"],
-  ["family", "IMAGINE", "🚪", "If you could add one room to our house, what would it be?", "What would we do in it?"],
-  ["family", "TELL ME", "📸", "What's your favorite family photo?", "What do you remember about that day?"],
-  ["family", "WHAT IF", "🧑‍🍳", "What if you were in charge of dinner for a week?", "What would we eat?"],
-  ["family", "BIG QUESTION", "🤲", "What's one way you help our family?", "What's one new way you could help?"],
-  ["family", "TELL ME", "🎄", "What's your favorite holiday tradition?", "What new tradition should we start?"],
-  ["family", "WOULD YOU RATHER", "🥞", "Would you rather have pancakes or waffles every Saturday?", "What toppings would you pick?"],
-  ["family", "IMAGINE", "🐕‍🦺", "If our family got a new pet, what should it be?", "What would you name it?"],
-  ["family", "TELL ME", "🧹", "What's your least favorite chore?", "How could we make it more fun?"],
-  ["family", "WHAT IF", "📅", "What if every Sunday were family adventure day?", "What should our first adventure be?"],
-  ["family", "BIG QUESTION", "👨‍👩‍👧", "What makes someone part of a family?", "Who feels like family to you?"],
-  ["family", "TELL ME", "🤣", "What's the funniest thing that's happened in our family?", "Who laughed the hardest?"],
-  ["family", "WOULD YOU RATHER", "🏨", "Would you rather go camping as a family or stay in a fancy hotel?", "What would we do first?"],
-  ["family", "IMAGINE", "🛡️", "If our family had its own flag, what would be on it?", "What would our family motto be?"],
-  ["family", "TELL ME", "🎵", "What song reminds you of our family?", "When do we sing or play it?"],
-  ["family", "WHAT IF", "🍪", "What if we opened a family bakery?", "What would be our best seller?"],
-  ["family", "BIG QUESTION", "💝", "How can we show each other we care, even on busy days?", "What's something small you'd like more of?"],
-  ["family", "TELL ME", "🌅", "What's your favorite part of the weekend?", "What should we do this weekend?"],
-  ["family", "WOULD YOU RATHER", "🧺", "Would you rather have a picnic in the park or breakfast in bed?", "What would we eat?"],
-  ["family", "IMAGINE", "🎬", "If our family were in a movie, who would play each of us?", "What would the movie be about?"],
-  ["family", "TELL ME", "🧑‍🏫", "What's something you'd like to learn from me?", "What could you teach me?"],
-  ["family", "BIG QUESTION", "🕯️", "What does home feel like to you?", "What's your favorite spot in our house?"],
-  ["me", "TELL ME", "📝", "What's your favorite subject at school?", "What makes it fun?"],
-  ["me", "IMAGINE", "🏫", "If you could design your own school, what would you learn there?", "What would lunch be like?"],
-  ["me", "WOULD YOU RATHER", "🎹", "Would you rather learn to play the piano or learn to skateboard?", "How would you practice?"],
-  ["me", "BIG QUESTION", "🌤️", "What's something you used to be afraid of but aren't anymore?", "How did you get over it?"],
-  ["me", "TELL ME", "🔤", "What are three words that describe you?", "Which one do you like best?"],
-  ["me", "WHAT IF", "🗓️", "What if you could plan your whole day tomorrow?", "What would you do first?"],
-  ["me", "IMAGINE", "🎯", "If you could learn any skill instantly, what would it be?", "What would you do with it?"],
-  ["me", "TELL ME", "📈", "What's something you've gotten better at this year?", "How did you do it?"],
-  ["me", "BIG QUESTION", "🪞", "What makes you feel most like yourself?", "When do you feel that way?"],
-  ["me", "WOULD YOU RATHER", "🖊️", "Would you rather write a story or draw a comic?", "What would it be about?"],
-  ["holidays", "TELL ME", "🎁", "What's the best present you've ever gotten?", "What made it so special?"],
-  ["holidays", "WOULD YOU RATHER", "🏖️", "Would you rather spend the holidays somewhere snowy or on a sunny beach?", "What would you do there all day?"],
-  ["holidays", "TELL ME", "🍪", "What's your favorite holiday treat?", "Could we make it together?"],
-  ["holidays", "IMAGINE", "🎉", "If you could make up a brand new holiday, what would it celebrate?", "How would everyone celebrate it?"],
-  ["holidays", "WHAT IF", "⛄", "What if your snowman came to life?", "What would you do together first?"],
-  ["holidays", "BIG QUESTION", "💝", "What's the best present you could give someone that doesn't cost any money?", "Who would you give it to?"],
-  ["holidays", "TELL ME", "🕯️", "What's your favorite holiday tradition in our family?", "Why do you like it so much?"],
-  ["holidays", "WOULD YOU RATHER", "🎀", "Would you rather wrap all the presents or decorate the whole house?", "What would you need to get it done?"],
-  ["holidays", "IMAGINE", "🧝", "If you were one of Santa's elves, what toy would you build?", "Who would you give it to?"],
-  ["holidays", "TELL ME", "🎶", "What's your favorite holiday song?", "Can you sing a little bit of it?"],
-  ["holidays", "WHAT IF", "❄️", "What if it snowed candy instead of snow?", "What kind of candy would you want?"],
-  ["holidays", "WOULD YOU RATHER", "🛷", "Would you rather go sledding or build a snow fort?", "Who would you bring with you?"],
-  ["holidays", "BIG QUESTION", "🙏", "What's something you're thankful for this year?", "Who helped make it happen?"],
-  ["holidays", "TELL ME", "🎄", "What's your favorite holiday decoration?", "Where would you put it?"],
-  ["holidays", "IMAGINE", "🥧", "If you got to plan the whole holiday dinner, what would we eat?", "What would we have for dessert?"],
-  ["holidays", "WHAT IF", "🦌", "What if a reindeer could give you a ride anywhere for one night?", "Where would you fly first?"],
-  ["holidays", "WOULD YOU RATHER", "🧤", "Would you rather have a snowball fight or drink hot cocoa by the fire?", "Who would be on your team?"],
-  ["holidays", "TELL ME", "📸", "What's your favorite holiday memory?", "What part do you remember best?"],
-  ["holidays", "BIG QUESTION", "🤗", "How can we help make the holidays happy for someone else?", "Could we do that this year?"],
-  ["holidays", "IMAGINE", "🍬", "If you could build a gingerbread house as big as a real house, what would it look like?", "Which part would you eat first?"],
-  ["holidays", "WHAT IF", "🎅", "What if you got to deliver presents to the whole world in one night?", "Where would you go first?"],
-  ["holidays", "TELL ME", "🎬", "What's your favorite holiday movie or story?", "Who's your favorite character in it?"],
-  ["holidays", "WOULD YOU RATHER", "🎊", "Would you rather open one present every day or all your presents at once?", "Why would that be more fun?"],
-  ["holidays", "BIG QUESTION", "✨", "What do you think makes the holidays feel special?", "What's one thing you hope happens this year?"],
-  ["holidays", "IMAGINE", "🌟", "If you could put anything on top of the tree instead of a star, what would it be?", "How would you get it up there?"],
-  ["holidays", "WHAT IF", "🧸", "What if your toys came to life while everyone was asleep?", "What do you think they'd get up to?"],
-  ["holidays", "TELL ME", "👨‍👩‍👧", "Who do you most like to see during the holidays?", "What do you like to do together?"],
-  ["holidays", "WOULD YOU RATHER", "☃️", "Would you rather build the biggest snowman ever or the tiniest one?", "What would you name it?"],
-  ["holidays", "IMAGINE", "🎆", "If you could make a wish at midnight on New Year's Eve, what would you wish for?", "What could you do to help it come true?"],
-  ["holidays", "BIG QUESTION", "🌱", "What's something you want to try in the new year?", "What's the first step?"],
-  ["holidays", "WHAT IF", "🎈", "What if you got to throw a holiday party for all your friends?", "What games would you play?"],
-  ["holidays", "TELL ME", "🍽️", "What's one holiday food you don't like at all?", "What would you swap it for?"],
-  ["holidays", "WOULD YOU RATHER", "🧦", "Would you rather find your stocking full of candy or full of tiny toys?", "Which one would you open first?"],
-  ["holidays", "IMAGINE", "🏔️", "If you could spend the holidays anywhere in the world, where would you go?", "Who would you take with you?"],
-  ["holidays", "WHAT IF", "🐧", "What if a penguin came to stay with us for the holidays?", "What would you show it first?"],
-  ["holidays", "BIG QUESTION", "💌", "If you could send a holiday card to anyone, who would it be?", "What would you write inside?"],
-  ["holidays", "TELL ME", "🎨", "What's something you've made by hand as a gift?", "What would you like to make next?"],
-  ["holidays", "WOULD YOU RATHER", "🌌", "Would you rather stay up late on New Year's Eve or wake up super early on a holiday morning?", "What would you do with the extra time?"],
-  ["holidays", "WHAT IF", "🎟️", "What if you could have one holiday every single week?", "Which holiday would you pick?"],
-  ["holidays", "IMAGINE", "🪄", "If you could add one magic thing to the holidays, what would it be?", "How would it make the holidays better?"]
-];
+  // Old shared links went to /icebreaker#12 to open question 12: send those on to the game.
+  if (/^#\d+$/.test(location.hash)) location.replace('/icebreaker/play/' + location.hash);
 
-const card = document.getElementById('card');
-const back = card.querySelector('.back');
-const els = {
-  tag: document.getElementById('tagFront'),
-  emoji: document.getElementById('emoji'),
-  question: document.getElementById('setup'),
-  follow: document.getElementById('punch')
-};
+  // Sample cards, taken from the game's own questions
+  const SAMPLES = [
+    ['WOULD YOU RATHER', '🦅', 'Would you rather be able to fly or be invisible?', "Where's the first place you'd go?"],
+    ['WHAT IF', '🐶', 'What if your pet could talk for one day?', 'What do you think it would complain about?'],
+    ['IMAGINE', '🚀', 'If you could visit any planet, which one would you pick?', 'What would you pack for the trip?'],
+  ];
+  const demo = document.getElementById('demo');
+  const card = document.getElementById('dCard');
+  const back = card.querySelector('.d-back');
+  let i = 0;
 
-// A link to a question (#7) opens it in its topic; otherwise the page starts on the topic screen
-const linked = parseInt(location.hash.slice(1), 10);
-let index = linked >= 1 && linked <= PROMPTS.length ? linked - 1 : 0;
-let flipped = false;
-let topic = PROMPTS[index][0];
-let deck = [];   // question numbers (0-based) in the chosen topic, in order
-const topicOf = id => TOPICS.find(t => t.id === id);
-
-function setFlipped(next){
-  flipped = next;
-  card.classList.toggle('flipped', flipped);
-  back.setAttribute('aria-hidden', String(!flipped));
-  card.setAttribute('aria-label', flipped ? 'Flip the card back to the question' : 'Flip the card for a follow-up question');
-}
-
-function show(i, quiet){
-  index = i;
-  // Turn the card back to its front with no animation first, so the next follow-up never shows mid-flip
-  card.classList.add('instant');
-  setFlipped(false);
-  const [, type, emoji, question, follow] = PROMPTS[index];
-  els.tag.textContent = type;
-  els.emoji.textContent = emoji;
-  els.question.textContent = question;
-  els.follow.textContent = follow;
-  resetPick();
-  if (!quiet) present();
-  history.replaceState(null, '', '#' + (index + 1));
-  card.classList.remove('pop');
-  void card.offsetWidth;
-  card.classList.remove('instant');
-  card.classList.add('pop');
-}
-const go = (delta) => {
-  const at = deck.indexOf(index);
-  show(deck[(at + delta + deck.length) % deck.length]);
-};
-
-
-card.addEventListener('animationend', () => card.classList.remove('pop'));
-// A new question: in team play, pick who answers first (the raffle reads the question when it lands);
-// otherwise read it straight away. Called inside a tap, so iPhone allows the sound that follows.
-let startTimer = null;
-function present(){
-  clearTimeout(startTimer);
-  if (!players) return speak();
-  audio();         // unlock the raffle ticks
-  primeVoice();    // and John's voice, for after the pick
-  const at = index;
-  startTimer = setTimeout(() => {   // let the card settle first
-    if (index === at && !flipped && picked === null && !raffling && !document.body.classList.contains('picking')) raffle();
-  }, 450);
-}
-card.addEventListener('click', () => {
-  if (raffling) return;
-  if (players && picked === null && !flipped) raffle();   // tap to pick, if it hasn't run yet
-  else flipAndRead();
-});
-// The follow-up is read when the card turns over; turning back to the question doesn't repeat it
-function flipAndRead(){
-  setFlipped(!flipped);
-  if (flipped) speak(); else voice.pause();
-}
-document.getElementById('prev').addEventListener('click', () => go(-1));
-document.getElementById('next').addEventListener('click', () => go(1));
-
-// Keyboard: arrows to move, space or enter flips (the card button handles those when focused)
-addEventListener('keydown', e => {
-  if (document.body.classList.contains('picking')) return;
-  if (spinDlg.open) return;   // the spinner has its own focus; leave the card alone
-  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-  else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-  else if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) { e.preventDefault(); flipAndRead(); }
-});
-
-// Swipe left or right on a phone to change questions
-let startX = null, startY = null;
-card.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
-card.addEventListener('touchend', e => {
-  if (startX === null) return;
-  const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
-  startX = null;
-  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-    e.preventDefault();   // a swipe is not also a tap-to-flip
-    go(dx < 0 ? 1 : -1);
+  function show(n, animate) {
+    const [tag, emoji, q, follow] = SAMPLES[n];
+    card.classList.remove('flipped');
+    back.setAttribute('aria-hidden', 'true');
+    document.getElementById('dTag').textContent = tag;
+    document.getElementById('dEmoji').textContent = emoji;
+    document.getElementById('dQuestion').textContent = q;
+    document.getElementById('dFollow').textContent = follow;
+    document.getElementById('dCount').textContent = 'Sample ' + (n + 1) + ' of ' + SAMPLES.length;
+    if (animate) { card.classList.remove('d-pop'); void card.offsetWidth; card.classList.add('d-pop'); }
   }
-});
 
-// ---------- players: the card's border is split into one side per player ----------
-// Tapping a new question runs a light around the sides (with raffle ticks) and lands on who answers.
-// The player count is remembered on this device.
-const SEAT_COLORS = ['#ff90e8', '#ffd23f', '#7ed957', '#8fd3ff', '#ffb26b', '#c9a7ff', '#7fe0d0', '#ff8a8a'];
-const MIN_PLAYERS = 2, MAX_PLAYERS = 8;
-const SVGNS = 'http://www.w3.org/2000/svg';
-const spinDlg = document.getElementById('spinDlg');
-const sides = document.getElementById('sides');
-const front = card.querySelector('.front');
-const hint = document.getElementById('hintFront');
-const whoFront = document.getElementById('whoFront');
-const countEl = document.getElementById('count');
-let players = 0, draft = 4, picked = null, lit = 0, raffling = false, raffleTimer = null;
-// Players mode starts off on every visit; the last count used only pre-fills the panel
-let lastCount = 4;
-try { lastCount = parseInt(localStorage.getItem('icebreaker-players'), 10) || 4; } catch (e) {}
-if (lastCount < MIN_PLAYERS || lastCount > MAX_PLAYERS) lastCount = 4;
+  card.addEventListener('click', () => {
+    const flipped = card.classList.toggle('flipped');
+    back.setAttribute('aria-hidden', flipped ? 'false' : 'true');
+  });
+  document.getElementById('dNext').addEventListener('click', () => { i = (i + 1) % SAMPLES.length; show(i, true); });
+  document.getElementById('demoClose').addEventListener('click', () => demo.close());
+  demo.addEventListener('click', e => { if (e.target === demo) demo.close(); });   // tap outside to close
 
-// One rounded-rectangle path just inside the card's ink border, starting at top-center and running clockwise.
-// Each player gets an equal length of it; player 1 is centered at the top.
-const stage = document.querySelector('.stage');
-// Team play's wedges fill the whole screen behind everything, and the card keeps its full size.
-// ?wheel=round shows the older round wheel behind a smaller card, for comparison.
-const FULL_WHEEL = new URLSearchParams(location.search).get('wheel') !== 'round';
-function drawSides(){
-  stage.classList.toggle('ringed', !!players);
-  sides.innerHTML = '';
-  if (!players) { card.style.cssText = ''; return; }
-  if (FULL_WHEEL) return drawFullWheel();
-  const W = stage.clientWidth, H = stage.clientHeight;
-  if (!W || !H) return;
-  // A round wheel as wide as the stage allows (a little past it on phones), centered;
-  // the card sits on it, sized so the wheel's curve shows all around and only its corners poke past
-  // The card keeps the size it had on the wheel; the wheel itself is about a third bigger and on phones
-  // runs past the screen edges. Where height is the limit (desktop), the card steps down a little instead.
-  const base = Math.min(W * 1.1, H);
-  const D = Math.min(W * 1.8, H * 1.2), R = D / 2, cx = W / 2, cy = H / 2;   // may reach behind the top bar and arrows
-  const cardScale = D > base * 1.05 ? 1 : .86;
-  const fw = Math.round(base * .62 * cardScale), fh = Math.round(Math.min(base * .7 * cardScale, H - 16));
-  const css = `left:${Math.round(cx - fw / 2)}px; top:${Math.round(cy - fh / 2)}px; width:${fw}px; height:${fh}px; bottom:auto; margin:0;`;
-  if (card.style.cssText !== css) { card.style.cssText = css; requestAnimationFrame(fitCard); }
-  sides.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const step = 360 / players;
-  const dir = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];   // 0deg = straight up, clockwise
-  const at = (deg, r) => { const [dx, dy] = dir(deg); return [cx + dx * r, cy + dy * r]; };
-  for (let p = 0; p < players; p++) {   // one wedge per player, player 1 centered at the top
-    const a0 = p * step - step / 2, a1 = a0 + step;
-    const [x0, y0] = at(a0, R), [x1, y1] = at(a1, R);
-    const path = document.createElementNS(SVGNS, 'path');
-    path.setAttribute('d', `M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${step > 180 ? 1 : 0} 1 ${x1} ${y1} Z`);
-    path.setAttribute('fill', SEAT_COLORS[p]);
-    path.dataset.p = p;
-    sides.appendChild(path);
-  }
-  for (let p = 0; p < players; p++) {   // each number sits in the visible band between the card and the rim
-    const [dx, dy] = dir(p * step);
-    const toEdge = (half, d) => Math.abs(d) < 1e-6 ? Infinity : half / Math.abs(d);
-    const tCard = Math.min(toEdge(fw / 2, dx), toEdge(fh / 2, dy));
-    const shadow = (dx > .3 || dy > .3) ? 5 : 0;   // clear the card's drop shadow on the right and bottom
-    const tView = Math.min(dx > 0 ? (W + 8 - cx) / dx : dx < 0 ? (cx + 8) / -dx : Infinity,   // stay on screen
-                           dy > 0 ? (H - cy) / dy : dy < 0 ? cy / -dy : Infinity) - 16;
-    const t = Math.min(Math.max(tCard + 16 + shadow, (tCard + shadow + R) / 2), Math.max(tCard + 16 + shadow, tView));
-    const g = document.createElementNS(SVGNS, 'g');
-    g.setAttribute('class', 'chip');
-    g.dataset.p = p;
-    g.innerHTML = `<text x="${cx + dx * t}" y="${cy + dy * t + 1}">${p + 1}</text>`;
-    sides.appendChild(g);
-  }
-  paint();
-}
-function drawFullWheel(){
-  sides.classList.add('full');
-  stage.classList.add('fullwheel');
-  const W = innerWidth, H = innerHeight;
-  const sr = stage.getBoundingClientRect();
-  // Center the card on the screen, as big as it can be without reaching the top bar or the arrows
-  const navBottom = document.querySelector('.page-nav').getBoundingClientRect().bottom;
-  const ctrlTop = document.querySelector('.controls').getBoundingClientRect().top;
-  const half = Math.max(80, Math.min(H / 2 - navBottom - 14, ctrlTop - H / 2 - 22));   // 22: room for the shadow
-  const fw = Math.round(Math.min(sr.width - 68, 712)), fh = Math.round(half * 2);
-  const css = `left:${Math.round(W / 2 - sr.left - fw / 2)}px; top:${Math.round(H / 2 - sr.top - fh / 2)}px; width:${fw}px; height:${fh}px; bottom:auto; margin:0;`;
-  if (card.style.cssText !== css) { card.style.cssText = css; requestAnimationFrame(fitCard); }
-  // Equal slices of a wheel centered on the screen, big enough to reach every corner
-  const cx = W / 2, cy = H / 2;
-  const R = Math.hypot(cx, cy) + 4;
-  const kx = cx, ky = cy;   // the card is centered on the screen too
-  sides.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const step = 360 / players;
-  const dir = deg => [Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180)];   // 0deg = straight up, clockwise
-  const at = (deg, r) => { const [dx, dy] = dir(deg); return [cx + dx * r, cy + dy * r]; };
-  for (let p = 0; p < players; p++) {   // player 1 centered at the top
-    const a0 = p * step - step / 2, a1 = a0 + step;
-    const [x0, y0] = at(a0, R), [x1, y1] = at(a1, R);
-    const path = document.createElementNS(SVGNS, 'path');
-    path.setAttribute('d', `M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${step > 180 ? 1 : 0} 1 ${x1} ${y1} Z`);
-    path.setAttribute('fill', SEAT_COLORS[p]);
-    path.dataset.p = p;
-    sides.appendChild(path);
-  }
-  for (let p = 0; p < players; p++) {   // numbers on each slice's middle line, between the card and the screen edge
-    const [dx, dy] = dir(p * step);
-    const tView = Math.min(dx > 0 ? (W - cx) / dx : dx < 0 ? cx / -dx : Infinity,
-                           dy > 0 ? (H - cy) / dy : dy < 0 ? cy / -dy : Infinity);
-    // where this line leaves the card (the card is centered at kx, ky)
-    const hx = fw / 2, hy = fh / 2;
-    let tCard = 0;
-    for (let t = 0; t < tView; t += 2) {
-      const x = cx + dx * t, y = cy + dy * t;
-      if (Math.abs(x - kx) > hx + ((dx > .3) ? 5 : 0) || Math.abs(y - ky) > hy + ((dy > .3) ? 5 : 0)) { tCard = t; break; }
-    }
-    const t = tCard + Math.max(18, (tView - tCard) / 2);
-    const g = document.createElementNS(SVGNS, 'g');
-    g.setAttribute('class', 'chip');
-    g.dataset.p = p;
-    g.innerHTML = `<text x="${cx + dx * t}" y="${cy + dy * t + 1}">${p + 1}</text>`;
-    sides.appendChild(g);
-  }
-  paint();
-}
-function paint(){
-  sides.classList.toggle('running', raffling);
-  sides.classList.toggle('landed', !raffling && picked !== null);
-  sides.querySelectorAll('[data-p]').forEach(el => el.classList.toggle('lit', +el.dataset.p === lit));
-}
-function setHint(){
-  // The bottom hint says what a tap does; in team play the winner's badge sits with the question
-  const chosen = !!players && !raffling && picked !== null;
-  hint.textContent = !players || chosen ? 'Tap for a follow-up' : raffling ? 'Picking…' : 'Tap to see who answers';
-  hint.classList.toggle('cue', !players || chosen);
-  whoFront.innerHTML = chosen ? '<span class="who" style="background:' + SEAT_COLORS[picked] + '">Player ' + (picked + 1) + ' answers!</span>' : '';
-  whoFront.hidden = !chosen;
-  fitCard();
-}
-// On the smaller team-play card a long question can run out of room: drop the emoji when it does
-function fitCard(){
-  const face = card.querySelector('.face.front');
-  face.classList.remove('tight');
-  if (players && face.scrollHeight > face.clientHeight + 1) face.classList.add('tight');
-}
-function resetPick(){
-  clearTimeout(raffleTimer);
-  raffling = false;
-  picked = null;
-  paint();
-  setHint();
-}
-
-// ---- sound: short raffle ticks that slow down, then a two-note ding (Web Audio, no files) ----
-let actx = null;
-function audio(){
-  try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume();
-  } catch (e) { actx = null; }
-  return actx;
-}
-function tone(freq, start, dur, type, vol){
-  const a = actx; if (!a) return;
-  const o = a.createOscillator(), g = a.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.setValueAtTime(vol, a.currentTime + start);
-  g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + start + dur);
-  o.connect(g).connect(a.destination);
-  o.start(a.currentTime + start); o.stop(a.currentTime + start + dur + .02);
-}
-const tick = () => { tone(1800, 0, .03, 'square', .08); tone(900, 0, .04, 'triangle', .1); };
-const ding = () => { tone(880, 0, .35, 'triangle', .22); tone(1320, .12, .5, 'triangle', .2); };
-
-function raffle(){
-  audio();   // created inside the tap so iPhone allows sound
-  raffling = true;
-  const winner = Math.floor(Math.random() * players);
-  const rounds = Math.max(2, Math.ceil(22 / players));
-  const steps = rounds * players + ((winner - lit + players) % players);
-  let n = 0;
-  setHint();
-  paint();
-  const step = () => {
-    if (!raffling) return;
-    n++;
-    lit = (lit + 1) % players;
-    tick();
-    paint();
-    if (n >= steps) {
-      raffling = false;
-      picked = lit;
-      paint();
-      setHint();
-      ding();
-      const at = index;
-      setTimeout(() => { if (index === at && !flipped && picked !== null) speak(); }, 500);   // then John reads the question
-      return;
-    }
-    const t = n / steps;
-    raffleTimer = setTimeout(step, 40 + 360 * t * t * t);   // fast at first, slowing to a stop
-  };
-  raffleTimer = setTimeout(step, 40);
-}
-
-// ---- the players panel ----
-function updateCount(){
-  countEl.textContent = draft;
-  document.getElementById('fewer').disabled = draft <= MIN_PLAYERS;
-  document.getElementById('more').disabled = draft >= MAX_PLAYERS;
-}
-function setPlayers(n){
-  players = n;
-  if (n) { lastCount = n; try { localStorage.setItem('icebreaker-players', n); } catch (e) {} }
-  document.getElementById('playersBadge').textContent = n || '';
-  lit = 0;
-  drawSides();
-  resetPick();
-  if (n && !voiceOn) setVoice(true, true);   // team play reads each question after the pick, so voice comes on too
-  if (n && !document.body.classList.contains('picking')) present();   // turning team play on picks right away
-}
-document.getElementById('playersBtn').addEventListener('click', () => {
-  draft = players || lastCount;
-  updateCount();
-  document.getElementById('playersOff').hidden = !players;
-  spinDlg.showModal();
-});
-document.getElementById('fewer').addEventListener('click', () => { draft = Math.max(MIN_PLAYERS, draft - 1); updateCount(); });
-document.getElementById('more').addEventListener('click', () => { draft = Math.min(MAX_PLAYERS, draft + 1); updateCount(); });
-document.getElementById('playersGo').addEventListener('click', () => { setPlayers(draft); spinDlg.close(); });
-document.getElementById('playersOff').addEventListener('click', () => { setPlayers(0); spinDlg.close(); });
-document.getElementById('spinClose').addEventListener('click', () => spinDlg.close());
-spinDlg.addEventListener('click', e => {   // a tap on the backdrop, outside the panel, closes it
-  const r = spinDlg.getBoundingClientRect();
-  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) spinDlg.close();
-});
-const ringWatch = new ResizeObserver(drawSides);
-ringWatch.observe(stage);
-ringWatch.observe(card);
-addEventListener('resize', () => { if (FULL_WHEEL && players) drawSides(); });
-document.getElementById('playersBadge').textContent = players || '';
-
-// ---------- voice mode: John reads the question, and the follow-up when the card flips ----------
-// Clips are pre-made by make-audio.py (icebreaker/audio/N-question.mp3, N-follow.mp3).
-// One <audio> element is reused, and every play starts from a tap, so iPhone allows it.
-const voice = new Audio();
-const voiceBtn = document.getElementById('voiceBtn');
-let voiceOn = false;
-try { voiceOn = localStorage.getItem('icebreaker-voice') === '1'; } catch (e) {}
-function clipSrc(){ return '/icebreaker/audio/' + (index + 1) + '-' + (flipped ? 'follow' : 'question') + '.mp3'; }
-function speak(){
-  if (!voiceOn) return;
-  voice.pause();
-  voice.muted = false;
-  voice.src = clipSrc();
-  voice.play().catch(() => {});   // a page load can't autoplay; the next tap will
-}
-// iPhone only lets audio start inside a tap. When the reading has to wait (the topic transition),
-// play the clip silently during the tap and stop it at once: that unlocks the player for later.
-function primeVoice(){
-  if (!voiceOn) return;
-  voice.pause();
-  voice.muted = true;
-  voice.src = clipSrc();
-  voice.play().then(() => { if (voice.muted) { voice.pause(); voice.currentTime = 0; voice.muted = false; } },
-                    () => { voice.muted = false; });
-}
-function setVoice(on, quiet){
-  voiceOn = on;
-  voiceBtn.setAttribute('aria-pressed', String(on));
-  voiceBtn.setAttribute('aria-label', on ? 'Stop reading the questions out loud' : 'Read the questions out loud');
-  try { localStorage.setItem('icebreaker-voice', on ? '1' : '0'); } catch (e) {}
-  if (!on) voice.pause();
-  else if (!quiet) speak();
-}
-voiceBtn.addEventListener('click', () => setVoice(!voiceOn));
-voiceBtn.setAttribute('aria-pressed', String(voiceOn));
-
-// ---------- start screen: pick a topic ----------
-const TOPIC_EMOJI = { magic: '🪄', animals: '🐾', places: '🗺️', friends: '💛', family: '🏡', me: '🌟', holidays: '🎁' };
-const topicsEl = document.getElementById('topics');
-const homeBtn = document.getElementById('homeBtn');
-document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
-  return '<button class="topic-tile pop-in" type="button" data-topic="' + t.id + '" style="background:' + t.color +
-    '; animation-delay:' + (80 + i * 70) + 'ms"><span class="t-emoji" aria-hidden="true">' + TOPIC_EMOJI[t.id] +
-    '</span><span class="t-name">' + t.name + '</span></button>';
-}).join('') +
-  '<button class="topic-tile random pop-in" type="button" data-topic="random" style="animation-delay:' + (80 + TOPICS.length * 70) + 'ms">' +
-  '<span class="t-emoji" aria-hidden="true">🎲</span><span class="t-text"><span class="t-name">Random</span>' +
-  '<span class="t-count">All topics, mixed up</span></span></button>';
-
-function useTopic(id){
-  topic = id;
-  if (id === 'random') {
-    deck = PROMPTS.map((_, i) => i);
-    for (let i = deck.length - 1; i > 0; i--) {   // shuffle, new order every time
-      const j = Math.floor(Math.random() * (i + 1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    homeBtn.setAttribute('aria-label', 'Change topic (now: Random)');
-    return;
-  }
-  deck = PROMPTS.map((p, i) => p[0] === id ? i : -1).filter(i => i >= 0);
-  homeBtn.setAttribute('aria-label', 'Change topic (now: ' + topicOf(id).name + ')');
-}
-function openTopics(){
-  voice.pause();
-  resetPick();
-  document.body.classList.add('picking');
-  homeBtn.setAttribute('aria-current', 'page');
-  topicsEl.hidden = false;
-  history.replaceState(null, '', location.pathname + location.search);
-}
-const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const BURST_EMOJI = {
-  magic:   ['🪄', '✨', '🔮', '⭐', '🧞', '🦄', '💫'],
-  animals: ['🐾', '🐶', '🦁', '🐸', '🦋', '🐢', '🌻'],
-  places:  ['🗺️', '🚀', '🏝️', '🏰', '🧭', '🎈', '🌋'],
-  friends: ['💛', '🤝', '😊', '🫶', '💬', '🌈', '🎉'],
-  family:  ['🏡', '❤️', '🍕', '🎂', '🧸', '🍿', '🥞'],
-  me:      ['🌟', '🎨', '🎸', '📚', '🏆', '💡', '🚲'],
-  holidays: ['🎁', '❄️', '⛄', '🎄', '🕯️', '🍪', '🎉']
-};
-BURST_EMOJI.random = Object.values(BURST_EMOJI).flat();
-
-// Emojis fly out from (x, y), arc down a little and fade
-function burst(x, y, set){
-  const layer = document.createElement('div');
-  layer.className = 'burst';
-  document.body.appendChild(layer);
-  for (let n = 0; n < 34; n++) {
-    const e = document.createElement('span');
-    const size = 22 + Math.random() * 26;
-    e.textContent = set[Math.floor(Math.random() * set.length)];
-    e.style.cssText = 'left:' + x + 'px; top:' + y + 'px; font-size:' + size + 'px; margin:' + (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px;';
-    layer.appendChild(e);
-    const a = Math.random() * Math.PI * 2, d = 140 + Math.random() * Math.max(innerWidth, innerHeight) * .45;
-    const tx = Math.cos(a) * d, ty = Math.sin(a) * d - 60, spin = (Math.random() - .5) * 540;
-    e.animate([
-      { transform: 'translate(0, 0) scale(.2) rotate(0deg)', opacity: 1 },
-      { transform: `translate(${tx * .75}px, ${ty * .75}px) scale(1.15) rotate(${spin * .6}deg)`, opacity: 1, offset: .55 },
-      { transform: `translate(${tx}px, ${ty + 160}px) scale(.85) rotate(${spin}deg)`, opacity: 0 }
-    ], { duration: 1100 + Math.random() * 500, easing: 'cubic-bezier(.12, .75, .3, 1)', fill: 'forwards' });
-  }
-  setTimeout(() => layer.remove(), 1800);
-}
-
-let choosing = false;
-function chooseTopic(id, tile){
-  if (choosing) return;
-  useTopic(id);
-  index = deck[0];
-  setFlipped(false);
-  const first = index;
-  const finish = () => {
-    topicsEl.hidden = true;
-    document.body.classList.remove('picking');
-    homeBtn.removeAttribute('aria-current');
-    show(deck[0], true);
-    if (tile) tile.classList.remove('chosen');
-    choosing = false;
-  };
-  if (REDUCE_MOTION || !tile) { finish(); present(); return; }
-  primeVoice();   // unlock audio inside this tap; John reads once the card is fully showing
-  if (players) audio();
-  choosing = true;
-  tile.classList.add('chosen');
-  const r = tile.getBoundingClientRect();
-  const x = r.left + r.width / 2, y = r.top + r.height / 2;
-  wipe(x, y, id === 'random'
-    ? 'linear-gradient(135deg, ' + TOPICS.map(t => t.color).join(', ') + ')'
-    : topicOf(id).color);
-  burst(x, y, BURST_EMOJI[id]);
-  setTimeout(finish, 480);   // swap to the card while the screen is fully covered
-  setTimeout(() => {          // the color has faded (560ms delay + 520ms fade): now read the question
-    if (index !== first || flipped || document.body.classList.contains('picking')) return;
-    if (players) raffle(); else speak();   // team play: pick who answers first, then read
-  }, 1120);
-}
-
-// The tile's color grows from the tile to fill the whole screen, then fades away to show the card
-function wipe(x, y, paint){
-  const el = document.createElement('div');
-  el.className = 'wipe';
-  el.style.background = paint;
-  document.body.appendChild(el);
-  const reach = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-  el.animate([
-    { clipPath: 'circle(0px at ' + x + 'px ' + y + 'px)' },
-    { clipPath: 'circle(' + reach + 'px at ' + x + 'px ' + y + 'px)' }
-  ], { duration: 460, easing: 'cubic-bezier(.55, 0, .35, 1)', fill: 'forwards' });
-  el.animate([{ opacity: 1 }, { opacity: 0 }],
-    { duration: 520, delay: 560, easing: 'ease-out', fill: 'forwards' })
-    .finished.then(() => el.remove(), () => el.remove());
-}
-document.getElementById('topicGrid').addEventListener('click', e => {
-  const tile = e.target.closest('.topic-tile');
-  if (tile) chooseTopic(tile.dataset.topic, tile);
-});
-homeBtn.addEventListener('click', () => { if (!document.body.classList.contains('picking')) openTopics(); });
-// Feedback form: builds an email to Scott and opens the visitor's mail app with it filled in
-const fbDlg = document.getElementById('fbDlg');
-document.getElementById('fbBtn').addEventListener('click', () => fbDlg.showModal());
-const fbStars = document.getElementById('fbStars'), fbRateWord = document.getElementById('fbRateWord');
-const RATE_WORDS = ['', 'Not for us', 'It\u2019s OK', 'Pretty good', 'Really good', 'We love it!'];
-const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.75 5.6 6.15.9-4.45 4.33 1.05 6.13L12 16.86l-5.5 2.9 1.05-6.13L3.1 9.3l6.15-.9z"/></svg>';
-for (let n = 1; n <= 5; n++) {
-  fbStars.insertAdjacentHTML('beforeend', `<label class="fb-star"><input type="radio" name="rating" value="${n}" aria-label="${n} star${n > 1 ? 's' : ''}: ${RATE_WORDS[n]}">${STAR}</label>`);
-}
-const fbRating = () => +(fbStars.querySelector('input:checked') || {}).value || 0;
-const showStars = n => {
-  fbStars.querySelectorAll('.fb-star').forEach((el, i) => el.classList.toggle('on', i < n));
-  fbRateWord.textContent = RATE_WORDS[n];
-};
-fbStars.addEventListener('change', () => {
-  showStars(fbRating());
-  fbStars.classList.remove('pop'); void fbStars.offsetWidth; fbStars.classList.add('pop');
-  document.getElementById('fbNote').textContent = '';
-});
-fbStars.addEventListener('pointerover', e => { const i = [...fbStars.children].indexOf(e.target.closest('.fb-star')); if (i >= 0 && e.pointerType === 'mouse') showStars(i + 1); });
-fbStars.addEventListener('pointerleave', () => showStars(fbRating()));
-document.getElementById('fbClose').addEventListener('click', () => fbDlg.close());
-fbDlg.addEventListener('click', e => {   // a tap on the backdrop (the dialog itself, not its contents) closes it
-  if (e.target !== fbDlg) return;
-  const r = fbDlg.getBoundingClientRect();
-  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) fbDlg.close();
-});
-const fbForm = document.getElementById('fbForm'), fbDone = document.getElementById('fbDone');
-const fbSend = document.getElementById('fbSend'), fbNote = document.getElementById('fbNote');
-document.getElementById('fbOk').addEventListener('click', () => fbDlg.close());
-fbDlg.addEventListener('close', () => {   // next time it opens on a fresh, empty form
-  if (!fbDone.hidden) { fbForm.reset(); showStars(0); fbForm.hidden = false; fbDone.hidden = true; }
-  fbNote.textContent = '';
-});
-// Sends through the site's /api/feedback (Resend). If that can't be reached, the visitor's
-// email app opens with the message filled in instead, so nothing they typed is lost.
-fbForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const text = document.getElementById('fbText').value.trim();
-  const rating = fbRating();
-  if (!text && !rating) { fbNote.textContent = 'Tap a star or write a note first.'; return; }
-  const from = document.getElementById('fbFrom').value.trim();
-  const ages = document.getElementById('fbAges').value;
-  fbSend.disabled = true; fbSend.textContent = 'Sending…'; fbNote.textContent = '';
-  let ok = false;
-  try {
-    const r = await fetch('/api/feedback', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, rating, ages, from, website: fbForm.website.value, page: 'IceBreaker' })
-    });
-    ok = r.ok;
-  } catch {}
-  fbSend.disabled = false; fbSend.textContent = 'Send';
-  if (ok) { fbForm.hidden = true; fbDone.hidden = false; document.getElementById('fbOk').focus(); return; }
-  fbNote.textContent = "Couldn't send it from here, so your email app is opening with it instead.";
-  const stars = rating ? 'Rating: ' + '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating) + ' (' + rating + '/5)' : '';
-  location.href = 'mailto:scottddickie@gmail.com?subject=' + encodeURIComponent('IceBreaker feedback' + (rating ? ' (' + rating + '/5)' : '')) +
-    '&body=' + encodeURIComponent([stars, ages && 'Who played: ' + ages, text, from && 'From: ' + from].filter(Boolean).join('\n\n'));
-});
-
-
-useTopic(topic);
-if (linked >= 1 && linked <= PROMPTS.length) show(index);
-else openTopics();
-
-// ---------- intro: logo pops in, then shrinks and flies to its spot in the top bar ----------
-(function intro(){
-  const splash = document.getElementById('splash');
-  const done = () => { splash.remove(); document.body.classList.remove('intro', 'landing'); };
-  if (REDUCE_MOTION) return done();
-  const logo = splash.querySelector('.splash-logo');
-  setTimeout(() => {
-    logo.getAnimations({ subtree: true }).forEach(an => an.finish());   // settle the pop-in before measuring
-    const to = document.querySelector('.page-nav .nav-title').getBoundingClientRect();
-    if (!to.width) {   // a question page has no logo in the top bar: shrink away in place
-      logo.style.transition = 'transform .5s cubic-bezier(.6, 0, .4, 1), opacity .5s ease';
-      logo.style.transform = 'scale(.6)';
-      logo.style.opacity = '0';
-    } else {
-      // Layout size and position, which ignore any transform still on the logo
-      const w = logo.offsetWidth, cx = logo.offsetLeft + w / 2, cy = logo.offsetTop + logo.offsetHeight / 2;
-      const dx = (to.left + to.width / 2) - cx;
-      const dy = (to.top + to.height / 2) - cy;
-      logo.style.transition = 'transform .75s cubic-bezier(.65, 0, .25, 1)';
-      logo.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + (to.width / w) + ')';
-    }
-    splash.classList.add('leaving');
-    document.body.classList.add('landing');
-    document.body.classList.remove('intro');   // tiles, buttons and card come in as the logo moves
-    setTimeout(done, 780);
-  }, 2300);   // after the white card's flip, with time to read the tagline
-})();
+  document.querySelectorAll('[data-try]').forEach(b => b.addEventListener('click', () => {
+    i = 0; show(i, false);
+    demo.showModal();
+    card.focus();
+  }));
 </script>
+
 </body>
 </html>
