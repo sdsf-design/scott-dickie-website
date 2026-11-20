@@ -366,6 +366,7 @@
     animation:tag-in .5s ease 1.05s backwards; transition:opacity .3s ease;
   }
   .splash.leaving .splash-tag{opacity:0;}
+  .splash-ages{display:block; margin-top:6px; font-size:.6em; font-weight:800; color:#777;}
   @keyframes tag-in{from{opacity:0; transform:translateY(.5em);}to{opacity:1; transform:none;}}
   @keyframes word-in{from{opacity:0; transform:translateX(-.4em);}to{opacity:1; transform:none;}}
   /* Until the logo starts moving, everything else waits; tiles hold their pop-in */
@@ -504,7 +505,12 @@
   .fb-rate-word{min-height:18px; margin:6px 0 0; font-size:14px; font-weight:800; color:#555;}
   .fb-star-row.pop .on svg{animation:pop .3s ease;}
   .fb-form label{font-size:14px; font-weight:900;}
-  .fb-form input, .fb-form textarea{
+  .fb-form label select{   /* after the shared field rule below in weight, so its arrow survives */
+    appearance:none; padding-right:40px; cursor:pointer;
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 18px;
+  }
+  .fb-form select:focus{outline:3px solid var(--blue); outline-offset:1px;}
+  .fb-form input, .fb-form textarea, .fb-form select{
     width:100%; margin-top:5px; padding:11px 12px; border:2.5px solid var(--ink); border-radius:12px;
     background:#fff; color:var(--ink); font-family:inherit; font-size:16px; font-weight:600; line-height:1.35;
   }
@@ -531,7 +537,7 @@
 <body class="intro">
 <div class="splash" id="splash" aria-hidden="true">
   <div class="nav-title splash-logo"><div class="splash-mark" aria-hidden="true"><div class="sc-y"></div><div class="sc-w"><div class="sc-face"><svg viewBox="4 5 34 48"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></svg></div><div class="sc-face sc-back"><svg viewBox="4 5 34 48"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" transform="translate(42 0) scale(-1 1)" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></svg></div></div></div><span class="logo-word">IceBreaker</span></div>
-  <p class="splash-tag">Flip a card. Start a conversation.</p>
+  <p class="splash-tag">Flip a card. Start a conversation.<span class="splash-ages">For ages 5+</span></p>
 </div>
 <nav class="page-nav">
   <button class="home-btn" id="homeBtn" type="button" aria-label="Change topic">
@@ -613,6 +619,14 @@
       <p class="fb-rate-word" id="fbRateWord" aria-hidden="true"></p>
     </fieldset>
     <label>Your feedback <span style="font-weight:600;color:#777">(optional)</span><textarea id="fbText" name="message" placeholder="What should we add or fix?"></textarea></label>
+    <label>Who played? <span style="font-weight:600;color:#777">(optional)</span><select id="fbAges" name="ages">
+      <option value="">Choose an age group</option>
+      <option>Kids 5–9</option>
+      <option>Kids 10–13</option>
+      <option>Teens 14–17</option>
+      <option>Adults</option>
+      <option>A mix of ages</option>
+    </select></label>
     <label>Your email <span style="font-weight:600;color:#777">(optional)</span><input id="fbFrom" name="from" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false"></label>
     <input class="fb-trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
     <button class="big-btn" type="submit" id="fbSend">Send</button>
@@ -1453,12 +1467,13 @@ fbForm.addEventListener('submit', async e => {
   const rating = fbRating();
   if (!text && !rating) { fbNote.textContent = 'Tap a star or write a note first.'; return; }
   const from = document.getElementById('fbFrom').value.trim();
+  const ages = document.getElementById('fbAges').value;
   fbSend.disabled = true; fbSend.textContent = 'Sending…'; fbNote.textContent = '';
   let ok = false;
   try {
     const r = await fetch('/api/feedback', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, rating, from, website: fbForm.website.value, page: 'IceBreaker' })
+      body: JSON.stringify({ message: text, rating, ages, from, website: fbForm.website.value, page: 'IceBreaker' })
     });
     ok = r.ok;
   } catch {}
@@ -1467,7 +1482,7 @@ fbForm.addEventListener('submit', async e => {
   fbNote.textContent = "Couldn't send it from here, so your email app is opening with it instead.";
   const stars = rating ? 'Rating: ' + '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating) + ' (' + rating + '/5)' : '';
   location.href = 'mailto:scottddickie@gmail.com?subject=' + encodeURIComponent('IceBreaker feedback' + (rating ? ' (' + rating + '/5)' : '')) +
-    '&body=' + encodeURIComponent([stars, text, from && 'From: ' + from].filter(Boolean).join('\n\n'));
+    '&body=' + encodeURIComponent([stars, ages && 'Who played: ' + ages, text, from && 'From: ' + from].filter(Boolean).join('\n\n'));
 });
 
 

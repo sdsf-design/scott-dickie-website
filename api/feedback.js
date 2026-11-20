@@ -12,7 +12,9 @@ const ALLOWED_ORIGINS = [
 ];
 const MAX_MESSAGE = 4000;
 const MAX_FROM = 200;
-const EMAIL = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+// The "Who played?" choices in the form; anything else is ignored
+const AGE_GROUPS = ["Kids 5–9", "Kids 10–13", "Teens 14–17", "Adults", "A mix of ages"];
+const EMAIL =/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -27,7 +29,7 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: "forbidden" });
   }
 
-  const { message = "", rating = 0, from = "", website = "", page = "IceBreaker" } = req.body || {};
+  const { message = "", rating = 0, ages = "", from = "", website = "", page = "IceBreaker" } = req.body || {};
   // "website" is a hidden field people never see; bots that fill every field get a quiet "ok"
   if (website) return res.status(200).json({ ok: true });
   // A rating of 1 to 5 stars, a written note, or both
@@ -44,7 +46,8 @@ export default async function handler(req, res) {
   const name = String(page).slice(0, 60);
   const starLine = stars ? `Rating: ${"\u2605".repeat(stars)}${"\u2606".repeat(5 - stars)} (${stars}/5)` : "";
   const note = message.trim();
-  const text = [starLine, note, sender && `From: ${sender}`, `Sent from ${name}`].filter(Boolean).join("\n\n");
+  const agesLine = AGE_GROUPS.includes(ages) ? `Who played: ${ages}` : "";
+  const text = [starLine, agesLine, note, sender && `From: ${sender}`, `Sent from ${name}`].filter(Boolean).join("\n\n");
   const body = {
     from: FROM,
     to: [TO],
