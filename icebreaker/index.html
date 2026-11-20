@@ -56,6 +56,50 @@
     background:var(--ink); box-shadow:10px 10px 0 var(--ink);
   }
   .video video{display:block; width:100%; height:auto; aspect-ratio:16/9; background:var(--ink);}
+  /* Big play button over the video, styled like the page's other buttons */
+  .play-btn{
+    position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+    width:clamp(72px, 14vw, 120px); aspect-ratio:1; display:grid; place-items:center;
+    border:3px solid var(--ink); border-radius:50%; background:var(--yellow);
+    box-shadow:0 0 0 3px #fff, 7px 7px 0 3px var(--ink); cursor:pointer; padding:0;
+    transition:transform .08s, box-shadow .08s;
+  }
+  .play-btn svg{width:42%; height:42%; margin-left:8%;}
+  .play-btn:hover{transform:translate(calc(-50% - 1px), calc(-50% - 1px)); box-shadow:0 0 0 3px #fff, 8px 8px 0 3px var(--ink);}
+  .play-btn:active{transform:translate(calc(-50% + 3px), calc(-50% + 3px)); box-shadow:0 0 0 3px #fff, 3px 3px 0 3px var(--ink);}
+  .play-btn:focus-visible{outline:3px solid var(--blue); outline-offset:4px;}
+  .play-btn[hidden]{display:none;}
+
+  /* ---------- category carousels: a row of topic cards that drifts sideways forever ---------- */
+  .topics{margin:56px 0 0;}
+  .topics-title{margin:0 0 18px; font-size:clamp(20px, 3.4vw, 26px); font-weight:900; letter-spacing:-.3px;}
+  .marquee{
+    overflow:hidden; padding:4px 0 12px;   /* room for the card shadows */
+    -webkit-mask:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+            mask:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .marquee-track{display:flex; gap:18px; width:max-content; animation:marquee 47s linear infinite;   /* 15% slower than the first 40s */}
+  .marquee.reverse .marquee-track{animation-direction:reverse; animation-delay:-20s;}   /* offset so the two rows don't line up */
+  .marquee:hover .marquee-track, .marquee:focus-within .marquee-track{animation-play-state:paused;}
+  @keyframes marquee{to{transform:translateX(calc(-50% - 9px));}}   /* one full set plus half the gap */
+  .topic{
+    flex:none; width:200px; min-height:132px; display:flex; flex-direction:column; align-items:flex-start; gap:8px;
+    padding:16px 16px 14px; text-align:left; text-decoration:none; color:var(--ink);
+    border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
+    transition:transform .08s, box-shadow .08s;
+  }
+  .topic:hover{transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink);}
+  .topic:focus-visible{outline:3px solid var(--blue); outline-offset:3px;}
+  .topic .t-emoji{font-size:36px; line-height:1;}
+  .topic .t-name{font-size:18px; font-weight:900; line-height:1.15;}
+  .topic .t-count{margin-top:auto; font-size:13px; font-weight:800; opacity:.7;}
+  .topics + .cta{margin-top:48px;}
+  .marquee + .marquee{margin-top:6px;}
+  @media (prefers-reduced-motion:reduce){
+    .marquee{-webkit-mask:none; mask:none;}
+    .marquee-track{animation:none; width:auto; flex-wrap:wrap; justify-content:center;}
+    .marquee-track [aria-hidden="true"]{display:none;}
+  }
   /* little cards peeking out behind the video */
   .video-wrap{position:relative; max-width:900px; margin:0 auto;}
   .peek{
@@ -165,9 +209,18 @@
     <div class="peek p1" aria-hidden="true"></div>
     <div class="peek p2" aria-hidden="true"></div>
     <div class="video">
-      <video src="/icebreaker/promo.mp4" controls playsinline preload="metadata" aria-label="IceBreaker product video"></video>
+      <video id="promo" src="/icebreaker/promo.mp4#t=0.1" playsinline preload="metadata" aria-label="IceBreaker product video"></video>
+      <button class="play-btn" id="playBtn" type="button" aria-label="Play the IceBreaker video">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v17L20 12z" fill="#0a0a0a" stroke="#0a0a0a" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
     </div>
   </div>
+
+  <section class="topics" aria-labelledby="topicsTitle">
+    <h2 class="topics-title" id="topicsTitle">Questions for every kind of conversation</h2>
+    <div class="marquee"><div class="marquee-track" data-topics></div></div>
+    <div class="marquee reverse"><div class="marquee-track" data-topics></div></div>
+  </section>
 
   <div class="cta">
     <div class="cta-row">
@@ -216,6 +269,36 @@
 </dialog>
 
 <script>
+  // Question categories, same names and colors as the game's topic screen
+  const TOPICS = [
+    ['🪄', 'Superpowers & Magic', '#c9a7ff'],
+    ['🐾', 'Animals & Nature',    '#7ed957'],
+    ['🗺️', 'Places & Adventures', '#8fd3ff'],
+    ['💛', 'Friends & Feelings',  '#ff90e8'],
+    ['🏡', 'Family & Home',       '#ffb26b'],
+    ['🌟', 'Me & My Dreams',      '#ffd23f'],
+    ['🎁', 'Holidays',            '#ff8a80'],
+  ];
+  // Each track holds the cards twice so the loop is seamless; the copy is hidden from screen readers and tabbing
+  document.querySelectorAll('[data-topics]').forEach(track => {
+    [false, true].forEach(copy => TOPICS.forEach(([emoji, name, color]) => {
+      const a = document.createElement('a');
+      a.className = 'topic';
+      a.href = '/icebreaker/play/';
+      a.style.background = color;
+      if (copy) { a.setAttribute('aria-hidden', 'true'); a.tabIndex = -1; }
+      a.innerHTML = '<span class="t-emoji" aria-hidden="true">' + emoji + '</span><span class="t-name">' + name + '</span><span class="t-count">40 questions</span>';
+      track.appendChild(a);
+    }));
+  });
+
+  // Play button: starts the video and brings in the normal controls; shows again if it ends
+  const promo = document.getElementById('promo');
+  const playBtn = document.getElementById('playBtn');
+  playBtn.addEventListener('click', () => { promo.controls = true; promo.play(); });
+  promo.addEventListener('play', () => { playBtn.hidden = true; promo.controls = true; });
+  promo.addEventListener('ended', () => { playBtn.hidden = false; promo.controls = false; });
+
   // Old shared links went to /icebreaker#12 to open question 12: send those on to the game.
   if (/^#\d+$/.test(location.hash)) location.replace('/icebreaker/play/' + location.hash);
 
