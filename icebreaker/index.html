@@ -39,19 +39,23 @@
 
   /* ---------- hero ---------- */
   main{max-width:1040px; margin:0 auto; padding:40px 16px 56px; text-align:center; overflow-x:clip;}
-  .hero-logo{
-    display:inline-flex; align-items:center; gap:.3em; margin:12px 0 0;
-    font-size:clamp(34px, 9vw, 96px); font-weight:900; letter-spacing:-.02em; line-height:1;
+  /* Logo lockup: the mark sits beside two lines, the name and the tagline, and is as tall as both.
+     Everything is sized in em off the name, so the mark always lines up with the pair. */
+  .lockup{
+    display:inline-flex; align-items:center; gap:.22em; margin:12px 0 0; text-align:left;
+    font-size:clamp(44px, 11.5vw, 84px);
   }
-  .hero-logo svg{height:1.4em; width:auto; overflow:visible;}
-  .tag{margin:16px auto 0; font-size:clamp(19px, 3.6vw, 28px); font-weight:800; color:#444; text-wrap:balance;}
-  .ages{
-    display:inline-block; margin-top:12px; padding:0;
-    font-size:15px; font-weight:900;
+  .lockup-mark{height:1.62em; width:auto; flex:none; overflow:visible;}
+  .lockup-name{margin:0; font-size:1em; font-weight:900; letter-spacing:-.02em; line-height:1;}
+  .lockup .tag{margin:.16em 0 0; font-size:max(14px, .32em); font-weight:800; line-height:1.25; color:#444; white-space:nowrap;}
+  .desc{
+    margin:22px auto 0; max-width:34em; text-wrap:pretty;
+    font-size:clamp(17px, 2.2vw, 19px); font-weight:600; line-height:1.5; color:#333;
   }
+  .desc strong{font-weight:900; color:var(--ink);}
 
   .video{
-    position:relative; margin:36px auto 0; max-width:900px;
+    position:relative; margin:64px auto 0; max-width:900px;
     border:3px solid var(--ink); border-radius:20px; overflow:hidden;
     background:var(--ink); box-shadow:10px 10px 0 var(--ink);
   }
@@ -119,7 +123,59 @@
 
   .btn-try{background:var(--pink);}
   .btn-big.btn-login{background:#fff;}
-  .hero-actions{margin-top:28px; display:flex; justify-content:center; flex-wrap:wrap; gap:16px;}
+  .hero-actions{display:flex; justify-content:center; flex-wrap:wrap; gap:16px;}
+
+  /* ---------- hero: copy and buttons beside a card you can play right here ---------- */
+  .hero{
+    display:grid; gap:28px; align-items:center;
+    grid-template-areas:"copy" "play" "actions";   /* phones: the card comes before the buttons */
+  }
+  .hero-copy{grid-area:copy;}
+  .hero-play{grid-area:play;}
+  .hero-actions{grid-area:actions;}
+  @media (min-width:860px){
+    .hero{grid-template-columns:1.1fr 1fr; grid-template-areas:"copy play" "actions play"; column-gap:48px; row-gap:32px; text-align:left;}
+    .hero-copy{align-self:end;}
+    .hero-actions{align-self:start; justify-content:flex-start;}
+    .lockup{font-size:clamp(56px, 6.6vw, 80px);}
+    .desc{margin-left:0;}
+    main{padding-top:64px;}
+    .hero-actions .btn-big{padding:16px 24px; font-size:21px;}
+  }
+
+  .deck{position:relative; width:min(380px, calc(100% - 28px)); margin:0 auto; isolation:isolate;}
+  .deck .d-flip{width:calc(100% - 8px); height:clamp(340px, 42vw, 420px); margin:0;}
+  .deck .d-emoji{font-size:clamp(52px, 13vw, 72px);}
+  .deck .d-line{font-size:clamp(22px, 5.8vw, 29px);}
+  /* the rest of the deck, fanned out behind the card */
+  .fan{
+    position:absolute; top:0; left:0; width:calc(100% - 8px); height:clamp(340px, 42vw, 420px); z-index:-1;
+    border:3px solid var(--ink); border-radius:22px; box-shadow:6px 6px 0 var(--ink);
+    transition:transform .35s cubic-bezier(.3, 1.4, .5, 1);
+  }
+  .fan.f1{background:var(--pink);   transform:rotate(-8deg) translate(-10px, 6px);}
+  .fan.f2{background:var(--blue);   transform:rotate(6deg) translate(12px, 2px);}
+  .fan.f3{background:var(--yellow); transform:rotate(-2deg) translate(4px, 10px);}
+  .deck.dealing .fan.f1{transform:rotate(-11deg) translate(-16px, 8px);}
+  .deck.dealing .fan.f2{transform:rotate(9deg) translate(18px, 2px);}
+  /* "Tap me!" sticker on the corner until the first flip */
+  .sticker{
+    position:absolute; top:-14px; right:-6px; z-index:2; pointer-events:none;
+    padding:7px 12px; border:3px solid var(--ink); border-radius:999px; background:var(--green);
+    box-shadow:3px 3px 0 var(--ink); font-size:15px; font-weight:900; transform:rotate(9deg);
+    animation:wiggle 2.4s ease-in-out infinite;
+  }
+  .sticker[hidden]{display:none;}
+  @keyframes wiggle{0%, 70%, 100%{transform:rotate(9deg);} 78%{transform:rotate(16deg) scale(1.06);} 86%{transform:rotate(3deg) scale(1.06);} 94%{transform:rotate(12deg);}}
+  .deck .d-flip.out{animation:deal-out .26s ease-in forwards;}
+  .deck .d-flip.in{animation:deal-in .42s cubic-bezier(.3, 1.4, .5, 1);}
+  @keyframes deal-out{to{transform:translate(-115%, -10px) rotate(-16deg); opacity:0;}}
+  @keyframes deal-in{from{transform:translate(18px, 14px) rotate(4deg) scale(.94); opacity:.4;} to{transform:none; opacity:1;}}
+  .deck-controls{margin-top:26px; display:flex; justify-content:center;}
+  @media (prefers-reduced-motion:reduce){
+    .sticker, .deck .d-flip.out, .deck .d-flip.in{animation:none;}
+    .fan{transition:none;}
+  }
   .cta-row{display:flex; justify-content:center; flex-wrap:wrap; gap:16px;}
 
   /* ---------- Try it free: a sample card in a dialog, the same flip card as the game ---------- */
@@ -193,17 +249,50 @@
 
 
 <main>
-  <h1 class="hero-logo">
-    <svg viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg>
-    <span>IceBreaker</span>
-  </h1>
-  <p class="tag">Flip a card. Start a conversation.</p>
-  <span class="ages">For ages 5+</span>
+  <section class="hero">
+  <div class="hero-copy">
+  <div class="lockup">
+    <svg class="lockup-mark" viewBox="0 0 52 58" aria-hidden="true"><rect x="16" y="6" width="30" height="40" rx="6" fill="#ffd23f" stroke="#0a0a0a" stroke-width="3" transform="rotate(12 31 26)"/><g transform="rotate(-8 20 26)"><path d="M10 5h22a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H20l-8 8v-8h-2a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z" fill="#fff" stroke="#0a0a0a" stroke-width="3" stroke-linejoin="round"/><text x="21" y="33" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="22" fill="#0a0a0a">?</text></g></svg>
+    <div>
+      <h1 class="lockup-name">IceBreaker</h1>
+      <p class="tag">Flip a card. Start a conversation.</p>
+    </div>
+  </div>
+  <p class="desc">Conversation starters for families and friends, each with a deeper follow-up on the back. The more we learn about each other, the stronger our connections become.</p>
+  </div>
+
+  <div class="hero-play">
+    <div class="deck" id="heroDeck">
+      <div class="fan f1" aria-hidden="true"></div>
+      <div class="fan f2" aria-hidden="true"></div>
+      <div class="fan f3" aria-hidden="true"></div>
+      <button class="d-flip" id="heroCard" type="button" aria-label="Flip the card for a follow-up question">
+        <div class="d-inner">
+          <div class="d-face d-front">
+            <span class="d-tag js-tag"></span>
+            <div class="d-emoji js-emoji" aria-hidden="true"></div>
+            <p class="d-line js-q"></p>
+            <span class="d-hint">Tap for a follow-up</span>
+          </div>
+          <div class="d-face d-back" aria-hidden="true">
+            <span class="d-tag">FOLLOW-UP</span>
+            <p class="d-line js-follow" aria-live="polite"></p>
+            <span class="d-hint">Tap to flip back</span>
+          </div>
+        </div>
+      </button>
+      <span class="sticker" id="tapMe" aria-hidden="true">Tap me!</span>
+    </div>
+    <div class="deck-controls">
+      <button class="btn" type="button" id="heroDeal">Deal another card ↻</button>
+    </div>
+  </div>
 
   <div class="hero-actions">
     <a class="btn btn-big btn-try" href="/icebreaker/play/">Play IceBreaker</a>
     <a class="btn btn-big btn-login" href="https://buymeacoffee.com/sddickie" target="_blank" rel="noopener">Support this game</a>
   </div>
+  </section>
 
   <div class="video-wrap">
     <div class="peek p1" aria-hidden="true"></div>
@@ -241,14 +330,14 @@
   <button class="d-flip" id="dCard" type="button" aria-label="Flip the card for a follow-up question">
     <div class="d-inner">
       <div class="d-face d-front">
-        <span class="d-tag" id="dTag"></span>
-        <div class="d-emoji" id="dEmoji" aria-hidden="true"></div>
-        <p class="d-line" id="dQuestion"></p>
+        <span class="d-tag js-tag"></span>
+        <div class="d-emoji js-emoji" aria-hidden="true"></div>
+        <p class="d-line js-q"></p>
         <span class="d-hint">Tap for a follow-up</span>
       </div>
       <div class="d-face d-back" aria-hidden="true">
         <span class="d-tag">FOLLOW-UP</span>
-        <p class="d-line" id="dFollow" aria-live="polite"></p>
+        <p class="d-line js-follow" aria-live="polite"></p>
         <span class="d-hint">Tap to flip back</span>
       </div>
     </div>
@@ -300,41 +389,93 @@
   // Old shared links went to /icebreaker#12 to open question 12: send those on to the game.
   if (/^#\d+$/.test(location.hash)) location.replace('/icebreaker/play/' + location.hash);
 
-  // Sample cards, taken from the game's own questions
+  // Sample cards from the game's own questions, one or two per topic, with that topic's color on the tag
   const SAMPLES = [
-    ['WOULD YOU RATHER', '🦅', 'Would you rather be able to fly or be invisible?', "Where's the first place you'd go?"],
-    ['WHAT IF', '🐶', 'What if your pet could talk for one day?', 'What do you think it would complain about?'],
-    ['IMAGINE', '🚀', 'If you could visit any planet, which one would you pick?', 'What would you pack for the trip?'],
+    ['#c9a7ff', 'WOULD YOU RATHER', '🦅', 'Would you rather be able to fly or be invisible?', "Where's the first place you'd go?"],
+    ['#c9a7ff', 'WHAT IF', '📏', 'What if you woke up three inches tall?', 'How would you get your breakfast?'],
+    ['#7ed957', 'WHAT IF', '🐶', 'What if your pet could talk for one day?', 'What do you think it would complain about?'],
+    ['#7ed957', 'WOULD YOU RATHER', '🐉', 'Would you rather have a pet dragon or a pet unicorn?', 'What would you name it, and what would it eat?'],
+    ['#8fd3ff', 'IMAGINE', '🚀', 'If you could visit any planet, which one would you pick?', 'What would you pack for the trip?'],
+    ['#8fd3ff', 'WOULD YOU RATHER', '🌊', 'Would you rather live under the sea or on the moon?', 'What would you miss most about home?'],
+    ['#ff90e8', 'BIG QUESTION', '🤝', 'What makes someone a really good friend?', 'When were you a good friend to someone?'],
+    ['#ff90e8', 'TELL ME', '😄', 'What made you laugh the hardest this week?', 'Can you act it out for me?'],
+    ['#ffb26b', 'WHAT IF', '🛏️', 'What if you could design your dream bedroom?', "What's the one wild thing it would have?"],
+    ['#ffb26b', 'TELL ME', '🍽️', "What's your favorite meal that we make at home?", 'What should we cook together next?'],
+    ['#ffd23f', 'WHAT IF', '🏫', 'What if you were the teacher for a day?', 'What would you teach, and what new rule would you make?'],
+    ['#ffd23f', 'BIG QUESTION', '🌍', 'If you could change one thing about the world, what would it be?', "What's one small step we could take?"],
+    ['#ff8a80', 'IMAGINE', '🧝', "If you were one of Santa's elves, what toy would you build?", 'Who would you give it to?'],
+    ['#ff8a80', 'WOULD YOU RATHER', '🏖️', 'Would you rather spend the holidays somewhere snowy or on a sunny beach?', 'What would you do there all day?'],
   ];
-  const demo = document.getElementById('demo');
-  const card = document.getElementById('dCard');
-  const back = card.querySelector('.d-back');
-  let i = 0;
+  // Shuffled once per visit, so the hero opens on a different question each time
+  const ORDER = SAMPLES.map((_, n) => n);
+  for (let n = ORDER.length - 1; n > 0; n--) { const r = Math.floor(Math.random() * (n + 1)); [ORDER[n], ORDER[r]] = [ORDER[r], ORDER[n]]; }
+  const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function show(n, animate) {
-    const [tag, emoji, q, follow] = SAMPLES[n];
-    card.classList.remove('flipped');
-    back.setAttribute('aria-hidden', 'true');
-    document.getElementById('dTag').textContent = tag;
-    document.getElementById('dEmoji').textContent = emoji;
-    document.getElementById('dQuestion').textContent = q;
-    document.getElementById('dFollow').textContent = follow;
-    document.getElementById('dCount').textContent = 'Sample ' + (n + 1) + ' of ' + SAMPLES.length;
-    if (animate) { card.classList.remove('d-pop'); void card.offsetWidth; card.classList.add('d-pop'); }
+  // One flip card: fills it with a sample, flips on tap, and deals the next one
+  function makeCard(card, onFlip) {
+    const back = card.querySelector('.d-back');
+    let pos = 0;
+    function fill() {
+      const [color, tag, emoji, q, follow] = SAMPLES[ORDER[pos]];
+      card.classList.remove('flipped');
+      back.setAttribute('aria-hidden', 'true');
+      const t = card.querySelector('.js-tag');
+      t.textContent = tag; t.style.background = color;
+      card.querySelector('.js-emoji').textContent = emoji;
+      card.querySelector('.js-q').textContent = q;
+      card.querySelector('.js-follow').textContent = follow;
+    }
+    card.addEventListener('click', () => {
+      if (card.classList.contains('out')) return;
+      const flipped = card.classList.toggle('flipped');
+      back.setAttribute('aria-hidden', flipped ? 'false' : 'true');
+      if (onFlip) onFlip(flipped);
+    });
+    fill();
+    return {
+      get pos() { return pos; },
+      reset() { pos = 0; fill(); },
+      next(animate) {
+        pos = (pos + 1) % ORDER.length;
+        if (!animate || REDUCE) { fill(); return; }
+        card.classList.remove('in');
+        card.classList.add('out');   // the top card flies off...
+        setTimeout(() => {           // ...and the next one comes up off the deck
+          fill();
+          card.classList.remove('out');
+          void card.offsetWidth;
+          card.classList.add('in');
+        }, 260);
+      },
+    };
   }
 
-  card.addEventListener('click', () => {
-    const flipped = card.classList.toggle('flipped');
-    back.setAttribute('aria-hidden', flipped ? 'false' : 'true');
+  // Hero card
+  const heroDeck = document.getElementById('heroDeck');
+  const tapMe = document.getElementById('tapMe');
+  const hero = makeCard(document.getElementById('heroCard'), () => { tapMe.hidden = true; });
+  document.getElementById('heroDeal').addEventListener('click', () => {
+    hero.next(true);
+    heroDeck.classList.add('dealing');
+    setTimeout(() => heroDeck.classList.remove('dealing'), 380);
   });
-  document.getElementById('dNext').addEventListener('click', () => { i = (i + 1) % SAMPLES.length; show(i, true); });
+
+  // "Try a card" dialog (not linked from the page right now, kept for later)
+  const demo = document.getElementById('demo');
+  const demoCard = document.getElementById('dCard');
+  const dialogCard = makeCard(demoCard);
+  const count = () => { document.getElementById('dCount').textContent = 'Sample ' + (dialogCard.pos + 1) + ' of ' + SAMPLES.length; };
+  document.getElementById('dNext').addEventListener('click', () => {
+    dialogCard.next(false);
+    demoCard.classList.remove('d-pop'); void demoCard.offsetWidth; demoCard.classList.add('d-pop');
+    count();
+  });
   document.getElementById('demoClose').addEventListener('click', () => demo.close());
   demo.addEventListener('click', e => { if (e.target === demo) demo.close(); });   // tap outside to close
-
   document.querySelectorAll('[data-try]').forEach(b => b.addEventListener('click', () => {
-    i = 0; show(i, false);
+    dialogCard.reset(); count();
     demo.showModal();
-    card.focus();
+    demoCard.focus();
   }));
 </script>
 
