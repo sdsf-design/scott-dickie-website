@@ -390,7 +390,7 @@
   }
   .players-btn svg, .voice-btn svg, .home-btn svg{width:58%; height:58%;}
   .home-btn{margin-left:0; background:transparent;}            /* outline only away from home */
-  body.picking .home-btn{background:var(--blue); cursor:default;}   /* filled: you're on the topic screen */
+  body.picking .home-btn{background:var(--blue);}   /* filled: you're on the topic screen, and it leads out to the IceBreaker home page */
   .voice-btn{background:var(--neutral-btn);}
   .voice-btn[aria-pressed="true"]{background:var(--yellow);}
   .voice-btn .waves, .voice-btn[aria-pressed="true"] .slash{display:none;}
@@ -1347,7 +1347,7 @@ function openTopics(){
   voice.pause();
   resetPick();
   document.body.classList.add('picking');
-  homeBtn.setAttribute('aria-current', 'page');
+  homeBtn.setAttribute('aria-label', 'Back to the IceBreaker home page');
   topicsEl.hidden = false;
   history.replaceState(null, '', location.pathname + location.search);
 }
@@ -1395,7 +1395,6 @@ function chooseTopic(id, tile){
   const finish = () => {
     topicsEl.hidden = true;
     document.body.classList.remove('picking');
-    homeBtn.removeAttribute('aria-current');
     show(deck[0], true);
     if (tile) tile.classList.remove('chosen');
     choosing = false;
@@ -1437,7 +1436,11 @@ document.getElementById('topicGrid').addEventListener('click', e => {
   const tile = e.target.closest('.topic-tile');
   if (tile) chooseTopic(tile.dataset.topic, tile);
 });
-homeBtn.addEventListener('click', () => { if (!document.body.classList.contains('picking')) openTopics(); });
+// Home: from a card it goes back to the topics; from the topics it goes out to the IceBreaker home page
+homeBtn.addEventListener('click', () => {
+  if (document.body.classList.contains('picking')) location.href = '/icebreaker/';
+  else openTopics();
+});
 // Feedback form: builds an email to Scott and opens the visitor's mail app with it filled in
 const fbDlg = document.getElementById('fbDlg');
 document.getElementById('fbBtn').addEventListener('click', () => fbDlg.showModal());
