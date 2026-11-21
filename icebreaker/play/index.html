@@ -290,7 +290,9 @@
   .topics[hidden], body.picking .wrap{display:none;}
   .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
   /* Tiles stretch to fill the screen's height; on short screens they keep a minimum and the page scrolls */
-  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(4, clamp(96px, 15.5vh, 132px)); gap:16px;}   /* every tile the same height, Holidays and Random included */
+  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(4, clamp(84px, calc((100vh - 310px) / 4), 132px)); grid-template-rows:repeat(4, clamp(84px, calc((100dvh - 310px) / 4), 132px)); gap:16px;}
+  /* Every tile the same height, Holidays and Random included. The 310px is the top bar, "Pick a topic" and the
+     coffee and Feedback buttons in the bottom-right corner, so the last row ends above them instead of under them. */
   .topic-tile{
     appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
     color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
@@ -498,6 +500,7 @@
   .coffee-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
   .coffee-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
   .topics{padding-bottom:84px;}   /* room so the button never covers the Random tile */
+  @media (max-height:640px){ .topics{padding-bottom:150px;} }   /* too short for the tiles to fit above the coffee and Feedback buttons: let them scroll up past both */
   .fb-form{display:flex; flex-direction:column; gap:12px; text-align:left;}
   /* Five-star rating: real radio buttons (keyboard and screen readers work), drawn as big stars */
   .fb-stars{border:0; margin:0 0 2px; padding:0; text-align:center;}
