@@ -290,8 +290,7 @@
   .topics[hidden], body.picking .wrap{display:none;}
   .topics .lead{margin:2px 0 18px; font-size:18px; font-weight:800; color:#444;}
   /* Tiles stretch to fill the screen's height; on short screens they keep a minimum and the page scrolls */
-  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(3, clamp(96px, 15.5vh, 132px)) auto; gap:16px;}   /* six tiles a set height; Holidays and Random share the last row and size to their content */
-  .topic-tile[data-topic="holidays"]{flex-direction:row; align-items:center; justify-content:flex-start; gap:14px; padding-bottom:22px;}
+  .topic-grid{width:100%; flex:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(4, clamp(96px, 15.5vh, 132px)); gap:16px;}   /* every tile the same height, Holidays and Random included */
   .topic-tile{
     appearance:none; border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
     color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
@@ -301,22 +300,16 @@
   }
   .topic-tile .t-emoji{font-size:clamp(34px, 5.5vw, 52px); line-height:1;}
   .topic-tile .t-name{font-size:clamp(18px, 3vw, 26px); font-weight:900; line-height:1.15;}
-  .topic-tile .t-count{font-size:clamp(13px, 1.8vw, 16px); font-weight:800; opacity:.7;}
   @media (hover:hover){ .topic-tile:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 var(--ink);} }
   .topic-tile:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
   .topic-tile:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
-  .topic-tile.random{
-    min-height:0; flex-direction:row; align-items:center; justify-content:flex-start; gap:14px;
+  .topic-tile.random{   /* same layout as the topic tiles, white with a rainbow stripe along the bottom */
     background:#fff;
     background-image:linear-gradient(90deg, #c9a7ff, #7ed957, #8fd3ff, #ff90e8, #ffb26b, #ffd23f, #ff8a80);
     background-size:100% 10px; background-repeat:no-repeat; background-position:bottom;
-    padding-bottom:22px;
+    padding-bottom:20px;   /* keeps the text clear of the stripe */
   }
-  .topic-tile.random .t-text{display:flex; flex-direction:column; gap:4px;}
-  @media (max-width:600px){   /* half-width tiles: emoji above the name, like the topic tiles */
-    .topic-tile.random, .topic-tile[data-topic="holidays"]{flex-direction:column; align-items:flex-start; justify-content:center; gap:6px; padding-top:12px;}
-    .topic-grid{gap:12px;}
-  }
+  @media (max-width:600px){ .topic-grid{gap:12px;} }
   body.picking .topics .pop-in{animation:pop .4s cubic-bezier(.3, 1.5, .5, 1) both;}
   .topic-tile.chosen{transform:scale(1.07) rotate(-1.5deg); box-shadow:8px 8px 0 var(--ink);}
 
@@ -1331,8 +1324,7 @@ document.getElementById('topicGrid').innerHTML = TOPICS.map((t, i) => {
     '</span><span class="t-name">' + t.name + '</span></button>';
 }).join('') +
   '<button class="topic-tile random pop-in" type="button" data-topic="random" style="animation-delay:' + (80 + TOPICS.length * 70) + 'ms">' +
-  '<span class="t-emoji" aria-hidden="true">🎲</span><span class="t-text"><span class="t-name">Random</span>' +
-  '<span class="t-count">All topics, mixed up</span></span></button>';
+  '<span class="t-emoji" aria-hidden="true">🎲</span><span class="t-name">Random</span></button>';
 
 function useTopic(id){
   topic = id;
