@@ -38,7 +38,8 @@
   .btn-big{background:var(--yellow); font-size:clamp(20px, 3vw, 24px); padding:18px 34px;}
 
   /* ---------- hero ---------- */
-  main{max-width:1040px; margin:0 auto; padding:40px 16px 56px; text-align:center; overflow-x:clip;}
+  html{overflow-x:clip;}   /* the carousels run to the screen edges; nothing else may scroll sideways */
+  main{max-width:1040px; margin:0 auto; padding:40px 16px 56px; text-align:center;}
   /* Logo lockup: the mark sits beside two lines, the name and the tagline, and is as tall as both.
      Everything is sized in em off the name, so the mark always lines up with the pair. */
   .lockup{
@@ -78,29 +79,26 @@
   .topics{margin:56px 0 0;}
   .topics-title{margin:0 0 18px; font-size:clamp(20px, 3.4vw, 26px); font-weight:900; letter-spacing:-.3px;}
   .marquee{
-    overflow:hidden; padding:4px 0 12px;   /* room for the card shadows */
-    -webkit-mask:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-            mask:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    overflow:hidden; padding:4px 0 14px;   /* room for the card shadows */
+    width:100vw; margin-left:calc(50% - 50vw);   /* full bleed: out of the 1040px column to both screen edges */
   }
-  .marquee-track{display:flex; gap:18px; width:max-content; animation:marquee 47s linear infinite;   /* 15% slower than the first 40s */}
+  .marquee-track{display:flex; gap:32px; width:max-content; animation:marquee 47s linear infinite;   /* 15% slower than the first 40s */}
   .marquee.reverse .marquee-track{animation-direction:reverse; animation-delay:-20s;}   /* offset so the two rows don't line up */
   .marquee:hover .marquee-track, .marquee:focus-within .marquee-track{animation-play-state:paused;}
-  @keyframes marquee{to{transform:translateX(calc(-50% - 9px));}}   /* one full set plus half the gap */
+  @keyframes marquee{to{transform:translateX(calc(-50% - 16px));}}   /* one full set plus half the gap */
   .topic{
-    flex:none; width:200px; min-height:132px; display:flex; flex-direction:column; align-items:flex-start; gap:8px;
-    padding:16px 16px 14px; text-align:left; text-decoration:none; color:var(--ink);
+    flex:none; width:250px; min-height:160px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:12px;
+    padding:20px 20px 18px; text-align:left; text-decoration:none; color:var(--ink);
     border:3px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
     transition:transform .08s, box-shadow .08s;
   }
   .topic:hover{transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink);}
   .topic:focus-visible{outline:3px solid var(--blue); outline-offset:3px;}
-  .topic .t-emoji{font-size:36px; line-height:1;}
-  .topic .t-name{font-size:18px; font-weight:900; line-height:1.15;}
-  .topic .t-count{margin-top:auto; font-size:13px; font-weight:800; opacity:.7;}
+  .topic .t-emoji{font-size:46px; line-height:1;}
+  .topic .t-name{font-size:22px; font-weight:900; line-height:1.15;}
   .topics + .cta{margin-top:48px;}
-  .marquee + .marquee{margin-top:6px;}
+  .marquee + .marquee{margin-top:14px;}
   @media (prefers-reduced-motion:reduce){
-    .marquee{-webkit-mask:none; mask:none;}
     .marquee-track{animation:none; width:auto; flex-wrap:wrap; justify-content:center;}
     .marquee-track [aria-hidden="true"]{display:none;}
   }
@@ -252,6 +250,9 @@
     .video{box-shadow:6px 6px 0 var(--ink); border-radius:14px;}
     .peek.p1{left:-12px;}
     .peek.p2{right:-10px;}
+    .topic{width:210px; min-height:140px; padding:16px 16px 14px;}
+    .topic .t-emoji{font-size:40px;}
+    .topic .t-name{font-size:20px;}
   }
   @media (prefers-reduced-motion:reduce){.btn{transition:none;}}
 </style>
@@ -385,7 +386,7 @@
       a.href = '/icebreaker/play/';
       a.style.background = color;
       if (copy) { a.setAttribute('aria-hidden', 'true'); a.tabIndex = -1; }
-      a.innerHTML = '<span class="t-emoji" aria-hidden="true">' + emoji + '</span><span class="t-name">' + name + '</span><span class="t-count">40 questions</span>';
+      a.innerHTML = '<span class="t-emoji" aria-hidden="true">' + emoji + '</span><span class="t-name">' + name + '</span>';
       track.appendChild(a);
     }));
   });
