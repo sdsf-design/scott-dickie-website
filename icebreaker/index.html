@@ -143,13 +143,16 @@
     .hero-actions .btn-big{padding:16px 24px; font-size:21px;}
   }
 
-  .deck{position:relative; width:min(380px, calc(100% - 28px)); margin:0 auto; isolation:isolate;}
-  .deck .d-flip{width:calc(100% - 8px); height:clamp(340px, 42vw, 420px); margin:0;}
-  .deck .d-emoji{font-size:clamp(52px, 13vw, 72px);}
-  .deck .d-line{font-size:clamp(22px, 5.8vw, 29px);}
+  .deck{position:relative; width:min(310px, calc(100% - 56px)); margin:0 auto; isolation:isolate;}
+  .deck .d-flip{width:calc(100% - 8px); height:clamp(290px, 32vw, 340px); margin:0;}
+  .deck .d-emoji{font-size:clamp(44px, 11vw, 56px);}
+  .deck .d-line{font-size:clamp(20px, 5.2vw, 24px);}
+  .deck .d-face{padding:20px 18px 14px; gap:12px;}
+  .deck .d-tag{font-size:13px;}
+  .deck .d-back .d-line{font-size:clamp(21px, 5.6vw, 26px);}
   /* the rest of the deck, fanned out behind the card */
   .fan{
-    position:absolute; top:0; left:0; width:calc(100% - 8px); height:clamp(340px, 42vw, 420px); z-index:-1;
+    position:absolute; top:0; left:0; width:calc(100% - 8px); height:clamp(290px, 32vw, 340px); z-index:-1;
     border:3px solid var(--ink); border-radius:22px; box-shadow:6px 6px 0 var(--ink);
     transition:transform .35s cubic-bezier(.3, 1.4, .5, 1);
   }
@@ -171,7 +174,15 @@
   .deck .d-flip.in{animation:deal-in .42s cubic-bezier(.3, 1.4, .5, 1);}
   @keyframes deal-out{to{transform:translate(-115%, -10px) rotate(-16deg); opacity:0;}}
   @keyframes deal-in{from{transform:translate(18px, 14px) rotate(4deg) scale(.94); opacity:.4;} to{transform:none; opacity:1;}}
-  .deck-controls{margin-top:26px; display:flex; justify-content:center;}
+  .deck-controls{margin-top:20px; display:flex; justify-content:center;}
+  /* Deal another card: a quiet text button so it doesn't compete with Play */
+  .deal-link{
+    appearance:none; border:0; background:none; padding:6px 8px; cursor:pointer;
+    font:inherit; font-size:15px; font-weight:800; color:#555;
+    text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:2px;
+  }
+  .deal-link:hover{color:var(--ink);}
+  .deal-link:focus-visible{outline:3px solid var(--blue); outline-offset:2px; border-radius:6px;}
   @media (prefers-reduced-motion:reduce){
     .sticker, .deck .d-flip.out, .deck .d-flip.in{animation:none;}
     .fan{transition:none;}
@@ -284,7 +295,7 @@
       <span class="sticker" id="tapMe" aria-hidden="true">Tap me!</span>
     </div>
     <div class="deck-controls">
-      <button class="btn" type="button" id="heroDeal">Deal another card ↻</button>
+      <button class="deal-link" type="button" id="heroDeal">Deal another card ↻</button>
     </div>
   </div>
 
