@@ -489,6 +489,21 @@
   @media (hover:hover){ .fb-btn:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink);} }
   .fb-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
   .fb-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
+
+  /* Support: a small round Buy Me a Coffee link stacked just above the feedback button, shown when it is */
+  .coffee-btn{
+    position:fixed; right:max(18px, env(safe-area-inset-right)); bottom:calc(max(18px, env(safe-area-inset-bottom)) + 66px); z-index:5;
+    width:52px; height:52px; border:3px solid var(--ink); border-radius:50%;
+    background:var(--yellow); color:var(--ink); box-shadow:4px 4px 0 var(--ink);
+    display:none; align-items:center; justify-content:center;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .coffee-btn svg{width:26px; height:26px;}
+  body.picking:not(.intro) .coffee-btn{display:flex;}
+  body.landing .coffee-btn{opacity:0;}
+  @media (hover:hover){ .coffee-btn:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink);} }
+  .coffee-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
+  .coffee-btn:focus-visible{outline:3px dashed var(--ink); outline-offset:4px;}
   .topics{padding-bottom:84px;}   /* room so the button never covers the Random tile */
   .fb-form{display:flex; flex-direction:column; gap:12px; text-align:left;}
   /* Five-star rating: real radio buttons (keyboard and screen readers work), drawn as big stars */
@@ -604,6 +619,9 @@
   <div><button class="link-btn" type="button" id="playersOff" hidden>Turn off players</button></div>
 </dialog>
 
+<a class="coffee-btn" href="https://buymeacoffee.com/sddickie" target="_blank" rel="noopener" aria-label="Support this game on Buy Me a Coffee" title="Support this game">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="#fff"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 2.5c-.6.9.6 1.6 0 2.5M12 2.5c-.6.9.6 1.6 0 2.5"/></svg>
+</a>
 <button class="fb-btn" id="fbBtn" type="button" aria-haspopup="dialog">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16v11H10l-4 3.5v-3.5H4z"/></svg>
   Feedback
